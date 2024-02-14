@@ -2,29 +2,37 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import generic
-from django.utils import timezone
+from django.db.models import Q
 
 from .models import Image
+from .forms import ImageSearchForm
 
 
 class HomeView(generic.ListView):
+    model = Image
     template_name = "images/index.html"
     context_object_name = "images"
-    model = Image
-    paginate_by = 16
+    paginate_by = 4
 
-    # def get_queryset(self):
-    #     """
-    #     Return the last five published questions (not including those set to be
-    #     published in the future).
-    #     """
-    #     return Image.objects.filter(pub_date__lte=timezone.now()).order_by("-pub_date")[:5]
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search_query')
+        if search_query:
+            search_terms = search_query.split()
+            queries = [Q(note__icontains=term) for term in search_terms]
+            combined_query = queries.pop()
 
+            for query in queries:
+                combined_query |= query
+
+            queryset = queryset.filter(combined_query)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_form'] = ImageSearchForm(self.request.GET)
+        return context
 
 class ImageView(generic.DetailView):
     template_name = "images/image.html"
-    def get_queryset(self):
-        """
-        Excludes any questions that aren't published yet.
-        """
-        return Image.objects.filter(pub_date__lte=timezone.now())
+    model = Image
