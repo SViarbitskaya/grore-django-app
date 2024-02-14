@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'debug_toolbar',
     # 'compressor',
+
+    'django.contrib.sites',
+    'django.contrib.flatpages',
 ]
 
 MIDDLEWARE = [
@@ -153,4 +156,7 @@ MEDIA_URL = '/media/'
 # DEBUG_TOOLBAR_CONFIG = {
 #     "INTERCEPT_REDIRECTS": False,
 # }
+
+#flatpages
+SITE_ID = 1
 
