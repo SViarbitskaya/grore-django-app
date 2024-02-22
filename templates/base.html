@@ -1,20 +1,29 @@
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     {% block stylesheets %}{% endblock %}
     {# <link rel="stylesheet" href="style.css"> #}
-    <title>{% block title %}Grore{% endblock %}</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <title>{% block title %}{% endblock %}</title>
 </head>
 
 <body>
-    <div id="menu">
-        {% block menu %}
-        <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="pages/about/">About</a></li>
-        </ul>
-        {% endblock %}
-    </div>
+    <nav class="navbar navbar-default">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/">{% trans 'home' %}</a>
+                <a class="navbar-brand" href="/{{LANGUAGE_CODE}}/pages/about">{% trans 'about' %}</a>
+                {% block search_form %}{% endblock %}
+                {% block language_switch_form %}{% endblock %}
+            </div>
+        </div>
+    </nav>
 
     <div id="content">
         {% block content %}{% endblock %}

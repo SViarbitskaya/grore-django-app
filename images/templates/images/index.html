@@ -1,22 +1,45 @@
 {% extends "base.html" %}
 {% load static %}
+{% load i18n %}
+
+{% block title %}Grore homepage{% endblock %}
 
 {% block stylesheets %}
     <link rel="stylesheet" href="{% static 'images/style.css' %}">
 {% endblock %}
 
+{% block search_form %}
+<form method="get" action="{% url 'home' %}" class="form-inline">
+    {% csrf_token %}
+    {{ search_form.as_p }}
+    {# <button type="submit"><i class="fa fa-search"></i></button> #}
+</form>
+{% if search_form.is_bound and search_form.search_query.errors %}
+    <p class="error">{{ search_form.search_query.errors }}</p>
+{% endif %}
+{% endblock %}
+
+{% block language_switch_form %}
+<form action="{% url 'set_language' %}" method="post">{% csrf_token %}
+    <input name="next" type="hidden" value="{{ redirect_to }}">
+    <select name="language">
+        {% get_current_language as LANGUAGE_CODE %}
+        {% get_available_languages as LANGUAGES %}
+        {% get_language_info_list for LANGUAGES as languages %}
+        {% for language in languages %}
+            <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected{% endif %}>
+                {{ language.name_local }} ({{ language.code }})
+            </option>
+        {% endfor %}
+    </select>
+    <input type="submit" value="Go">
+</form>
+{% endblock %}
+
 {% block content %}
-
-    <form method="get" action="{% url 'home' %}">
-        {{ search_form.as_p }}
-        <button type="submit">Search</button>
-    </form>
-    {% if search_form.is_bound and search_form.search_query.errors %}
-        <p class="error">{{ search_form.search_query.errors }}</p>
-    {% endif %}
-
+<div class="container">
+    {{ language }}
     <div class="row">
-
         {% for image in images %}
         <div class="column">
             <a href="{% url 'image' image.id %}">
@@ -24,6 +47,7 @@
             </a>
         </div>
         {% endfor %}
-
     </div>
+</div>
+
 {% endblock %}

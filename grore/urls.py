@@ -15,12 +15,39 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path,re_path
+from django.contrib.flatpages import views as flatpages_views
+from django.conf.urls.i18n import i18n_patterns
+from django.contrib.staticfiles.views import serve
+from django.conf import settings
+from django.conf.urls.static import static
+
+
 
 urlpatterns = [
-    #path("polls/", include("polls.urls")),
     path('admin/', admin.site.urls),
-    path('pages/', include('django.contrib.flatpages.urls')),
+    # path('/', include('django.contrib.flatpages.urls')),
     path("__debug__/", include("debug_toolbar.urls")),
+    # path("", include("images.urls")),
+    path('i18n/', include('django.conf.urls.i18n')),
+]
+
+flatpages_patterns = [
+    path('pages/', include('django.contrib.flatpages.urls')),
+]
+
+images_patterns = [
     path("", include("images.urls")),
 ]
+
+urlpatterns += i18n_patterns(
+    path("", include(images_patterns)),
+    path("", include(flatpages_patterns)),
+)
+
+# urlpatterns += [
+#     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+# ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

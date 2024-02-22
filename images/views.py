@@ -3,10 +3,10 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import generic
 from django.db.models import Q
+from django.utils import translation
 
 from .models import Image
 from .forms import ImageSearchForm
-
 
 class HomeView(generic.ListView):
     model = Image
@@ -31,7 +31,11 @@ class HomeView(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['search_form'] = ImageSearchForm(self.request.GET)
+        context['language'] = self.request.LANGUAGE_CODE
+        context['redirect_to'] = self.request.path
+
         return context
+
 
 class ImageView(generic.DetailView):
     template_name = "images/image.html"
