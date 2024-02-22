@@ -4,7 +4,7 @@ import os
 
 class Image(models.Model):
     identifier = models.CharField(max_length=10)
-    note = models.TextField()
+    note = models.TextField(max_length=255)
     pub_date = models.DateTimeField("date published")
     modif_date = models.DateTimeField("date modified")
     file = models.ImageField()

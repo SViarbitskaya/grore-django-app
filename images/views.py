@@ -12,7 +12,7 @@ class HomeView(generic.ListView):
     model = Image
     template_name = "images/index.html"
     context_object_name = "images"
-    paginate_by = 4
+    paginate_by = 20
 
     def get_queryset(self):
         queryset = super().get_queryset()

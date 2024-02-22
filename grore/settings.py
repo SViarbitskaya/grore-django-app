@@ -33,8 +33,9 @@ ALLOWED_HOSTS = ['localhost']
 # Application definition
 
 INSTALLED_APPS = [
-    "polls.apps.PollsConfig",
+    "pages.apps.PagesConfig",
     "images.apps.ImagesConfig",
+    'modeltranslation',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,25 +43,19 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'debug_toolbar',
-    # 'compressor',
 
-    'django.contrib.sites',
-    'django.contrib.flatpages',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
-    
-
 ]
 
 ROOT_URLCONF = 'grore.urls'
@@ -121,6 +116,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
+USE_I18N = True
+
 LANGUAGE_CODE = 'en-us'
 
 LANGUAGES = [
@@ -170,6 +167,4 @@ MEDIA_URL = '/media/'
 #     "INTERCEPT_REDIRECTS": False,
 # }
 
-#flatpages
-SITE_ID = 1
 
