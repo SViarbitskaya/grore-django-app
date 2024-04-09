@@ -18,6 +18,10 @@ input{
   justify-content: space-between;
 }
 
+.image-detail{
+  text-align: center;
+}
+
 .search-form{
 
 }
