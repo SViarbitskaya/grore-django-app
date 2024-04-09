@@ -5,8 +5,14 @@
 {% block title %}Grore homepage{% endblock %}
 
 {% block stylesheets %}
-    <link rel="stylesheet" href="{% static 'images/style.css' %}">
+    <link rel="stylesheet" href="{% static 'images/css/style.css' %}">
 {% endblock %}
+
+{% block javascript %}
+    <script src="{% static '/images/js/htmx.min.js' %}" defer></script>
+{% endblock %}
+
+
 
 {% block search_form %}
 <form method="get" action="{% url 'home' %}" class="form-inline">
@@ -38,15 +44,8 @@
 
 {% block content %}
 <div class="container">
-    {{ language }}
     <div class="row">
-        {% for image in images %}
-        <div class="column">
-            <a href="{% url 'image' image.id %}">
-                <img src="{% get_media_prefix %}{{image.filename}}" alt="{{image.note}}">
-            </a>
-        </div>
-        {% endfor %}
+        {% include 'images/list.html' with images=images %}
     </div>
 </div>
 

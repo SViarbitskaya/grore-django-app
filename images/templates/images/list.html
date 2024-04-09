@@ -1,0 +1,16 @@
+{% load static %}
+{% for image in images %}
+    {% if forloop.last %}
+        <div class="column" 
+            hx-trigger="revealed"
+            hx-get="{% url 'home' %}?page={{ page_obj.number|add:1 }}"
+            hx-swap="afterend"
+        >
+    {% else %}
+        <div class="column">
+    {% endif %}
+        <a href="{% url 'image' image.id %}">
+            <img src="{% get_media_prefix %}{{image.filename}}" alt="{{image.note}}">
+        </a>
+    </div>
+{% endfor %}

@@ -11,3 +11,8 @@ class Image(models.Model):
 
     def filename(self):
         return os.path.basename(self.file.name)
+
+    def thumbnail(self):
+        return u'<img src="%s" />' % (self.image.url)
+
+    thumbnail.short_description = 'Thumbnail'
