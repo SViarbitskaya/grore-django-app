@@ -27,6 +27,7 @@ for i, row in enumerate(decoded_json):
         "pk": i+1,
         "fields": {
             "identifier": row["identifier"],
+            "slug": row["identifier"],       
             "note": "",
             "note_en": row["note_en"],
             "note_fr": row["note_fr"],

@@ -12,7 +12,7 @@ class ImageAdmin(TranslationAdmin):
         models.TextField: {'widget': Textarea(attrs={'rows':4, 'cols':40})},
     }
 
-    fields = ["identifier", "note", "pub_date", "modif_date", "file", "img_preview", ]
+    fields = ["identifier", "slug", "note", "pub_date", "modif_date", "file", "img_preview", ]
 
     # add img_preview
     readonly_fields = ("img_preview",)
