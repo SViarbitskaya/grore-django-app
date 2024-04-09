@@ -12,17 +12,16 @@ input{
   color:#fff;
 }
 
-/* a{
-  color: white;
+.navbar-header{
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
 }
 
+.search-form{
 
+}
 
-input:focus{ 
-  border:none;	
-  outline:none;
-  border-bottom:1px solid #e74c3c;	
- } */
 .row {
     display: flex;
     flex-wrap: wrap;

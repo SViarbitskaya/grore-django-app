@@ -7,6 +7,7 @@ from django.utils.html import format_html
 
 class ImageAdmin(TranslationAdmin):
     list_display = ["identifier", "note", "pub_date"]
+    prepopulated_fields = {"slug": ("identifier",)} 
     search_fields = ["identifier", "note"]
     formfield_overrides = {
         models.TextField: {'widget': Textarea(attrs={'rows':4, 'cols':40})},

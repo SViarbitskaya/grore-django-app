@@ -21,9 +21,9 @@
                 <a class="navbar-brand" href="/">{% trans 'home' %}</a>
                 <a class="navbar-brand" href="/{{LANGUAGE_CODE}}/about">{% trans 'about' %}</a>
                 <a class="navbar-brand" href="/{{LANGUAGE_CODE}}/contact">{% trans 'contact' %}</a>
-                {% block search_form %}{% endblock %}
                 {% block language_switch_form %}{% endblock %}
             </div>
+            {# {% block search_form %}{% endblock %} #}
         </div>
     </nav>
 

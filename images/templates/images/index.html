@@ -12,23 +12,11 @@
     <script src="{% static '/images/js/htmx.min.js' %}" defer></script>
 {% endblock %}
 
-
-
-{% block search_form %}
-<form method="get" action="{% url 'home' %}" class="form-inline">
-    {% csrf_token %}
-    {{ search_form.as_p }}
-    {# <button type="submit"><i class="fa fa-search"></i></button> #}
-</form>
-{% if search_form.is_bound and search_form.search_query.errors %}
-    <p class="error">{{ search_form.search_query.errors }}</p>
-{% endif %}
-{% endblock %}
-
 {% block language_switch_form %}
+<div class="navbar-brand">
 <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
     <input name="next" type="hidden" value="{{ redirect_to }}">
-    <select name="language">
+    <select name="language" onchange="this.form.submit()">
         {% get_current_language as LANGUAGE_CODE %}
         {% get_available_languages as LANGUAGES %}
         {% get_language_info_list for LANGUAGES as languages %}
@@ -38,12 +26,23 @@
             </option>
         {% endfor %}
     </select>
-    <input type="submit" value="Go">
+    {# <input type="submit" value="Go"> #}
 </form>
+</div>
 {% endblock %}
 
 {% block content %}
 <div class="container">
+
+    <form method="get" action="{% url 'home' %}" class="form-inline search-form">
+        {% csrf_token %}
+        {{ search_form.as_p }}
+        {# <button type="submit"><i class="fa fa-search"></i></button> #}
+    </form>
+    {% if search_form.is_bound and search_form.search_query.errors %}
+        <p class="error">{{ search_form.search_query.errors }}</p>
+    {% endif %}
+
     <div class="row">
         {% include 'images/list.html' with images=images %}
     </div>
