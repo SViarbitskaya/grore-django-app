@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Image homepage{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{% static 'images/css/style.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container image-detail">
+    <div><a href="/">Go back</a></div>
+    <img src="{% get_media_prefix %}{{image.filename}}" alt="{{image.note}}">
+    <p>{{image.note}}</p>
+</div>
+{% endblock %}
