@@ -6,3 +6,5 @@ __pycache__
 db.sqlite3
 media
 **/__pycache__/
+settings_local.py
+settings_prod.py

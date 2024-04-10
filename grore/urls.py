@@ -39,8 +39,9 @@ pages_patterns = [
 ]
 
 urlpatterns += i18n_patterns(
-    path("", include(images_patterns)),
     path("", include(pages_patterns)),
+    path("", include(images_patterns)),
+
 )
 
 if settings.DEBUG:
