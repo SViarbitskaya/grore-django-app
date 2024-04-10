@@ -26,12 +26,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-5(o@$_j%hfn*smdqdut9o$ya18r^kg!-7#lc6dh(g*ijn!2j_0'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-ALLOWED_HOSTS = [
-  'localhost',
-  '127.0.0.1',
-]
-CSRF_TRUSTED_ORIGINS = ['https://grore.resdigita.com']
+ALLOWED_HOSTS = ['example.com']
+DEBUG = False
 
 
 # Application definition
@@ -60,7 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-#    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     "django_htmx.middleware.HtmxMiddleware",
 ]
 
@@ -73,7 +69,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-#                'django.template.context_processors.debug',
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -91,11 +87,14 @@ WSGI_APPLICATION = 'grore.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'grore',
-        'USER': 'grore',
-        'PASSWORD': 'asfhsofdzz',
-        'HOST': 'localhost',
-        'PORT': '',
+        'NAME': 'production_db',
+        'USER': 'user',
+        'PASSWORD': 'password',
+        'HOST': 'db.example.com',
+        'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'require'
+        }
     }
 }
 
@@ -147,7 +146,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT =  os.path.join(BASE_DIR, 'static')
+
 #STATICFILES_DIRS = [
 #  '/home/django/grore-django-app/static',
 #]
@@ -166,15 +165,4 @@ INTERNAL_IPS = [
 MEDIA_ROOT =  os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-# compressor
-# COMPRESS_ROOT = BASE_DIR / 'static'
-# COMPRESS_ENABLED = True
-# STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',)
-
-
-#toolbar
-# mimetypes.add_type("application/javascript", ".js", True)
-
-# DEBUG_TOOLBAR_CONFIG = {
-#     "INTERCEPT_REDIRECTS": False,
-# }
+from .settings_local import *
