@@ -3,7 +3,7 @@
     {% if forloop.last %}
         <div class="column" 
             hx-trigger="revealed"
-            hx-get="{% url 'home' %}?page={{ page_obj.number|add:1 }}"
+            hx-get="{% url 'home' %}?page={{ page_obj.number|add:1 }}{% if request.GET.search_query %}&search_query={{ request.GET.search_query }}{% endif %}"
             hx-swap="afterend"
         >
     {% else %}
