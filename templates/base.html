@@ -20,8 +20,9 @@
         <div class="container">
             <div class="navbar-header">
                 <a class="navbar-brand" href="/">{% trans 'home' %}</a>
-                <a class="navbar-brand" href="/{{LANGUAGE_CODE}}/pages/about">{% trans 'about' %}</a>
+                {# <a class="navbar-brand" href="/{{LANGUAGE_CODE}}/pages/about">{% trans 'about' %}</a> #}
                 <a class="navbar-brand" href="/{{LANGUAGE_CODE}}/contact">{% trans 'contact' %}</a>
+                <a class="navbar-brand" href="{% url 'pages' slug='about' %}">{% trans 'about' %}</a>
                 {% block language_switch_form %}
                 <div class="navbar-brand">
                 <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
