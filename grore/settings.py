@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-5(o@$_j%hfn*smdqdut9o$ya18r^kg!-7#lc6dh(g*ijn!2j_0
 
 # SECURITY WARNING: don't run with debug turned on in production!
 ALLOWED_HOSTS = ['example.com']
-DEBUG = False
+DEBUG = True
 
 
 # Application definition
@@ -147,9 +147,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-#STATICFILES_DIRS = [
-#  '/home/django/grore-django-app/static',
-#]
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+    "/static/",
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
