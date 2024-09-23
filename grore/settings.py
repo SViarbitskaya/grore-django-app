@@ -63,6 +63,11 @@ MIDDLEWARE = [
     "django_htmx.middleware.HtmxMiddleware",
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:1337',  # The port you're running on
+    'http://127.0.0.1:1337',
+]
+
 ROOT_URLCONF = 'grore.urls'
 
 TEMPLATES = [
@@ -161,11 +166,11 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# INTERNAL_IPS = [
-#     "127.0.0.1",
-#     "localhost",
-#     '0.0.0.0'
-# ]
+INTERNAL_IPS = [
+    "127.0.0.1",
+    "localhost",
+    '0.0.0.0'
+]
 
 
 # MEDIA_ROOT =  os.path.join(BASE_DIR, 'media')
