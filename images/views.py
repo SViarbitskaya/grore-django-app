@@ -12,7 +12,7 @@ class HomeView(generic.ListView):
     model = Image
     template_name = "images/index.html"
     context_object_name = "images"
-    paginate_by = 5
+    paginate_by = 25
 
     def get_template_names(self, *args, **kwargs):
         if self.request.htmx:
