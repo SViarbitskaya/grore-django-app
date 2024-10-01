@@ -1,0 +1,12 @@
+{% load static %}
+<div class="text-container htmx"
+    hx-trigger="revealed"
+    hx-get="{% url 'home' %}?page={{ page_obj.number|add:1 }}{% if request.GET.search_query %}&search_query={{ request.GET.search_query }}{% endif %}"
+    hx-swap="afterend"
+>
+    {% for image in images %}
+    <div class="text-item" data-id="{{ image.id }}">
+        {{ image.note }}
+    </div>
+    {% endfor %}
+</div>
