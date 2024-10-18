@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {% block stylesheets %}{% endblock %}
     {% block javascript %}{% endblock %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {# <link rel="stylesheet" href="{% static 'css/style.css' %}"> #}
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <title>{% block title %}{% endblock %}</title>
 </head>
@@ -21,8 +21,10 @@
             <div class="navbar-header">
                 <a class="navbar-brand" href="/">{% trans 'home' %}</a>
                 {# <a class="navbar-brand" href="/{{LANGUAGE_CODE}}/pages/about">{% trans 'about' %}</a> #}
-                <a class="navbar-brand" href="/{{LANGUAGE_CODE}}/contact">{% trans 'contact' %}</a>
+                <a class="navbar-brand" href="{% url 'contact' %}">{% trans 'contact' %}</a>
                 <a class="navbar-brand" href="{% url 'pages' slug='about' %}">{% trans 'about' %}</a>
+                <a class="navbar-brand" href="{% url 'selection' %}">{% trans 'my selection' %}</a>
+                {% block searchbar %}{% endblock %}
                 {% block language_switch_form %}
                 <div class="navbar-brand">
                 <form action="{% url 'set_language' %}" method="post">{% csrf_token %}

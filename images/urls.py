@@ -7,5 +7,6 @@ from . import views
 
 urlpatterns = [
     path("", views.HomeView.as_view(), name="home"),
+    path("selection", views.SelectionView.as_view(), name="selection"),
     path("images/<slug:slug>", views.ImageView.as_view(), name="image"),
 ]

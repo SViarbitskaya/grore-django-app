@@ -8,3 +8,5 @@ media
 **/__pycache__/
 settings_local.py
 settings_prod.py
+.env.dev
+.env.prod

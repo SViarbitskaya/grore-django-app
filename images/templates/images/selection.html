@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Your Image Selections</h1>
+  <div class="image-gallery">
+    {% for image in images %}
+      <div class="image-item">
+        <img src="{{ image.file.url }}" alt="{{ image.title }}">
+        <!-- Optionally, add a button to deselect the image -->
+        <form method="post" action="{% url 'images:selection' %}">
+          {% csrf_token %}
+          <input type="hidden" name="image_id" value="{{ image.id }}">
+          <input type="hidden" name="action" value="deselect">
+          <button type="submit">Remove from Selection</button>
+        </form>
+      </div>
+    {% empty %}
+      <p>No images selected yet.</p>
+    {% endfor %}
+  </div>
+{% endblock %}

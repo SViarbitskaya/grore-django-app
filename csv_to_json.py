@@ -22,21 +22,21 @@ decoded_json = json.loads(result_json)
 fixtures_list = []
 
 for i, row in enumerate(decoded_json):
-  entry = {
-      "model": "images.image",
-        "pk": i+1,
-        "fields": {
-            "identifier": row["identifier"],
-            "slug": row["identifier"],       
-            "note": "",
-            "note_en": row["note_en"],
-            "note_fr": row["note_fr"],
-            "pub_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "modif_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "file": row["identifier"] +".jpg"
+    entry = {
+        "model": "images.image",
+            "pk": i+1,
+            "fields": {
+                "identifier": row["identifier"],
+                "slug": row["identifier"],       
+                "note": "",
+                "note_en": row["note_en"],
+                "note_fr": row["note_fr"],
+                "pub_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "modif_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "file": row["identifier"] +".jpg"
         }
-  }
-  fixtures_list.append(entry)
+}
+fixtures_list.append(entry)
 
 # Convert to JSON string with readable strings using json.dumps
 file_path = 'classeur.json'

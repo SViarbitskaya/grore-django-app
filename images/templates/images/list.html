@@ -1,16 +1,12 @@
 {% load static %}
-{% for image in images %}
-    {% if forloop.last %}
-        <div class="column" 
-            hx-trigger="revealed"
-            hx-get="{% url 'home' %}?page={{ page_obj.number|add:1 }}{% if request.GET.search_query %}&search_query={{ request.GET.search_query }}{% endif %}"
-            hx-swap="afterend"
-        >
-    {% else %}
-        <div class="column">
-    {% endif %}
-        <a href="{{ image.get_absolute_url }}">
-            <img src="{% get_media_prefix %}{{image.filename}}" alt="{{image.note}}">
-        </a>
+<div class="text-container htmx"
+    hx-trigger="revealed"
+    hx-get="{% url 'home' %}?page={{ page_obj.number|add:1 }}{% if request.GET.search_query %}&search_query={{ request.GET.search_query }}{% endif %}"
+    hx-swap="afterend"
+>
+    {% for image in images %}
+    <div class="text-item" data-id="{{ image.id }}">
+        {{ image.note }}
     </div>
-{% endfor %}
+    {% endfor %}
+</div>

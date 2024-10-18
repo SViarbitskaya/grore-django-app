@@ -5,28 +5,29 @@
 {% block title %}Grore homepage{% endblock %}
 
 {% block stylesheets %}
-    <link rel="stylesheet" href="{% static 'images/css/style.css' %}">
+    <link rel="stylesheet" href="{% static '/images/css/style.css' %}">
 {% endblock %}
 
 {% block javascript %}
-    <script src="{% static '/images/js/htmx.min.js' %}" defer></script>
+    <script src="{% static 'images/js/htmx.min.js' %}" defer></script>
+    <script src="{% static 'images/js/index.js' %}" defer></script>
 {% endblock %}
 
-{% block content %}
-<div class="container">
-
+{% block searchbar %}
+<div>
     <form method="get" action="{% url 'home' %}" class="form-inline search-form">
         {% csrf_token %}
         {{ search_form.as_p }}
-        {# <button type="submit"><i class="fa fa-search"></i></button> #}
+        {% if search_form.is_bound and search_form.search_query.errors %}
+            <p class="error">{{ search_form.search_query.errors }}</p>
+        {% endif %}
     </form>
-    {% if search_form.is_bound and search_form.search_query.errors %}
-        <p class="error">{{ search_form.search_query.errors }}</p>
-    {% endif %}
-
-    <div class="row">
-        {% include 'images/list.html' with images=images %}
-    </div>
 </div>
-
 {% endblock %}
+
+{% block content %}
+    {% include 'images/list.html' with images=images %}
+{% endblock %}
+
+
+

@@ -1,48 +1,14 @@
-.image-detail{
-  text-align: center;
+.navbar-header{
+  display: flex;
 }
 
-.search-form{
-
+.text-container {
+  position: relative; /* Container should be relative */
+  height: 100vh; /* Set a height for the container */
+  overflow: hidden;
 }
 
-.row {
-    display: flex;
-    flex-wrap: wrap;
-    padding: 0 0px;
-  }
-  
-  /* Create four equal columns that sits next to each other */
-  .column {
-    justify-content: center; /* Horizontal center alignment */
-    align-items: center; /* Vertical center alignment */
-    flex: 10%;
-    flex-wrap: wrap;
-    max-width: 25%;
-    padding: 0 0px;
-    margin: 1%;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .column a img {
-    max-width: 100%;
-    height: auto;
-    vertical-align: middle;
-  }
-  
-  /* Responsive layout - makes a two column-layout instead of four columns */
-  @media screen and (max-width: 800px) {
-    .column {
-      flex: 50%;
-      max-width: 50%;
-    }
-  }
-  
-  /* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
-  @media screen and (max-width: 600px) {
-    .column {
-      flex: 100%;
-      max-width: 100%;
-    }
-  }
+.text-item {
+  position: absolute; /* Position items absolutely */
+  transition: opacity 0.5s; /* Optional transition for appearance */
+}
