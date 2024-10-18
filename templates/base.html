@@ -23,6 +23,7 @@
                 {# <a class="navbar-brand" href="/{{LANGUAGE_CODE}}/pages/about">{% trans 'about' %}</a> #}
                 <a class="navbar-brand" href="{% url 'contact' %}">{% trans 'contact' %}</a>
                 <a class="navbar-brand" href="{% url 'pages' slug='about' %}">{% trans 'about' %}</a>
+                <a class="navbar-brand" href="{% url 'selection' %}">{% trans 'my selection' %}</a>
                 {% block searchbar %}{% endblock %}
                 {% block language_switch_form %}
                 <div class="navbar-brand">
