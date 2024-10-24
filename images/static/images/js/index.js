@@ -3,32 +3,25 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function positionTextItems(container = document.querySelector('.text-container')) {
-    // Get all the text items within the provided container
     const textItems = container.querySelectorAll('.text-item');
 
-    // Get the current dimensions of the container
-    const containerHeight = container.scrollHeight; // Dynamic height of the container
-    const containerWidth = container.clientWidth; // Dynamic width of the container
+    const containerHeight = container.scrollHeight; 
+    const containerWidth = container.clientWidth; 
 
     textItems.forEach(item => {
-        // Generate a random font size between a specified range (e.g., 14px to 36px)
-        const randomFontSize = Math.floor(Math.random() * (36 - 14 + 1)) + 14; // Random size between 14px and 36px
-        item.style.fontSize = `${randomFontSize}px`; // Set the font size
+        const randomFontSize = Math.floor(Math.random() * (36 - 14 + 1)) + 14; 
+        item.style.fontSize = `${randomFontSize}px`;
 
-        // Generate random X and Y positions within the container's dimensions
-        const randomX = Math.floor(Math.random() * (containerWidth - 100)); // Adjust for item width
-        const randomY = Math.floor(Math.random() * (containerHeight - 50)); // Adjust for item height
+        const randomX = Math.floor(Math.random() * (containerWidth - 100)); 
+        const randomY = Math.floor(Math.random() * (containerHeight - 50)); 
 
-        // Apply the random positions to the item
-        item.style.position = 'absolute'; // Ensure the position is absolute
+        item.style.position = 'absolute'; 
         item.style.left = `${randomX}px`;
         item.style.top = `${randomY}px`;
-        item.style.opacity = '1'; // Optional: Make it visible
+        item.style.opacity = '1';
 
-        // Start moving the text item
         moveTextItemRandomly(item, containerWidth, containerHeight);
 
-        // Add mouse event listeners to restart movement on hover
         item.addEventListener('mouseenter', () => {
             if (item.dataset.isMoving === "false") {
                 moveTextItemRandomly(item, containerWidth, containerHeight);
@@ -38,56 +31,46 @@ function positionTextItems(container = document.querySelector('.text-container')
 }
 
 function moveTextItemRandomly(item, containerWidth, containerHeight) {
-    const speed = 1; // Adjust speed of movement (pixels per iteration)
+    const speed = 1; 
     let directionX = Math.random() < 0.5 ? -1 : 1;
     let directionY = Math.random() < 0.5 ? -1 : 1;
 
     function animate() {
-        // Get current position of the item
         let currentX = parseFloat(item.style.left);
         let currentY = parseFloat(item.style.top);
 
-        // Calculate new position based on speed and direction
         currentX += directionX * speed;
         currentY += directionY * speed;
 
-        // Check if the item goes out of bounds (container boundaries)
         if (currentX < 0 || currentX > (containerWidth - item.offsetWidth)) {
-            directionX *= -1; // Reverse X direction
+            directionX *= -1; 
         }
         if (currentY < 0 || currentY > (containerHeight - item.offsetHeight)) {
-            directionY *= -1; // Reverse Y direction
+            directionY *= -1; 
         }
 
-        // Update the item's position
         item.style.left = `${currentX}px`;
         item.style.top = `${currentY}px`;
 
-        // Check if the item is still in the viewport
         if (isElementInViewport(item)) {
-            requestAnimationFrame(animate); // Continue animating if in viewport
+            requestAnimationFrame(animate); 
         } else {
-            // Stop animating when out of viewport
-            cancelAnimationFrame(animate);
-            item.dataset.isMoving = "false"; // Mark as not moving
+            cancelAnimationFrame(animate); 
+            item.dataset.isMoving = "false"; 
         }
     }
 
-    // Start the animation loop
     requestAnimationFrame(animate);
 
-    // Monitor if the item comes back into the viewport
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting && item.dataset.isMoving === "false") {
-                // Restart movement when the item is back in the viewport
-                item.dataset.isMoving = "true"; // Mark as moving
+                item.dataset.isMoving = "true"; 
                 moveTextItemRandomly(item, containerWidth, containerHeight);
             }
         });
     });
 
-    // Observe the text item for visibility changes
     observer.observe(item);
 }
 
@@ -106,3 +89,82 @@ document.addEventListener('htmx:afterSwap', (event) => {
         positionTextItems(event.target);
     }
 });
+
+
+
+// Function to display the modal with the image and buttons
+function showModal(imageId, imageUrl) {
+    const modalImage = document.getElementById('modalImage');
+    const selectButton = document.getElementById('selectButton');
+    const downloadButton = document.getElementById('downloadButton');
+
+    modalImage.src = imageUrl;
+    downloadButton.href = imageUrl;  
+    downloadButton.style.display = 'inline-block';  
+
+    selectButton.dataset.imageId = imageId;
+    selectButton.dataset.selected = 'false';  // Default to unselected
+    selectButton.textContent = 'Select Image';  // Reset button text
+
+    const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+    modal.show();
+}
+
+// Function to make the AJAX request to toggle image selection
+function toggleSelection(imageId, action, selectButton) {
+
+    // CSRF token for secure requests
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    const data = {
+        image_id: imageId,  // Use imageId from the parameter
+        action: action
+    };
+
+    console.log(data)
+
+    // Make AJAX POST request
+    fetch('toggle-selection', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken  // Include CSRF token in the headers
+        },
+        body: JSON.stringify(data)  // Convert JS object to JSON
+    })
+    .then(response => response.json())
+    .then(result => {
+        // Handle the response from the server
+        if (result.status === 'success') {
+            // Update the button state based on action
+            const isSelected = action === 'select';
+            updateSelectButton(selectButton, isSelected);
+        } else {
+            console.error('Failed to update selection:', result.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+// Function to update the button state based on the selection status
+function updateSelectButton(button, isSelected) {
+    button.dataset.selected = isSelected ? "true" : "false";
+    button.textContent = isSelected ? "Deselect Image" : "Select Image";
+}
+
+document.addEventListener('click', function(event) {
+    if (event.target && event.target.id === 'selectButton') {
+        event.preventDefault();
+        
+        const selectButton = event.target;
+        const imageId = selectButton.dataset.imageId;
+        const isSelected = selectButton.dataset.selected === 'true';
+        const action = isSelected ? 'deselect' : 'select';
+
+        // Call toggleSelection with imageId and action
+        toggleSelection(imageId, action, selectButton);
+    }
+});
+

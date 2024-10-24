@@ -1,9 +1,11 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import generic, View
+from django.views.decorators.http import require_POST
 from django.db.models import Q
 from django.utils import translation
+import json
 
 from .models import Image
 from .forms import ImageSearchForm
@@ -43,11 +45,6 @@ class HomeView(SelectionMixin, generic.ListView):
         # Add selected images to the context
         context['selected_images_ids'] = self.request.session.get('selected_images', [])
         return context
-    
-    def post(self, request, *args, **kwargs):
-        # Use the mixin to handle session updates
-        self.update_session_selection(request)
-        return JsonResponse({'status': 'success'})
 
 
 class ImageView(generic.DetailView):
@@ -66,3 +63,7 @@ class SelectionView(SelectionMixin, View):
         # Use the mixin to handle session updates
         self.update_session_selection(request)
         return HttpResponseRedirect(reverse('images:selection'))
+
+class ToggleSelectionView(SelectionMixin, View):
+    def post(self, request, *args, **kwargs):
+        return JsonResponse(self.update_session_selection(request))

@@ -10,5 +10,12 @@
 
 .text-item {
   position: absolute; /* Position items absolutely */
-  transition: opacity 0.5s; /* Optional transition for appearance */
+  cursor: pointer;
+  padding: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.text-item:hover {
+  background-color: #f0f0f0; /* Change background on hover */
+  color: #007bff; /* Optional: Change text color on hover */
 }
