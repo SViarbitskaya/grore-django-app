@@ -176,4 +176,4 @@ INTERNAL_IPS = [
 # MEDIA_ROOT =  os.path.join(BASE_DIR, 'media')
 # MEDIA_URL = '/media/'
 
-from .settings_prod import *
+# from .settings_prod import *

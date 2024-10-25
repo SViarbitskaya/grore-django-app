@@ -1,3 +1,5 @@
+import { toggleSelection } from './toggle-selection.js';
+
 document.addEventListener("DOMContentLoaded", () => {
     positionTextItems();
 });
@@ -91,7 +93,6 @@ document.addEventListener('htmx:afterSwap', (event) => {
 });
 
 
-
 // Function to display the modal with the image and buttons
 function showModal(imageId, imageUrl) {
     const modalImage = document.getElementById('modalImage');
@@ -110,49 +111,7 @@ function showModal(imageId, imageUrl) {
     modal.show();
 }
 
-// Function to make the AJAX request to toggle image selection
-function toggleSelection(imageId, action, selectButton) {
-
-    // CSRF token for secure requests
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-    const data = {
-        image_id: imageId,  // Use imageId from the parameter
-        action: action
-    };
-
-    console.log(data)
-
-    // Make AJAX POST request
-    fetch('toggle-selection', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken  // Include CSRF token in the headers
-        },
-        body: JSON.stringify(data)  // Convert JS object to JSON
-    })
-    .then(response => response.json())
-    .then(result => {
-        // Handle the response from the server
-        if (result.status === 'success') {
-            // Update the button state based on action
-            const isSelected = action === 'select';
-            updateSelectButton(selectButton, isSelected);
-        } else {
-            console.error('Failed to update selection:', result.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-}
-
-// Function to update the button state based on the selection status
-function updateSelectButton(button, isSelected) {
-    button.dataset.selected = isSelected ? "true" : "false";
-    button.textContent = isSelected ? "Deselect Image" : "Select Image";
-}
+window.showModal = showModal;
 
 document.addEventListener('click', function(event) {
     if (event.target && event.target.id === 'selectButton') {

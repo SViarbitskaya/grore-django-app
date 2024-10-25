@@ -62,7 +62,7 @@ class SelectionView(SelectionMixin, View):
     def post(self, request, *args, **kwargs):
         # Use the mixin to handle session updates
         self.update_session_selection(request)
-        return HttpResponseRedirect(reverse('images:selection'))
+        return HttpResponseRedirect(reverse('selection'))
 
 class ToggleSelectionView(SelectionMixin, View):
     def post(self, request, *args, **kwargs):
