@@ -59,10 +59,17 @@ class SelectionView(SelectionMixin, View):
         images = self.get_selected_images(request)
         return render(request, self.template_name, {'images': images})
 
-    def post(self, request, *args, **kwargs):
-        # Use the mixin to handle session updates
-        self.update_session_selection(request)
-        return HttpResponseRedirect(reverse('selection'))
+    def delete(self, request, *args, **kwargs):
+        # Handle image deletion
+        image_id = str(kwargs.get('image_id'))
+        selected_images = request.session.get('selected_images', [])
+
+        if image_id in selected_images:
+            selected_images.remove(image_id)
+            request.session['selected_images'] = selected_images
+            return JsonResponse({'status': 'success', 'message': 'Image removed from selection.'})
+
+        return JsonResponse({'status': 'error', 'message': 'Image not found in selection.', 'image_id':  image_id, 'selected': selected_images  })
 
 class ToggleSelectionView(SelectionMixin, View):
     def post(self, request, *args, **kwargs):

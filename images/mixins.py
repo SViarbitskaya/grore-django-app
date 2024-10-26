@@ -46,9 +46,9 @@ class SelectionMixin:
 
                 return {'status': 'success', 'message': message}
 
-            return {'status': 'Invalid request'}
+            return {'status': 'Invalid request: not POST!'}
         else:
-            return {'status': 'Invalid request'}
+            return {'status': 'Invalid request: not ajax!'}
 
 
         # image_id = request.POST.get('image_id')

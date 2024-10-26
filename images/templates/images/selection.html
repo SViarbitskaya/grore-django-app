@@ -1,21 +1,34 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block javascript %}
+    <script src="{% static 'images/js/htmx.min.js' %}" defer></script>
+{% endblock %}
 
 {% block content %}
-  <h1>Your Image Selections</h1>
-  <div class="image-gallery">
-    {% for image in images %}
-      <div class="image-item">
-        <img src="{{ image.file.url }}" alt="{{ image.title }}">
-        <!-- Optionally, add a button to deselect the image -->
-        <form method="post" action="{% url 'selection' %}">
-          {% csrf_token %}
-          <input type="hidden" name="image_id" value="{{ image.id }}">
-          <input type="hidden" name="action" value="deselect">
-          <button type="submit">Remove from Selection</button>
-        </form>
-      </div>
-    {% empty %}
-      <p>No images selected yet.</p>
-    {% endfor %}
-  </div>
+    <h1>Your Image Selections</h1>
+    <table class="image-gallery">
+        <thead>
+        </thead>
+        <tbody 
+            hx-confirm="Are you sure?" 
+            hx-target="closest tr" 
+            hx-swap="outerHTML swap:1s"
+            data-hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+        >
+        {% for image in images %}
+        <tr id="{{ image.id }}" class="image-item">
+            <td>
+                <img src="{{ image.file.url }}" alt="{{ image.title }}">
+            </td>
+            <td>
+                <button class="btn danger" hx-delete="{% url 'delete_image_from_selection' image.id %}">
+                    Delete
+                </button>
+            </td>
+        {% empty %}
+            <p>No images selected yet.</p>
+        {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}
