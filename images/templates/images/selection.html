@@ -22,7 +22,7 @@
                 <img src="{{ image.file.url }}" alt="{{ image.title }}">
             </td>
             <td>
-                <button class="btn danger" hx-delete="{% url 'delete_image_from_selection' image.id %}">
+                <button class="btn danger" hx-delete="{% url "delete_image_from_selection" image.id %}">
                     Delete
                 </button>
             </td>

@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import generic, View
@@ -67,9 +67,9 @@ class SelectionView(SelectionMixin, View):
         if image_id in selected_images:
             selected_images.remove(image_id)
             request.session['selected_images'] = selected_images
-            return JsonResponse({'status': 'success', 'message': 'Image removed from selection.'})
+            return HttpResponse("", status=200)
 
-        return JsonResponse({'status': 'error', 'message': 'Image not found in selection.', 'image_id':  image_id, 'selected': selected_images  })
+        return HttpResponse(status=400)
 
 class ToggleSelectionView(SelectionMixin, View):
     def post(self, request, *args, **kwargs):

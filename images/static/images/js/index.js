@@ -105,7 +105,7 @@ function showModal(imageId, imageUrl) {
 
     selectButton.dataset.imageId = imageId;
     selectButton.dataset.selected = 'false';  // Default to unselected
-    selectButton.textContent = 'Select Image';  // Reset button text
+    selectButton.textContent = 'Select';  // Reset button text
 
     const modal = new bootstrap.Modal(document.getElementById('imageModal'));
     modal.show();

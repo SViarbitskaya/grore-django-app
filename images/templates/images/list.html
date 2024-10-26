@@ -5,7 +5,7 @@
     hx-swap="afterend"
 >
     {% for image in images %}
-    <div class="text-item" data-id="{{ image.id }}" onclick="showModal({{ image.id }}, '{{ image.image_url }}')">
+    <div class="text-item" data-id="{{ image.id }}" onclick="showModal({{ image.id }}, '{{ image.file.url }}')">
         {{ image.note }}
     </div>
     {% endfor %}
@@ -16,15 +16,15 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalLabel">Image Preview</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <img src="" id="modalImage" alt="Selected Image" class="img-fluid">
+                <img src="{{ image.file.url }}" id="modalImage" alt="{{ image.note }}" class="img-fluid">
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="selectButton" data-selected="false" data-image-id="">Select Image</button>
-                <a id="downloadButton" class="btn btn-secondary" href="" download style="display: none;">Download Image</a>
+                <a id="goToSelection" class="btn btn-secondary" href="{% url 'selection' %}">Your Selection</a>
+                <button type="button" class="btn btn-primary" id="selectButton" data-selected="false" data-image-id="">Add to Your Selection</button>
+                <a id="downloadButton" class="btn btn-secondary" href="{{ image.file.url }}" download style="display: none;">Download</a>
             </div>
         </div>
     </div>
