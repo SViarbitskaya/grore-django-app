@@ -5,7 +5,7 @@ from django.views import generic, View
 from django.views.decorators.http import require_POST
 from django.db.models import Q
 from django.utils import translation
-import json, re
+import json, re, random
 
 from .models import Image
 from .forms import ImageSearchForm
@@ -40,6 +40,10 @@ class HomeView(SelectionMixin, generic.ListView):
             
             # Filter the queryset based on the presence of full words
             queryset = queryset.filter(note__in=[note.note for note in queryset if contains_full_word(note.note)])
+        else:
+            # Shuffle the queryset if no search query is present
+            queryset = list(queryset)
+            random.shuffle(queryset)
         
         return queryset
 
