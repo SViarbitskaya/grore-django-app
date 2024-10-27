@@ -7,28 +7,34 @@
 
 {% block content %}
     <h1>Your Image Selections</h1>
-    <table class="image-gallery">
-        <thead>
-        </thead>
-        <tbody 
-            hx-confirm="Are you sure?" 
-            hx-target="closest tr" 
-            hx-swap="outerHTML swap:1s"
-            data-hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-        >
-        {% for image in images %}
-        <tr id="{{ image.id }}" class="image-item">
-            <td>
-                <img src="{{ image.file.url }}" alt="{{ image.title }}">
-            </td>
-            <td>
-                <button class="btn danger" hx-delete="{% url "delete_image_from_selection" image.id %}">
-                    Delete
-                </button>
-            </td>
-        {% empty %}
-            <p>No images selected yet.</p>
-        {% endfor %}
-        </tbody>
-    </table>
+
+    <div>
+        {% if request.session.selected_images %}
+            <a href="{% url 'download_images' %}" class="btn btn-primary">Download Selected Images</a>
+            <table class="image-gallery">
+                <thead>
+                </thead>
+                <tbody 
+                    hx-confirm="Are you sure?" 
+                    hx-target="closest tr" 
+                    hx-swap="outerHTML"
+                    data-hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                >
+                {% for image in images %}
+                <tr id="{{ image.id }}" class="image-item">
+                    <td>
+                        <img src="{{ image.file.url }}" alt="{{ image.title }}">
+                    </td>
+                    <td>
+                        <button class="btn danger" hx-delete="{% url "delete_image_from_selection" image.id %}">
+                            Delete
+                        </button>
+                    </td>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No images selected.</p>
+        {% endif %}
+    </div>
 {% endblock %}

@@ -5,7 +5,7 @@ from django.views import generic, View
 from django.views.decorators.http import require_POST
 from django.db.models import Q
 from django.utils import translation
-import json, re, random
+import json, re, random, zipfile, os
 
 from .models import Image
 from .forms import ImageSearchForm
@@ -19,7 +19,7 @@ class HomeView(SelectionMixin, generic.ListView):
 
     def get_template_names(self, *args, **kwargs):
         if self.request.htmx:
-            return "images/list.html"
+            return "images/htmx_partial.html"
         else:
             return self.template_name
 
@@ -54,6 +54,8 @@ class HomeView(SelectionMixin, generic.ListView):
         context['redirect_to'] = self.request.path
         # Add selected images to the context
         context['selected_images_ids'] = self.request.session.get('selected_images', [])
+        page_number = self.request.GET.get('page', 1)
+        context['calculated_height'] = 100 * int(page_number)
         return context
 
 
@@ -80,6 +82,27 @@ class SelectionView(SelectionMixin, View):
             return HttpResponse("", status=200)
 
         return HttpResponse(status=400)
+
+def download_images(request):
+    # Get the list of image IDs from the session
+    selected_image_ids = request.session.get('selected_images', [])
+    
+    # Fetch the images from the database
+    images = Image.objects.filter(id__in=selected_image_ids)
+
+    # Create a zip file in memory
+    zip_filename = "selected_images.zip"
+    response = HttpResponse(content_type='application/zip')
+    response['Content-Disposition'] = f'attachment; filename={zip_filename}'
+
+    with zipfile.ZipFile(response, 'w') as zip_file:
+        for image in images:
+            # Ensure the image file exists
+            if os.path.exists(image.file.path):
+                # Add the image to the zip file
+                zip_file.write(image.file.path, arcname=os.path.basename(image.file.path))
+
+    return response
 
 class ToggleSelectionView(SelectionMixin, View):
     def post(self, request, *args, **kwargs):

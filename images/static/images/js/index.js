@@ -92,6 +92,22 @@ document.addEventListener('htmx:afterSwap', (event) => {
     }
 });
 
+document.addEventListener('htmx:beforeRequest', function(event) {
+    const container = event.target;
+    const trigger = container.querySelector('.load-more-trigger');
+
+    if (trigger) {
+        // Update the height based on the data-height value
+        const desiredHeight = trigger.dataset.height;
+        if (desiredHeight) {
+            container.style.height = `${desiredHeight}px`;
+        }
+
+        // Remove the trigger element from the DOM
+        trigger.remove();
+    }
+});
+
 
 // Function to display the modal with the image and buttons
 function showModal(imageId, imageUrl) {

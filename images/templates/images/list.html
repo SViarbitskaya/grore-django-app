@@ -1,14 +1,6 @@
 {% load static %}
-<div class="text-container htmx"
-    hx-trigger="revealed"
-    hx-get="{% url 'home' %}?page={{ page_obj.number|add:1 }}{% if request.GET.search_query %}&search_query={{ request.GET.search_query }}{% endif %}"
-    hx-swap="afterend"
->
-    {% for image in images %}
-    <div class="text-item" data-id="{{ image.id }}" onclick="showModal({{ image.id }}, '{{ image.file.url }}')">
-        {{ image.note }}
-    </div>
-    {% endfor %}
+<div id="text-items-container" class="text-container htmx">
+    {% include 'images/htmx_partial.html' with images=images %}
 </div>
 
 <!-- Modal Structure -->
