@@ -5,7 +5,7 @@ from django.views import generic, View
 from django.views.decorators.http import require_POST
 from django.db.models import Q
 from django.utils import translation
-import json
+import json, re
 
 from .models import Image
 from .forms import ImageSearchForm
@@ -26,15 +26,21 @@ class HomeView(SelectionMixin, generic.ListView):
     def get_queryset(self):
         queryset = super().get_queryset()
         search_query = self.request.GET.get('search_query')
+        
         if search_query:
             search_terms = search_query.split()
-            queries = [Q(note__icontains=term) for term in search_terms]
-            combined_query = queries.pop()
-
-            for query in queries:
-                combined_query |= query
-
-            queryset = queryset.filter(combined_query)
+            
+            # Create a regex pattern that matches whole words with optional punctuation
+            def contains_full_word(note):
+                for term in search_terms:
+                    pattern = fr'\b{re.escape(term)}\b[\s.,;:!?]*'
+                    if re.search(pattern, note, re.IGNORECASE):
+                        return True
+                return False
+            
+            # Filter the queryset based on the presence of full words
+            queryset = queryset.filter(note__in=[note.note for note in queryset if contains_full_word(note.note)])
+        
         return queryset
 
     def get_context_data(self, **kwargs):
