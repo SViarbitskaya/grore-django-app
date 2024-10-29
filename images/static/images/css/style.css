@@ -10,9 +10,11 @@
 .text-item {
   position: absolute; /* Position items absolutely */
   cursor: pointer;
-  padding: 10px;
+  margin: 10px;
   transition: background-color 0.3s ease;
-  height: 15vh;
+  height: 5vh;
+  min-width:5wh;
+  z-index: 1000;  
 }
 
 .text-item:hover {

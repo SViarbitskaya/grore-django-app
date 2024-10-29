@@ -21,9 +21,8 @@
         <div class="container">
             <div class="navbar-header">
                 <a class="navbar-brand" href="/">{% trans 'home' %}</a>
-                {# <a class="navbar-brand" href="/{{LANGUAGE_CODE}}/pages/about">{% trans 'about' %}</a> #}
-                <a class="navbar-brand" href="{% url 'contact' %}">{% trans 'contact' %}</a>
-                <a class="navbar-brand" href="{% url 'pages' slug='about' %}">{% trans 'about' %}</a>
+                <a class="navbar-brand" href="{% url 'pages' slug='info' %}">{% trans 'info' %}</a>
+                <a class="navbar-brand" href="{% url 'pages' slug='legal-advice' %}">{% trans 'legal advice' %}</a>
                 <a class="navbar-brand" href="{% url 'selection' %}">{% trans 'my selection' %}</a>
                 {% block searchbar %}{% endblock %}
                 {% block language_switch_form %}
