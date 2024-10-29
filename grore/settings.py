@@ -15,6 +15,18 @@ from django.utils.translation import gettext_lazy as _
 import os
 import mimetypes
 
+from dotenv import load_dotenv # Pour les variables d'.env
+
+# Prendre les variables d'environnement
+load_dotenv() 
+
+REQUIRED = ["DB_NAME","DB_USER","DB_PASSWORD", "DB_HOST","DB_PORT"]
+
+needs_required = []
+for i in REQUIRED:
+  if not os.getenv(i) != '':
+    needs_required.append(i)
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,8 +38,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-5(o@$_j%hfn*smdqdut9o$ya18r^kg!-7#lc6dh(g*ijn!2j_0'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-ALLOWED_HOSTS = ['example.com']
-DEBUG = True
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'example.com']
+DEBUG = True    
 
 
 # Application definition
@@ -87,11 +99,11 @@ WSGI_APPLICATION = 'grore.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'production_db',
-        'USER': 'user',
-        'PASSWORD': 'password',
-        'HOST': 'db.example.com',
-        'PORT': '5432',
+        'NAME': os.getenv("DB_NAME"),                
+        'USER': os.getenv("DB_USER"),
+        'PASSWORD':  os.getenv("DB_PASSWORD"),
+        'HOST': os.getenv("DB_HOST"),
+        'PORT': os.getenv("DB_PORT"),
         'OPTIONS': {
             'sslmode': 'require'
         }
