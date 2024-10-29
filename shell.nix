@@ -65,6 +65,7 @@ mkShell {
     pyPkgs.pq
     pyPkgs.aiosasl
     pyPkgs.psycopg2
+    pyPkgs.python-dotenv
         ]))
     # Necessities
     git
