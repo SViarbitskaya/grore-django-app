@@ -10,3 +10,5 @@ settings_local.py
 settings_prod.py
 .env.dev
 .env.prod
+.env
+venv/
