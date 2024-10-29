@@ -12,3 +12,4 @@ settings_prod.py
 .env.prod
 .env
 venv/
+*.pyc

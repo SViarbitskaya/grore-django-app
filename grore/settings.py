@@ -13,11 +13,25 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 from django.utils.translation import gettext_lazy as _
 import os
-import mimetypes
+import mimetypes            
+
+from dotenv import load_dotenv # Pour les variables d'.env
+
+# Prendre les variables d'environnement
+load_dotenv()
+
+# Check to see if basic variables needed are defined
+
+REQUIRED = ["DB_DATABASE"]
+
+needs_required = []
+for i in REQUIRED:
+  if not os.getenv(i) != '':
+    needs_required.append(i)
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -31,7 +45,7 @@ DEBUG = bool(os.environ.get("DEBUG", default=0))
 
 # 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.
 # For example: 'DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]'
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ").replace(" ", "").split(",")
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS","localhost 127.0.0.1").replace(",","").   split(" ")
 
 # Application definition
 
