@@ -93,5 +93,6 @@ mkShell {
   shellHook = ''
     export LC_ALL="C"
     alias ll="ls -l"
+    source venv/bin/activate
   '';
 }
