@@ -1,0 +1,25 @@
+server {
+    root ${DJANGO_NGINX_ROOT};
+    server_name ${NGINX_DOMAINS};  # Use localhost for local development
+    client_max_body_size ${NGINX_MAX_SIZE};
+                                                
+    location /static/ {
+        alias ${DJANGO_STATIC_ROOT}/;  # Ensure this matches STATIC_ROOT
+        autoindex off;
+    }
+
+    location /media/ {
+        alias ${DJANGO_MEDIA_ROOT}/;  # Ensure this matches MEDIA_ROOT
+        autoindex off;
+    }
+
+    location / {
+        error_log /var/log/nginx/grore-${WEB_DOMAIN}-error.log;
+        access_log /var/log/nginx/grore-${WEB_DOMAIN}-access.log;
+        proxy_set_header Host $${no_value}host;
+        proxy_set_header X-Real-IP $${no_value}remote_addr; 
+        proxy_set_header X-Forwarded-For $${no_value}proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $${no_value}scheme;
+        proxy_pass ${DJANGO_PROTO}://${DJANGO_HOST}:${DJANGO_PORT};  # Use the upstream block defined earlier
+    }
+}

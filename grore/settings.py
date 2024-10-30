@@ -13,11 +13,25 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 from django.utils.translation import gettext_lazy as _
 import os
-import mimetypes
+import mimetypes            
+
+from dotenv import load_dotenv # Pour les variables d'.env
+
+# Prendre les variables d'environnement
+load_dotenv()
+
+# Check to see if basic variables needed are defined
+
+REQUIRED = ["DB_DATABASE"]
+
+needs_required = []
+for i in REQUIRED:
+  if not os.getenv(i) != '':
+    needs_required.append(i)
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -27,11 +41,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.environ.get("DEBUG", default=0))
+if os.environ.get("DEBUG", 'false').lower == 'true':
+    DEBUG = true
 
 # 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.
 # For example: 'DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]'
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS","localhost 127.0.0.1").replace(",","").split(" ")
 
 # Application definition
 
@@ -47,7 +62,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'debug_toolbar',
-
 ]
 
 MIDDLEWARE = [
@@ -63,10 +77,14 @@ MIDDLEWARE = [
     "django_htmx.middleware.HtmxMiddleware",
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:1337',  # The port you're running on
-    'http://127.0.0.1:1337',
-]
+CSRF_TRUSTED_ORIGINS = [  os.getenv('WEB_PROTO','http') + '://' +  os.getenv('DJANGO_HOST','localhost') + ':' +  os.getenv('DJANGO_PORT','8000'),
+                           os.getenv('WEB_PROTO','http') + '://' +  os.getenv('WEB_DOMAIN','localhost') 
+                        ];
+
+# CSRF_TRUSTED_ORIGINS = [
+#     'http://localhost:1337',  # The port you're running on
+#     'http://127.0.0.1:1337',
+# ]
 
 ROOT_URLCONF = 'grore.urls'
 
@@ -94,12 +112,12 @@ WSGI_APPLICATION = 'grore.wsgi.application'
 
 DATABASES = {
     "default": {
-        "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
-        "NAME": os.environ.get("SQL_DATABASE", BASE_DIR / "db.sqlite3"),
-        "USER": os.environ.get("SQL_USER", "user"),
-        "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),
-        "HOST": os.environ.get("SQL_HOST", "localhost"),
-        "PORT": os.environ.get("SQL_PORT", "5432"),
+        "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends."),
+        "NAME": os.environ.get("DB_DATABASE", BASE_DIR / "db.sqlite3"),
+        "USER": os.environ.get("DB_USER", "user"),
+        "PASSWORD": os.environ.get("DB_PASSWORD", "password"),
+        "HOST": os.environ.get("DB_HOST", "localhost"),
+        "PORT": os.environ.get("DB_PORT", "5432"),
     }
 }
 
@@ -129,7 +147,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 USE_I18N = True
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = os.environ.get("DJANGO_LANGUAGE_CODE", 'en-us')
 
 LANGUAGES = [
     ("en", _("English")),
@@ -150,11 +168,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_URL = os.environ.get("DJANGO_STATIC_URL", '/static') + '/'
+STATIC_ROOT = os.environ.get("DJANGO_STATIC_ROOT", BASE_DIR / "staticfiles")
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = os.environ.get("DJANGO_MEDIA_URL", '/media') + '/'
+MEDIA_ROOT = os.environ.get("DJANGO_MEDIA_ROOT", BASE_DIR / "media")
 
 # STATICFILES_DIRS = [
 #     BASE_DIR / "static",

@@ -1,13 +1,13 @@
 services:
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: python manage.py runserver ${DJANGO_HOST}:${DJANGO_PORT}
     volumes:
       - .:/usr/src/grore/
     ports:
-      - 8000:8000
+      - ${DJANGO_PORT}:${DJANGO_PORT}
     env_file:
-      - ./.env.dev
+      - ./.env
     depends_on:
       - db
   db:
@@ -15,9 +15,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
-      POSTGRES_DB: grore
-      POSTGRES_USER: groreuser
-      POSTGRES_PASSWORD: grorepassword
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
 
 volumes:
   postgres_data:
