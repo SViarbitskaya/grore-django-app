@@ -1,0 +1,27 @@
+name: Deploy to Grore Images Server
+
+on:
+  push:
+    branches:
+      - production  # Or whichever branch you want to trigger this action on
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.GRORE_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H grore-images.com >> ~/.ssh/known_hosts
+
+      - name: Run deployment script on Grore Images Server
+        run: |
+          ssh django@grore-images.com 'cd /home/django/grore-django-app && ./up.sh'
