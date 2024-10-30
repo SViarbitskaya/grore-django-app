@@ -32,4 +32,5 @@ sudo cp ${DJANGO_GRORE_APP_ROOT}/production/output/${WEB_DOMAIN}.conf /etc/nginx
 sudo ln -s /etc/nginx/sites-available/${WEB_DOMAIN}.conf /etc/nginx/sites-enabled/${WEB_DOMAIN}.conf
 sudo nginx -t
 sudo systemctl restart nginx
+certbot --nginx -d ${WEB_DOMAIN} -d www.${WEB_DOMAIN}
 EOF
