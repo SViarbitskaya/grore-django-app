@@ -38,3 +38,8 @@ or provision a working database if production
 Copy the settings    
 `cp grore/settings.py grore/settings_local.py`  
 and modify parameters as required 
+
+## GITHUB ACTIONS
+
+Try for continous integration underway.
+
