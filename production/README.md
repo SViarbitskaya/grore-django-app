@@ -1,8 +1,14 @@
 # New Grore Installation Strategy
 
-  ## GITHUB ACTIONS
+## GITHUB ACTIONS
 
-  Try for continous integration underway.
+Try for continous integration underway.
+
+See 
+
+https://github.com/chris2fr/messhouse/wiki
+
+for intgrating continuous deployment secret.
 
 ## NIXPLGS
 
