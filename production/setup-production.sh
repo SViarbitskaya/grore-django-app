@@ -39,4 +39,5 @@ sudo ln -s /etc/nginx/sites-available/${WEB_DOMAIN}.conf /etc/nginx/sites-enable
 sudo nginx -t
 sudo systemctl restart nginx
 certbot --nginx -d ${WEB_DOMAIN} -d www.${WEB_DOMAIN}
+sudo systemctl restart grore nginx
 EOF
