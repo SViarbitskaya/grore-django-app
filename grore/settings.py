@@ -77,10 +77,14 @@ MIDDLEWARE = [
     "django_htmx.middleware.HtmxMiddleware",
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:1337',  # The port you're running on
-    'http://127.0.0.1:1337',
-]
+CSRF_TRUSTED_ORIGINS = [  os.getenv('DJANGO_HOST') + ':' +  os.getenv('DJANGO_PORT'),
+                           os.getenv('WEB_DOMAIN_NAME') 
+                        ];
+
+# CSRF_TRUSTED_ORIGINS = [
+#     'http://localhost:1337',  # The port you're running on
+#     'http://127.0.0.1:1337',
+# ]
 
 ROOT_URLCONF = 'grore.urls'
 
