@@ -1,0 +1,27 @@
+[
+    {
+      "model": "pages.page",
+      "pk": 1,
+      "fields": {
+        "slug": "info",
+        "title_en": "Info",
+        "title_fr": "Info",
+        "content_en": "This is some sample content for Page Info.",
+        "content_fr": "This is some sample content for Page Info.",
+        "pub_date": "2024-10-27T10:00:00Z"
+      }
+    },
+    {
+      "model": "pages.page",
+      "pk": 2,
+      "fields": {
+        "slug": "legal-advice",
+        "title_en": "Legal advice",
+        "title_fr": "Legal advice",
+        "content_en": "This is some sample content for Page Legal Advice.",
+        "content_fr": "This is some sample content for Page Legal Advice.",
+        "pub_date": "2024-10-27T12:00:00Z"
+      }
+    }
+  ]
+  
