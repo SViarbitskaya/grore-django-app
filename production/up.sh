@@ -2,7 +2,7 @@
 # meant to be run by django
 # I copy it to /home/django/up.sh such that it is out of the repository
 # The access is via 
-# ssh django@grore-images.com 'cd /home/django/up.sh'
+# ssh django@grore-images.com '/home/django/up.sh'
 # Assuming that 
 # django@grore-images.com:/home/django/.ssh/authorized_keys
 # has the id_rsa.pub equivalent to the id_rsa used by the calling agent.

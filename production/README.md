@@ -10,6 +10,20 @@ https://github.com/chris2fr/messhouse/wiki
 
 for intgrating continuous deployment secret.
 
+The following command deploys from github:SVarbitskya/grore-django-app branch production
+
+ssh django@grore-images.com '/home/django/up.sh'
+
+Assuming that   
+django@grore-images.com:/home/django/.ssh/authorized_keys  
+has the id_rsa.pub equivalent to the id_rsa used by the calling agent.
+`ssh-keygen -t rsa`  
+to create the id_rsa and id_rsa.pub files  in .ssh  
+`cat ~/.ssh/id_rsa.pub`   
+to share the public key.
+
+Also used by .github/workflows/up.yml continuous deployment script
+
 ## NIXPLGS
 
 We use NIXPKGS and not NIXOS. To install Nixpkgs (multi-user daemon) :
