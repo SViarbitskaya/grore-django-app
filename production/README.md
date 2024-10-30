@@ -1,5 +1,11 @@
 # New Grore Installation Strategy
 
+## GITHUB ACTIONS
+
+Try for continous integration underway.
+
+## NIXPLGS
+
 We use NIXPKGS and not NIXOS. To install Nixpkgs (multi-user daemon) :
 
 https://nixos.org/download/#download-nix
