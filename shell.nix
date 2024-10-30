@@ -86,13 +86,21 @@ mkShell {
     docker
     docker-compose
     # sqlite
-    postgresql_14
+    postgresql_15
     # apparmor-bin-utils    
     # cowsay
   ];
   shellHook = ''
     export LC_ALL="C"
     alias ll="ls -l"
+    python -m venv venv
     source venv/bin/activate
-  '';
+    git pull
+    pip install -r requirements.txt
+    python manage.py makemigrations
+    python manage.py migrate
+    python manage.py collectstatic
+    sudo /usr/bin/systemctl restart grore
+  ''
+  ;
 }
