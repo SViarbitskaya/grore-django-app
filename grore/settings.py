@@ -79,7 +79,7 @@ MIDDLEWARE = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [  os.getenv('WEB_PROTO','http') + '://' +  os.getenv('DJANGO_HOST','localhost') + ':' +  os.getenv('DJANGO_PORT','8000'),
-                           os.getenv('WEB_PROTO','http') + '://' +  os.getenv('WEB_DOMAIN_NAME','localhost') 
+                           os.getenv('WEB_PROTO','http') + '://' +  os.getenv('WEB_DOMAIN','localhost') 
                         ];
 
 # CSRF_TRUSTED_ORIGINS = [
