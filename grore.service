@@ -5,11 +5,12 @@ After=network.target
 
 [Service]
 # gunicorn can let systemd know when it is ready
+EnvironmentFile=-/home/django/grore-django-app/.env
 Type=notify
 NotifyAccess=main
 # the specific user that our service will run as
-User=grore
-Group=www-data
+User=${SYS_DJANGO_USER}
+Group=${SYS_DJANGO_GROUP}
 # this user can be transiently created by systemd
 # DynamicUser=true
 # RuntimeDirectory=grore-gunicorn
