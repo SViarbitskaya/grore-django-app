@@ -4,12 +4,12 @@ server {
     client_max_body_size ${NGINX_MAX_SIZE};
                                                 
     location /static/ {
-        alias ${DJANGO_STATIC_ROOT};  # Ensure this matches STATIC_ROOT
+        alias ${DJANGO_STATIC_ROOT}/;  # Ensure this matches STATIC_ROOT
         autoindex off;
     }
 
     location /media/ {
-        alias ${DJANGO_MEDIA_ROOT};  # Ensure this matches MEDIA_ROOT
+        alias ${DJANGO_MEDIA_ROOT}/;  # Ensure this matches MEDIA_ROOT
         autoindex off;
     }
 
