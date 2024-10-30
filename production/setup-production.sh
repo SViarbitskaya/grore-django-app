@@ -1,3 +1,7 @@
+# SCRIPT POUR ETABLIR L'ENVIRONNEMENT DE PRODUCTION POUR GRORE-IMAGE
+# VERIFIER .env 
+#
+echo "Mise en place de l'environnement de production"
 source ../.env
 echo "" > "./output/template.sh" 
 IFS=$'\n'
@@ -17,6 +21,8 @@ echo -n " envsubst < grore.service.template > ./output/grore.service" >> "./outp
 source ./output/template-service.sh
 rm ./output/template-service.sh
 rm ./output/template.sh
+cd ..
+./venv/bin/python manage.py collectstatic
 cat << EOF
 # MERCI DEFAIRE LES COMMANDES SUIVANTES AUSSI
 sudo mkdir -p ${DJANGO_MEDIA_ROOT}
