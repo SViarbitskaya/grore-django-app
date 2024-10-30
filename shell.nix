@@ -97,9 +97,9 @@ mkShell {
     source venv/bin/activate
     git pull
     pip install -r requirements.txt
-    python manage.py makemigrations
-    python manage.py migrate
-    python manage.py collectstatic
+    python manage.py makemigrations --noinput
+    python manage.py migrate --noinput
+    python manage.py collectstatic --noinput
     sudo /usr/bin/systemctl restart grore
   ''
   ;
