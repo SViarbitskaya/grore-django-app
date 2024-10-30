@@ -12,4 +12,4 @@ settings_prod.py
 .env.prod
 .env
 venv/
-production/output/
+production/output/*
