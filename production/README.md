@@ -1,5 +1,11 @@
 # New Grore Installation Strategy
 
+## GITHUB ACTIONS
+
+Try for continous integration underway.
+
+## NIXPLGS
+
 We use NIXPKGS and not NIXOS. To install Nixpkgs (multi-user daemon) :
 
 https://nixos.org/download/#download-nix
@@ -38,8 +44,4 @@ or provision a working database if production
 Copy the settings    
 `cp grore/settings.py grore/settings_local.py`  
 and modify parameters as required 
-
-## GITHUB ACTIONS
-
-Try for continous integration underway.
 
