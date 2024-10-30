@@ -1,8 +1,8 @@
 # New Grore Installation Strategy
 
-## GITHUB ACTIONS
+  ## GITHUB ACTIONS
 
-Try for continous integration underway.
+  Try for continous integration underway.
 
 ## NIXPLGS
 

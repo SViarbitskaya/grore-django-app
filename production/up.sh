@@ -1,4 +1,4 @@
 cd grore-django-app
-nix-shell
+/nix/var/nix/profiles/default/bin/nix-shell
 sudo /usr/bin/systemctl restart grore
 exit
