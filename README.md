@@ -74,7 +74,7 @@ Voici les variables de configuration :
 | NGINX_MAX_SIZE | Taille max des fichiers  |
 |  |  500M  |
 | SECRET_KEY |  Pour Django/ Gunicorn |
-|  |  CHANGE THE SECRET KEY PLEASE VEUILLEW CHANGER LA CLEF SECRETE SVP  |
+|  |  ./venv/bin/python manage.py shell -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"  |
 
 ## Commandes Makefile
 
