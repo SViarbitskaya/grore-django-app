@@ -190,7 +190,7 @@ activate the venv
 
 create and edit the .env configuration file:
 
-`cp sample.env .env`  
+`cp scripts/sample.env .env`  
 puis modifier .env selon les besoins
 
 start the database from docker (if dev)  
