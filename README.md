@@ -10,35 +10,62 @@ L'ensemble de la configuration se trouve dans le fichier .env. Pour créer ce fi
 
 Voici les variables de configuration :
 
-| Paramètre | Explication | Exemple |
-| --- | --- | --- |
-| DB_DATABASE | Le nom de la base de données (ou le fichier chemin absolu si SQLite3)  | grore |
-| DB_ENGINE |  Le type de base de données | django.db.backends.postgresql (ou .sqlite3) |
-| DB_HOST |   | localhost |
-| DB_PASSWORD |   | CHANGE_ME |
-| DB_PORT |   | 5432 |
-| DB_USER |   | grore |
-| DEBUG |   | false |
-| DJANGO_ALLOWED_HOSTS |  La partie après :// et avant /, pour avoir permission d'y accéder | localhost, 127.0.0.1, grore-images.com, ${WEB_DOMAIN_NAME} |
-| DJANGO_GRORE_APP_ROOT |  Chemin absolu **démarre avec / et termine sans /** | /home/django/grore-django-app |
-| DJANGO_HOST |  La partie après :// et avant / où le serveur Django ou Gunicorn écoute principalement  | localhost |
-| DJANGO_LANGUAGE_CODE | en ou fr  | fr |
-| DJANGO_MEDIA_ROOT |  **démarre avec / et termine sans /** | /var/www/html/grore/media |
-| DJANGO_MEDIA_URL | **ni / avant ni / après**  | media |
-| DJANGO_NGINX_ROOT | **démarre avec / et termine sans /**  | /var/www/html/grore |
-| DJANGO_PORT | pour gunicorn ou django  | 8000 |
-| DJANGO_PROTO | https ou http pour gunicorn ou django  | http |
-| DJANGO_SETTINGS_MODULE | N'est guère utilisé actuellement  | grore.settings |
-| DJANGO_STATIC_ROOT | **démarre avec / et termine sans /**  | /var/www/html/grore/staticfiles |
-| DJANGO_STATIC_URL |  **ni / avant ni / après**  | static |
-| DOCKER_POSTGRES_ROOT | **démarre avec / et termine sans /**  utilisé seulement pour le postgres/Dockerfile ou dockercompose.yml (pas en production ou pas si pas Docker)  | /var/lib/postgresql/data |
-| NGINX_DOMAINS |  Configuration de proxy NGINX partie après :// et avant premier / | www.grore-images.com grore-images.com |
-| NGINX_MAX_SIZE | Taille max des fichiers  | 500M |
-| SECRET_KEY |  Pour Django/ Gunicorn | CHANGE_KEY_CHANGE_KEY_CHANGE_KEY_CHANGE_KEY_CHANGE_KEY_CHANGE_KEY |
-| SYS_DJANGO_GROUP |   | www-data |
-| SYS_DJANGO_USER |   | django |
-| WEB_DOMAIN | Parite externe après :// et avant / peut être directement Django | grore-images.com |
-| WEB_PROTO | Parite externe http peut être directement Django  | https |
+| Paramètre | Explication / Exemple|
+| --- | --- | 
+| DB_DATABASE | Le nom de la base de données (ou le fichier chemin absolu si SQLite3)  |
+|  |  grore  |
+| DB_ENGINE |  Le type de base de données |
+|  |  django.db.backends.postgresql (ou .sqlite3)  |
+| DB_HOST |   |
+|  |  localhost  |
+| DB_PASSWORD |   |
+|  |  CHANGE_ME  |
+| DB_PORT |   |
+|  |  5432  |
+| DB_USER |   |
+|  |  grore  |
+| DEBUG |   |
+|  |  false  |
+| DJANGO_ALLOWED_HOSTS |  La partie après :// et avant /, pour avoir permission d'y accéder |
+|  |  localhost, 127.0.0.1, grore-images.com, ${WEB_DOMAIN_NAME}  |
+| DJANGO_GRORE_APP_ROOT |  Chemin absolu **démarre avec / et termine sans /** |
+|  |  /home/django/grore-django-app  |
+| DJANGO_HOST |  La partie après :// et avant / où le serveur Django ou Gunicorn écoute principalement  |
+|  |  localhost  |
+| DJANGO_LANGUAGE_CODE | en ou fr  |
+|  |  fr  |
+| DJANGO_MEDIA_ROOT |  **démarre avec / et termine sans /** |
+|  |  /var/www/html/grore/media  |
+| DJANGO_MEDIA_URL | **ni / avant ni / après**  |
+|  |  media  |
+| DJANGO_NGINX_ROOT | **démarre avec / et termine sans /**  |
+|  |  /var/www/html/grore  |
+| DJANGO_PORT | pour gunicorn ou django  |
+|  |  8000  |
+| DJANGO_PROTO | https ou http pour gunicorn ou django  |
+|  |  http  |
+| DJANGO_SETTINGS_MODULE | N'est guère utilisé actuellement  |
+|  |  grore.settings  |
+| DJANGO_STATIC_ROOT | **démarre avec / et termine sans /**  |
+|  |  /var/www/html/grore/staticfiles  |
+| DJANGO_STATIC_URL |  **ni / avant ni / après**  |
+|  |  static  |
+| DOCKER_POSTGRES_ROOT | **démarre avec / et termine sans /**  utilisé seulement pour le postgres/Dockerfile ou dockercompose.yml (pas en production ou pas si pas Docker)  |
+|  |  /var/lib/postgresql/data  |
+| NGINX_DOMAINS |  Configuration de proxy NGINX partie après :// et avant premier / |
+|  |  www.grore-images.com grore-images.com  |
+| NGINX_MAX_SIZE | Taille max des fichiers  |
+|  |  500M  |
+| SECRET_KEY |  Pour Django/ Gunicorn |
+|  |  CHANGE_KEY_CHANGE_KEY_CHANGE_KEY_CHANGE_KEY_CHANGE_KEY_CHANGE_KEY  |
+| SYS_DJANGO_GROUP |   |
+|  |  www-data  |
+| SYS_DJANGO_USER |   |
+|  |  django  |
+| WEB_DOMAIN | Parite externe après :// et avant / peut être directement Django |
+|  |  grore-images.com  |
+| WEB_PROTO | Parite externe http peut être directement Django  |
+|  |  https  |
 
 ## Commandes Makefile
 
