@@ -23,15 +23,15 @@ Voici les variables de configuration :
 | APP_DJANGO_USER_GROUP |  Pour le service systemd |
 |  |  www-data  |
 | APP_WEB_HOST | Parite externe après "://" et avant "/" peut être directement Django. Peut être le même que DJANGO_HOST |
-|  |  grore-images.com ou localhost |
-| APP_WEB_PORT | Le port visible à l'extérieur  |
+|  |  grore-images.com ou 127.0.0.1 ou localhost |
+| APP_WEB_PORT | Le port visible à l'extérieur (identique que intérieur si absence proxy)  |
 |  |  443 ou 80 ou 8000  |
 | APP_WEB_PROTO | Parite externe http peut être directement Django  |
-|  |  https  |
-| APP_WEB_ROOT | **démarre avec "/" et termine sans "/"**  |
+|  |  https ou http |
+| APP_WEB_ROOT | Dossier pour la racine du proxy web sous lequel on trouve habituellement media et staticfiles **démarre avec "/" et termine sans "/"**  |
 |  |  /var/www/html/grore ou ${APP_DJANGO_ROOT}/cache/www |
-| DB_DATABASE | Le nom de la base de données (ou le fichier chemin absolu si SQLite3)  |
-|  |  grore  |
+| DB_DATABASE | Le nom de la base de données (ou le fichier chemin absolu si SQLite3, mais attention, le dossier doit exister)  |
+|  |  grore ou ${APP_DJANGO_ROOT}/cache/db.sqlite3 |
 | DB_ENGINE |  Le type de base de données |
 |  |  django.db.backends.postgresql (ou .sqlite3)  |
 | DB_HOST |   |
@@ -42,17 +42,15 @@ Voici les variables de configuration :
 |  |  5432  |
 | DB_USER |   |
 |  |  grore  |
-| DEBUG |   |
+| DEBUG |  Pour DJANGO |
 |  |  false  |
-| DJANGO_ALLOWED_HOSTS |  La partie après "://" et avant "/", pour avoir permission d'y accéder |
+| DJANGO_ALLOWED_HOSTS |  La partie après "://" et avant ":" et avant "/", pour avoir permission d'y accéder. Pas besoin d'indiquer le port. |
 |  |  localhost, 127.0.0.1, grore-images.com, ${APP_WEB_HOST}  |
-| DJANGO_APP_DJANGO_ROOT |  Chemin absolu **démarre avec "/" et termine sans "/"** |
-|  |  /home/django/grore-django-app  |
 | DJANGO_HOST |  La partie après "://" et avant "/" où le serveur Django ou Gunicorn écoute principalement  |
 |  |  localhost ou  ou ${APP_WEB_HOST}  |
-| DJANGO_LANGUAGE_CODE | en ou fr  |
-|  |  fr  |
-| DJANGO_MEDIA_ROOT |  **démarre avec "/" et termine sans "/"** |
+| DJANGO_LANGUAGE_CODE | La langue (par défaut ?) du site  |
+|  |  en ou fr  |
+| DJANGO_MEDIA_ROOT |  Ce dossier est créé avec `make init-nix`. **démarre avec "/" et termine sans "/"** |
 |  |  /var/www/html/grore/media  |
 | DJANGO_MEDIA_URL | **ni "/" avant ni "/" après**  |
 |  |  media  |
@@ -60,10 +58,10 @@ Voici les variables de configuration :
 |  |  8000 ou ${APP_WEB_PORT} |
 | DJANGO_PROTO | https ou http pour gunicorn ou django  |
 |  |  http  |
-| DJANGO_SETTINGS_MODULE | N'est guère utilisé actuellement  |
+| DJANGO_SETTINGS_MODULE | N'est guère utilisé actuellement en interne mais pris automatiquement par DJANGO |
 |  |  grore.settings  |
-| DJANGO_STATIC_ROOT | **démarre avec "/" et termine sans "/"**  |
-|  |  /var/www/html/grore/staticfiles  |
+| DJANGO_STATIC_ROOT | Ce dossier est créé avec `make init-nix`. **démarre avec "/" et termine sans "/"**. |
+|  | ${APP_DJANGO_ROOT}/cache/www/staticfiles ou /var/www/html/grore/staticfiles  |
 | DJANGO_STATIC_URL |  **ni "/" avant ni "/" après**  |
 |  |  static  |
 | DOCKER_POSTGRES_ROOT | **démarre avec "/" et termine sans "/"**  utilisé seulement pour le postgres/Dockerfile ou dockercompose.yml (pas en production ou pas si pas Docker). Pas certain que ce soit utile de mapper sur la machine locale.. |
