@@ -25,7 +25,7 @@ services:
       - static_volume:${DJANGO_STATIC_ROOT}
       - media_volume:${DJANGO_MEDIA_ROOT}
     ports:
-      - 1337:80
+      - ${APP_WEB_PORT}:80
     depends_on:
       - web
     env_file:

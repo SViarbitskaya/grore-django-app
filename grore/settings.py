@@ -33,8 +33,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-#SECRET_KEY = 'django-insecure-5(o@$_j%hfn*smdqdut9o$ya18r^kg!-7#lc6dh(g*ijn!2j_0'
-SECRET_KEY = os.environ.get("SECRET_KEY")
+#DJANGO_SECRET_KEY = 'django-insecure-5(o@$_j%hfn*smdqdut9o$ya18r^kg!-7#lc6dh(g*ijn!2j_0'
+DJANGO_SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 if os.environ.get("DEBUG", 'false').lower == 'true':
@@ -73,8 +73,8 @@ MIDDLEWARE = [
     "django_htmx.middleware.HtmxMiddleware",
 ]
 
-CSRF_TRUSTED_ORIGINS = [  os.getenv('WEB_PROTO','http') + '://' +  os.getenv('DJANGO_HOST','localhost') + ':' +  os.getenv('DJANGO_PORT','8000'),
-                           os.getenv('WEB_PROTO','http') + '://' +  os.getenv('WEB_DOMAIN','localhost') 
+CSRF_TRUSTED_ORIGINS = [  os.getenv('APP_WEB_PROTO','http') + '://' +  os.getenv('DJANGO_HOST','localhost') + ':' +  os.getenv('DJANGO_PORT','8000'),
+                           os.getenv('APP_WEB_PROTO','http') + '://' +  os.getenv('APP_WEB_HOST','localhost') 
                         ];
 
 # CSRF_TRUSTED_ORIGINS = [
