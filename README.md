@@ -10,7 +10,7 @@ L'ensemble de la configuration se trouve dans le fichier .env. Pour créer ce fi
 
 `cp sample.env .env`
 
-**Ne pas mettre aucune valeur entre guillements**
+**Ne pas mettre aucune valeur entre guillements (") ni simple quotes (')**
 
 Voici les variables de configuration :
 
@@ -30,19 +30,19 @@ Voici les variables de configuration :
 |  |  grore  |
 | DEBUG |   |
 |  |  false  |
-| DJANGO_ALLOWED_HOSTS |  La partie après :// et avant /, pour avoir permission d'y accéder |
+| DJANGO_ALLOWED_HOSTS |  La partie après "://" et avant "/", pour avoir permission d'y accéder |
 |  |  localhost, 127.0.0.1, grore-images.com, ${WEB_DOMAIN_NAME}  |
-| DJANGO_GRORE_APP_ROOT |  Chemin absolu **démarre avec / et termine sans /** |
+| DJANGO_GRORE_APP_ROOT |  Chemin absolu **démarre avec "/" et termine sans "/"** |
 |  |  /home/django/grore-django-app  |
-| DJANGO_HOST |  La partie après :// et avant / où le serveur Django ou Gunicorn écoute principalement  |
+| DJANGO_HOST |  La partie après "://" et avant "/" où le serveur Django ou Gunicorn écoute principalement  |
 |  |  localhost  |
 | DJANGO_LANGUAGE_CODE | en ou fr  |
 |  |  fr  |
-| DJANGO_MEDIA_ROOT |  **démarre avec / et termine sans /** |
+| DJANGO_MEDIA_ROOT |  **démarre avec "/" et termine sans "/"** |
 |  |  /var/www/html/grore/media  |
-| DJANGO_MEDIA_URL | **ni / avant ni / après**  |
+| DJANGO_MEDIA_URL | **ni "/" avant ni "/" après**  |
 |  |  media  |
-| DJANGO_NGINX_ROOT | **démarre avec / et termine sans /**  |
+| DJANGO_NGINX_ROOT | **démarre avec "/" et termine sans "/"**  |
 |  |  /var/www/html/grore  |
 | DJANGO_PORT | pour gunicorn ou django  |
 |  |  8000  |
@@ -50,13 +50,13 @@ Voici les variables de configuration :
 |  |  http  |
 | DJANGO_SETTINGS_MODULE | N'est guère utilisé actuellement  |
 |  |  grore.settings  |
-| DJANGO_STATIC_ROOT | **démarre avec / et termine sans /**  |
+| DJANGO_STATIC_ROOT | **démarre avec "/" et termine sans "/"**  |
 |  |  /var/www/html/grore/staticfiles  |
-| DJANGO_STATIC_URL |  **ni / avant ni / après**  |
+| DJANGO_STATIC_URL |  **ni "/" avant ni "/" après**  |
 |  |  static  |
-| DOCKER_POSTGRES_ROOT | **démarre avec / et termine sans /**  utilisé seulement pour le postgres/Dockerfile ou dockercompose.yml (pas en production ou pas si pas Docker)  |
+| DOCKER_POSTGRES_ROOT | **démarre avec "/" et termine sans "/"**  utilisé seulement pour le postgres/Dockerfile ou dockercompose.yml (pas en production ou pas si pas Docker)  |
 |  |  /var/lib/postgresql/data  |
-| NGINX_DOMAINS |  Configuration de proxy NGINX partie après :// et avant premier / |
+| NGINX_DOMAINS |  Configuration de proxy NGINX partie après "://" et avant premier / |
 |  |  www.grore-images.com grore-images.com  |
 | NGINX_MAX_SIZE | Taille max des fichiers  |
 |  |  500M  |
@@ -66,7 +66,7 @@ Voici les variables de configuration :
 |  |  www-data  |
 | SYS_DJANGO_USER |   |
 |  |  django  |
-| WEB_DOMAIN | Parite externe après :// et avant / peut être directement Django |
+| WEB_DOMAIN | Parite externe après "://" et avant "/" peut être directement Django |
 |  |  grore-images.com  |
 | WEB_PROTO | Parite externe http peut être directement Django  |
 |  |  https  |
