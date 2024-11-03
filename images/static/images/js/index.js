@@ -20,7 +20,11 @@ function positionTextItems(container = document.querySelector('.text-container')
         item.style.position = 'absolute'; 
         item.style.left = `${randomX}px`;
         item.style.top = `${randomY}px`;
-        item.style.opacity = '1';
+
+        // Now that the item is positioned, set it to visible
+        setTimeout(() => {
+            item.style.opacity = '1';
+        }, 10);
 
         moveTextItemRandomly(item, containerWidth, containerHeight);
 
