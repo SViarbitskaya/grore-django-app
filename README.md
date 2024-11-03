@@ -28,6 +28,8 @@ Voici les variables de configuration :
 |  |  443 ou 80 ou 8000  |
 | APP_WEB_PROTO | Parite externe http peut être directement Django  |
 |  |  https  |
+| APP_WEB_ROOT | **démarre avec "/" et termine sans "/"**  |
+|  |  /var/www/html/grore ou ${APP_DJANGO_ROOT}/cache/www |
 | DB_DATABASE | Le nom de la base de données (ou le fichier chemin absolu si SQLite3)  |
 |  |  grore  |
 | DB_ENGINE |  Le type de base de données |
@@ -54,14 +56,10 @@ Voici les variables de configuration :
 |  |  /var/www/html/grore/media  |
 | DJANGO_MEDIA_URL | **ni "/" avant ni "/" après**  |
 |  |  media  |
-| APP_WEB_ROOT | **démarre avec "/" et termine sans "/"**  |
-|  |  /var/www/html/grore  |
 | DJANGO_PORT | pour gunicorn ou django  |
 |  |  8000 ou ${APP_WEB_PORT} |
 | DJANGO_PROTO | https ou http pour gunicorn ou django  |
 |  |  http  |
-| DJANGO_SECRET_KEY |  Pour Django/ Gunicorn |
-|  |  CHANGE_KEY_CHANGE_KEY_CHANGE_KEY_CHANGE_KEY_CHANGE_KEY_CHANGE_KEY  |
 | DJANGO_SETTINGS_MODULE | N'est guère utilisé actuellement  |
 |  |  grore.settings  |
 | DJANGO_STATIC_ROOT | **démarre avec "/" et termine sans "/"**  |
@@ -74,6 +72,8 @@ Voici les variables de configuration :
 |  |  www.grore-images.com grore-images.com et éventuellement ${APP_WEB_HOST} / ${DJANGO_HOST} |
 | NGINX_MAX_SIZE | Taille max des fichiers  |
 |  |  500M  |
+| SECRET_KEY |  Pour Django/ Gunicorn |
+|  |  CHANGE_KEY_CHANGE_KEY_CHANGE_KEY_CHANGE_KEY_CHANGE_KEY_CHANGE_KEY  |
 
 ## Commandes Makefile
 
