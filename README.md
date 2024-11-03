@@ -90,6 +90,7 @@ GroreNginxConf>"{APP_WEB_HOST}.conf"]
 grore.service>systemctl start grore.service]
 internet{{Internet}}
 .env>.env]
+grore-django-app(((grore-django-app)))
 
 Postgres -- "Sert les données pour" --> Django -- "Sert l'application pour" --> Nginx -- "Sert les pages (Proxy) pour" --> internet
 grore.service -- "grore/application.wsgi" ---> Django
