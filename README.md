@@ -1,5 +1,9 @@
 # GRORE
 
+[grore-images.com](https://www.grore-images.com)
+
+Hébergé par [Hetzner](https://www.hetzner.com)
+
 ## Configuration
 
 L'ensemble de la configuration se trouve dans le fichier .env. Pour créer ce fichier, 
