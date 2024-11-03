@@ -22,11 +22,11 @@ Voici les variables de configuration :
 |  |  django  |
 | APP_DJANGO_USER_GROUP |  Pour le service systemd |
 |  |  www-data  |
-| APP_WEB_HOST | Parite externe après "://" et avant "/" peut être directement Django. Peut être le même que DJANGO_HOST |
+| APP_WEB_HOST | Partie externe après "://" et avant "/" peut être directement Django. Peut être le même que DJANGO_HOST |
 |  |  grore-images.com ou 127.0.0.1 ou localhost |
 | APP_WEB_PORT | Le port visible à l'extérieur (identique que intérieur si absence proxy)  |
 |  |  443 ou 80 ou 8000  |
-| APP_WEB_PROTO | Parite externe http peut être directement Django  |
+| APP_WEB_PROTO | Partie externe http peut être directement Django  |
 |  |  https ou http |
 | APP_WEB_ROOT | Dossier pour la racine du proxy web sous lequel on trouve habituellement media et staticfiles **démarre avec "/" et termine sans "/"**  |
 |  |  /var/www/html/grore ou ${APP_DJANGO_ROOT}/cache/www |
@@ -71,7 +71,7 @@ Voici les variables de configuration :
 | NGINX_MAX_SIZE | Taille max des fichiers  |
 |  |  500M  |
 | SECRET_KEY |  Pour Django/ Gunicorn |
-|  |  CHANGE_KEY_CHANGE_KEY_CHANGE_KEY_CHANGE_KEY_CHANGE_KEY_CHANGE_KEY  |
+|  |  CHANGE THE SECRET KEY PLEASE VEUILLEW CHANGER LA CLEF SECRETE SVP  |
 
 ## Commandes Makefile
 
