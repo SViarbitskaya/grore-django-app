@@ -122,6 +122,7 @@ Voici les commandes intermédiaires
 | `make init` / `make init-nix` | Etablit l'environnement de base Python (ne fait pas `source ./venv/bin/activate`)  | 
 | `make nginxconf` / `make nginxconf-nix` |  Crée le fichier de config scripts/production/output/webser.nginx | 
 | `make service` / `make service-nix` |  Crée le fichier de config scripts/production/output/grore.service | 
+| `make sys-install-nix` ou `make sys-install-nix-mac` | Installe Nix sur votre propre ordinateur linux (y compris wsl) ou mac |
 
 Voici les commandes en travaux
 
