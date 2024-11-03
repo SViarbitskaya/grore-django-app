@@ -22,7 +22,7 @@ Voici les variables de configuration :
 |  |  django  |
 | APP_DJANGO_USER_GROUP |  Pour le service systemd |
 |  |  www-data  |
-| APP_WEB_HOST | Partie externe après "://" et avant "/" peut être directement Django. Peut être le même que DJANGO_HOST |
+| APP_WEB_HOST | Partie externe après "://" et avant "/" peut être directement Django. Peut être le même que DJANGO_HOST. Utilisé par NGINX aussi. |
 |  |  grore-images.com ou 127.0.0.1 ou localhost |
 | APP_WEB_PORT | Le port visible à l'extérieur (identique que intérieur si absence proxy)  |
 |  |  443 ou 80 ou 8000  |
