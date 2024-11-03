@@ -18,7 +18,7 @@ init:
 	$(EXEC_CMD) python -m venv venv  # Not sure about this in docker
 
 init-nix:
-	nix-shell scripts/default.nix --command "make init"
+	nix-shell default.nix --command "make init"
 
 up:
 	make init
@@ -29,42 +29,42 @@ up:
 	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py collectstatic --noinput
 
 up-nix:
-	nix-shell scripts/default.nix --command "make up"
+	nix-shell default.nix --command "make up"
 
 restart: 
 	make init
 	$(EXEC_CMD) sudo /usr/bin/systemctl restart grore
 
 restart-nix: 
-	nix-shell scripts/default.nix --command "make restart"
+	nix-shell default.nix --command "make restart"
 
 runserver:
 	make init
 	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py runserver
 
 runserver-nix:
-	nix-shell scripts/default.nix --command "make runserver"
+	nix-shell default.nix --command "make runserver"
 
 nginxconf:
 	make init
 	envsubst < ./scripts/production/grore-nginx.conf.template > ./scripts/production/output/${APP_WEB_HOST}.conf
 
 nginxconf-nix:
-	nix-shell scripts/default.nix --command "make nginxconf"
+	nix-shell default.nix --command "make nginxconf"
 
 service:
 	make init
 	envsubst < ./scripts/production/grore.service.template > ./scripts/production/output/grore.service
 
 service-nix:
-	nix-shell scripts/default.nix --command "make service"
+	nix-shell default.nix --command "make service"
 
 production-prepare:
 	make service
 	make nginxconf
 
 production-prepare-nix:
-	nix-shell scripts/default.nix --command "make production-prepare"
+	nix-shell default.nix --command "make production-prepare"
 
 production-install:
 	make production-prepare
@@ -85,14 +85,14 @@ production-install:
 	sudo systemctl restart grore nginx
 
 production-install-nix:
-	nix-shell scripts/default.nix --command "make production-install"
+	nix-shell default.nix --command "make production-install"
 
 default-pages:
 	make up
 	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py loaddata scripts/data/page_fixtures.json
 
 default-pages-nix:
-	nix-shell scripts/default.nix --command "make default-pages"
+	nix-shell default.nix --command "make default-pages"
 
 test-uploaded-images:
 	echo "DOESN'T WORK"
@@ -101,7 +101,7 @@ test-uploaded-images:
 	echo "DOESN'T WORK"
 
 test-uploaded-images-nix:
-	nix-shell scripts/default.nix --command "make test-uploaded-images"
+	nix-shell default.nix --command "make test-uploaded-images"
 
 docker-compose-up:
 	make init
@@ -110,18 +110,34 @@ docker-compose-up:
 	cd ../..
 
 docker-compose-up-nix:
-	nix-shell scripts/default.nix --command "make docker-compose-up"
+	nix-shell default.nix --command "make docker-compose-up"
 
 docker-nginx:
 	make init
 	echo "I don't know how to execute this file scripts/docker/nginx/Dockerfile"
 
 docker-nginx-nix:
-	nix-shell scripts/default.nix --command "make docker-nginx"
+	nix-shell default.nix --command "make docker-nginx"
 
 docker-postgres:
 	make init
 	echo "I don't know how to execute this file scripts/docker/Dockerfile"
 
 docker-postgres-nix:
-	nix-shell scripts/default.nix --command "make docker-postgres"
+	nix-shell default.nix --command "make docker-postgres"
+
+
+sys-install-nix-profile:
+	mkdir -p ~/.config/nix
+	! test -s ~/.config/nix/nix.conf && echo "experimental-features = nix-command flakes" > ~/.config/nix/nix.conf
+
+sys-install-nix:
+	echo "Install Nix on this local machine"
+	sh <(curl -L https://nixos.org/nix/install) --daemon
+	make sys-install-nix-profile
+
+sys-install-nix-mac:
+	echo "Install Nix on this local machine mode "
+	sh <(curl -L https://nixos.org/nix/install)
+	make sys-install-nix-profil
+
