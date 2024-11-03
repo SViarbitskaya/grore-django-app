@@ -76,6 +76,29 @@ Voici les variables de configuration :
 | SECRET_KEY |  Pour Django/ Gunicorn |
 |  |  ./venv/bin/python manage.py shell -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"  |
 
+Voici un diagramme de l'architecture en production.
+
+```mermaid
+graph TB
+
+Django[/Django/]
+Nginx[/Nginx/]
+Postgres[(Postgres)]
+make-production-install>make production-install-nix]
+make-up>make up-nix]
+GroreNginxConf>"{APP_WEB_HOST}.conf"]
+grore.service>systemctl start grore.service]
+internet{{Internet}}
+.env>.env]
+
+Postgres -- "Sert les données pour" --> Django -- "Sert l'application pour" --> Nginx -- "Sert les pages (Proxy) pour" --> internet
+grore.service -- "grore/application.wsgi" ---> Django
+make-production-install ---> grore.service
+make-production-install ---> GroreNginxConf --> Nginx
+make-up ---> grore-django-app --> Django
+.env --> grore-django-app
+```
+
 ## Commandes Makefile
 
 Toute commande `make` peut être post-fixé `-nix` pour exécuter la commande dans l'environnement nix spécifié par `scripts/default.nix`.
