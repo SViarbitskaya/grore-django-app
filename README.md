@@ -71,6 +71,8 @@ Voici les variables de configuration :
 
 Toute commande `make` peut être post-fixé `-nix` pour exécuter la commande dans l'environnement nix spécifié par `scripts/default.nix`.
 
+Voici les commandes principales
+
 | command make | explication |
 | --- | --- |
 | up/-nix | Met à jour et initialize l'environnement actuel  | 
@@ -79,12 +81,15 @@ Toute commande `make` peut être post-fixé `-nix` pour exécuter la commande da
 | production-install/-nix |  Fait toutes les opérations sur NGINX et SYSTEMD en tant que SUDO | 
 | restart/-nix  | Met à jour et redémarre le serveur en production  | 
 
+Voici les commandes intermédiaires
 
 | command make | explication |
 | --- | --- |
 | python/-nix | Etablit l'environnement de base Python (ne fait pas `source ./venv/bin/activate`)  | 
 | nginxconf/-nix |  Crée le fichier de config scripts/production/output/webser.nginx | 
 | service/-nix |  Crée le fichier de config scripts/production/output/grore.service | 
+
+Voici les commandes en travaux
 
 | command make | explication |
 | --- | --- |
