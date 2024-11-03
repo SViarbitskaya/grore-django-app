@@ -1,0 +1,27 @@
+[Unit]
+Description=Grore-Images.com gunicorn daemon
+# Requires=grore-gunicorn.socket
+After=network.target
+
+[Service]
+# gunicorn can let systemd know when it is ready
+# EnvironmentFile=-/home/mannchri/work/grore-django-app/.env
+Type=notify
+NotifyAccess=main
+# the specific user that our service will run as
+User=django
+Group=www-data
+# this user can be transiently created by systemd
+# DynamicUser=true
+# RuntimeDirectory=grore-gunicorn
+WorkingDirectory=/home/mannchri/work/grore-django-app/
+ExecStart=/home/mannchri/work/grore-django-app/venv/bin/gunicorn grore.wsgi
+ExecReload=/bin/kill -s HUP \
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+# if your app does not need administrative capabilities, let systemd know
+# ProtectSystem=strict
+
+[Install]
+WantedBy=multi-user.target

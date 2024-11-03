@@ -16,19 +16,15 @@ import os
 import mimetypes            
 
 from dotenv import load_dotenv # Pour les variables d'.env
-
 # Prendre les variables d'environnement
 load_dotenv()
 
 # Check to see if basic variables needed are defined
-
 REQUIRED = ["DB_DATABASE"]
-
 needs_required = []
 for i in REQUIRED:
   if not os.getenv(i) != '':
     needs_required.append(i)
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

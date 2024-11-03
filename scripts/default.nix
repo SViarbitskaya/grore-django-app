@@ -92,15 +92,6 @@ mkShell {
   ];
   shellHook = ''
     export LC_ALL="C"
-    alias ll="ls -l"
-    python -m venv venv
-    source venv/bin/activate
-    git pull
-    pip install -r requirements.txt
-    python manage.py makemigrations --noinput
-    python manage.py migrate --noinput
-    python manage.py collectstatic --noinput
-    sudo /usr/bin/systemctl restart grore
   ''
   ;
 }

@@ -16,3 +16,4 @@ production/output/*.conf
 production/output/*.service
 production/output/*.sh
 .env.prod.db
+cache/

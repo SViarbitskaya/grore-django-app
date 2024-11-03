@@ -55,10 +55,10 @@ COPY --from=builder /usr/src/grore/requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install --no-cache /wheels/*
 
-# copy entrypoint.prod.sh
-COPY ./entrypoint.prod.sh .
-RUN sed -i 's/\r$//g'  $APP_HOME/entrypoint.prod.sh
-RUN chmod +x  $APP_HOME/entrypoint.prod.sh
+# copy entrypoint.sh
+COPY ./entrypoint.sh .
+RUN sed -i 's/\r$//g'  $APP_HOME/entrypoint.sh
+RUN chmod +x  $APP_HOME/entrypoint.sh
 
 # copy project
 COPY . $APP_HOME
@@ -69,5 +69,5 @@ RUN chown -R grore:grore $APP_HOME
 # change to the app user
 USER grore
 
-# run entrypoint.prod.sh
-ENTRYPOINT ["/home/grore/web/entrypoint.prod.sh"]
+# run entrypoint.sh
+ENTRYPOINT ["/home/grore/web/entrypoint.sh"]
