@@ -24,4 +24,4 @@ jobs:
 
       - name: Run deployment script on Grore Images Server
         run: |
-          ssh django@grore-images.com 'cd /home/django/up.sh'
+          ssh django@grore-images.com 'cd /home/django && ./up.sh'
