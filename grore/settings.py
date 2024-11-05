@@ -41,8 +41,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-if os.environ.get("DEBUG", 'false').lower == 'true':
-    DEBUG = true
+
+if os.environ.get("DEBUG", 'false').lower() == 'true':
+    DEBUG = True
+else:
+    DEBUG = False
 
 # 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.
 # For example: 'DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]'
@@ -168,15 +171,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = os.environ.get("DJANGO_STATIC_URL", '/static') + '/'
+STATIC_URL = os.environ.get("DJANGO_STATIC_URL", "/static") + '/'
 STATIC_ROOT = os.environ.get("DJANGO_STATIC_ROOT", BASE_DIR / "staticfiles")
 
 MEDIA_URL = os.environ.get("DJANGO_MEDIA_URL", '/media') + '/'
 MEDIA_ROOT = os.environ.get("DJANGO_MEDIA_ROOT", BASE_DIR / "media")
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static"
-]
+STATICFILES_DIRS = []
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
