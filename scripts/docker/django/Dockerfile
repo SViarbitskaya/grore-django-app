@@ -56,12 +56,16 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache /wheels/*
 
 # copy entrypoint.sh
-COPY ./entrypoint.sh .
+COPY ./scripts/docker/django/entrypoint.sh .
 RUN sed -i 's/\r$//g'  $APP_HOME/entrypoint.sh
 RUN chmod +x  $APP_HOME/entrypoint.sh
 
 # copy project
 COPY . $APP_HOME
+# RUN rm -Rf $APP_HOME/venv
+# RUN python -v venv venv
+# $APP_HOME/venv/bin/pip -r requirements.txt
+
 
 # chown all the files to the app user
 RUN chown -R grore:grore $APP_HOME

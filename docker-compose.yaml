@@ -1,6 +1,8 @@
 services:
-  web:
-    build: .
+  django:
+    build: 
+      context: .
+      dockerfile: ./scripts/docker/django/Dockerfile
     command: python manage.py runserver ${DJANGO_HOST}:${DJANGO_PORT}
     volumes:
       - .:/usr/src/grore/
@@ -8,16 +10,21 @@ services:
       - ${DJANGO_PORT}:${DJANGO_PORT}
     env_file:
       - ./.env
+    environment:
+      DATABASE: "postgres"
+      DB_HOST: "postgres"
+      DB_PORT: 5432
     depends_on:
       - db
   db:
     image: postgres:15
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
     environment:
       POSTGRES_DB: ${DB_DATABASE}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-
 volumes:
   postgres_data:

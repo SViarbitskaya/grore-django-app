@@ -1,8 +1,12 @@
+#
+# En cours de finalisation
+# Permet de simuler le serveur proxy NGINX
+# 
+
 services:
   web:
     build:
-      context: .
-      dockerfile: ./scripts/docker/django/Dockerfile
+      context: ./django
     command: gunicorn grore.wsgi:application --bind ${DJANGO_HOST}:${DJANGO_PORT}
     volumes:
       - static_volume:${DJANGO_STATIC_ROOT}
