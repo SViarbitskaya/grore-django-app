@@ -20,6 +20,8 @@ services:
       DJANGO_MEDIA_URL: media
       DJANGO_STATIC_ROOT: /home/grore/web/cache/staticfiles
       DJANGO_STATIC_URL: static
+      ENVIRONEMENT: "docker"
+      DEGUG: True
     depends_on:
       - db
   db:
