@@ -11,6 +11,7 @@ settings_prod.py
 .env.dev
 .env.prod
 .env
+.env.*
 venv/
 production/output/*.conf
 production/output/*.service
