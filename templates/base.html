@@ -11,44 +11,53 @@
     {% block meta %}{% endblock %}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     {% block stylesheets %}{% endblock %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous" defer></script>
     {% block javascript %}{% endblock %}
     
     <title>{% block title %}{% endblock %}</title>
 </head>
 
-<body>
-    <nav class="navbar navbar-default">
-        <div class="container">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="/">{% trans 'home' %}</a>
-                <a class="navbar-brand" href="{% url 'pages' slug='info' %}">{% trans 'info' %}</a>
-                <a class="navbar-brand" href="{% url 'pages' slug='legal-advice' %}">{% trans 'legal advice' %}</a>
-                <a class="navbar-brand" href="{% url 'selection' %}">{% trans 'my selection' %}</a>
-                {% block searchbar %}{% endblock %}
-                {% block language_switch_form %}
-                <div class="navbar-brand">
-                <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
-                    <input name="next" type="hidden" value="{{ redirect_to }}">
-                    <select name="language" onchange="this.form.submit()">
-                        {% get_current_language as LANGUAGE_CODE %}
-                        {% get_available_languages as LANGUAGES %}
-                        {% get_language_info_list for LANGUAGES as languages %}
-                        {% for language in languages %}
-                            <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected{% endif %}>
-                                {{ language.name_local }} ({{ language.code }})
-                            </option>
-                        {% endfor %}
-                    </select>
-                    {# <input type="submit" value="Go"> #}
-                </form>
-                </div>
-                {% endblock %}
+<body class="container-fluid">
+        <nav class="navbar navbar-expand-lg fixed-top bg-white">
+            <div class="container">
+                <a class="navbar-brand" href="/">GRORE images</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            
+                        <li class="nav-item active">
+                            <a class="nav-link active" aria-current="page" href="/"><span class="sr-only">{% trans 'home' %}</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'pages' slug='info' %}">{% trans 'info' %}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'pages' slug='legal-advice' %}">{% trans 'legal advice' %}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'selection' %}">{% trans 'my selection' %}</a>
+                        </li>
+                    </ul>
+            {% block searchbar %}{% endblock %}
+            <form class="language-switch" action="{% url 'set_language' %}" method="post">{% csrf_token %}
+                <input name="next" type="hidden" value="{{ redirect_to }}">
+                <select class="form-select" name="language" onchange="this.form.submit()">
+                    {% get_current_language as LANGUAGE_CODE %}
+                    {% get_available_languages as LANGUAGES %}
+                    {% get_language_info_list for LANGUAGES as languages %}
+                    {% for language in languages %}
+                        <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected{% endif %}>
+                            {{ language.name_local }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {# <input type="submit" value="Go"> #}
+            </form>
             </div>
-            {# {% block search_form %}{% endblock %} #}
-        </div>
-    </nav>
-
-    <div id="content">
+        </nav>
+    <div id="content" class="mt-5">
         {% block content %}{% endblock %}
     </div>
 </body>

@@ -18,6 +18,32 @@
 }
 
 .text-item:hover {
-  background-color: #f0f0f0; /* Change background on hover */
   color: #007bff; /* Optional: Change text color on hover */
+}
+
+.navbar-nav{
+  margin-right: auto;
+}
+
+.modal-body{
+  text-align: center;
+}
+.modal-content{
+  border-radius: 0;
+}
+
+.modal-header, .modal-body, .modal-footer{
+  border: 0;
+}
+
+#imageNote{
+  color: black;
+  margin-top: 2rem;
+}
+
+.img-thumbnail{
+  width: 5rem;
+  height: 5rem;
+  display: block;  /* Makes the image a block element for centering */
+  margin: 0 auto; /* Center the image */
 }

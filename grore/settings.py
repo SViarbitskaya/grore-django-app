@@ -189,9 +189,3 @@ INTERNAL_IPS = [
     "localhost",
     '0.0.0.0'
 ]
-
-
-# MEDIA_ROOT =  os.path.join(BASE_DIR, 'media')
-# MEDIA_URL = '/media/'
-
-# from .settings_prod import *
