@@ -8,8 +8,6 @@ services:
       - .:/usr/src/grore/
     ports:
       - ${DJANGO_PORT}:${DJANGO_PORT}
-    # expose:
-    #   - ${DJANGO_PORT}
     env_file:
       - ./.env
     environment:
@@ -21,7 +19,7 @@ services:
       DJANGO_STATIC_ROOT: /home/grore/web/cache/staticfiles
       DJANGO_STATIC_URL: static
       ENVIRONEMENT: "docker"
-      DEGUG: True
+      DEBUG: True
     depends_on:
       - db
   db:
