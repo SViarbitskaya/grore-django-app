@@ -8,8 +8,6 @@ services:
       - .:/usr/src/grore/
     ports:
       - ${DJANGO_PORT}:${DJANGO_PORT}
-    # expose:
-    #   - ${DJANGO_PORT}
     env_file:
       - ./.env
     environment:

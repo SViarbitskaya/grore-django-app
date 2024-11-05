@@ -114,14 +114,16 @@ document.addEventListener('htmx:beforeRequest', function(event) {
 
 
 // Function to display the modal with the image and buttons
-function showModal(imageId, imageUrl) {
+function showModal(imageId, imageUrl, imageNote) {
     const modalImage = document.getElementById('modalImage');
     const selectButton = document.getElementById('selectButton');
     const downloadButton = document.getElementById('downloadButton');
+    const pNote = document.getElementById('imageNote');
 
     modalImage.src = imageUrl;
     downloadButton.href = imageUrl;  
-    downloadButton.style.display = 'inline-block';  
+    downloadButton.style.display = 'inline-block';
+    pNote.textContent = imageNote;
 
     selectButton.dataset.imageId = imageId;
     selectButton.dataset.selected = 'false';  // Default to unselected
