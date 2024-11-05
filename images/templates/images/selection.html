@@ -1,11 +1,16 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block stylesheets %}
+    <link rel="stylesheet" href="{% static '/images/css/style.css' %}">
+{% endblock %}
+
 {% block javascript %}
     <script src="{% static 'images/js/htmx.min.js' %}" defer></script>
 {% endblock %}
 
 {% block content %}
+<div class="container">
     <h1>Your Image Selections</h1>
 
     <div>
@@ -23,7 +28,10 @@
                 {% for image in images %}
                 <tr id="{{ image.id }}" class="image-item">
                     <td>
-                        <img src="{{ image.file.url }}" alt="{{ image.title }}">
+                        <img class="img-thumbnail" src="{{ image.file.url }}" alt="{{ image.note }}">
+                    </td>
+                    <td>
+                        {{image.note}}
                     </td>
                     <td>
                         <button class="btn danger" hx-delete="{% url "delete_image_from_selection" image.id %}">
@@ -37,4 +45,5 @@
             <p>No images selected.</p>
         {% endif %}
     </div>
+</div>
 {% endblock %}
