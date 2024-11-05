@@ -67,8 +67,6 @@ Voici les variables de configuration :
 |  | ${APP_DJANGO_ROOT}/cache/www/staticfiles ou /var/www/html/grore/staticfiles  |
 | DJANGO_STATIC_URL |  **ni "/" avant ni "/" après**  |
 |  |  static  |
-| DOCKER_POSTGRES_ROOT | **démarre avec "/" et termine sans "/"**  utilisé seulement pour le postgres/Dockerfile ou dockercompose.yml (pas en production ou pas si pas Docker). Pas certain que ce soit utile de mapper sur la machine locale.. |
-|  |  /var/lib/postgresql/data  |
 | NGINX_DOMAINS |  Configuration de proxy NGINX partie après "://" et avant premier / |
 |  |  www.grore-images.com grore-images.com et éventuellement ${APP_WEB_HOST} / ${DJANGO_HOST} |
 | NGINX_MAX_SIZE | Taille max des fichiers  |
