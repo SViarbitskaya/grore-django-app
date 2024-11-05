@@ -15,12 +15,18 @@ init:
 	$(EXEC_CMD) mkdir -p ${DJANGO_STATIC_ROOT}
 	$(EXEC_CMD) touch ./grore/settings_local.py
 	$(EXEC_CMD) python -m venv venv  # Not sure about this in docker
-	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py flush --no-input
-	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py migrate
-	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py loaddata scripts/data/classeur.json 
+	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/pip install -r requirements
 
 init-nix:
 	nix-shell default.nix --command "make init"
+
+load-fixtures:
+  $(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py flush --no-input
+	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py migrate
+	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py loaddata scripts/data/classeur.json 
+
+load-fixtures-nix:
+	nix-shell default.nix --command "make load-fixtures"
 
 up:
 	make init
@@ -62,7 +68,7 @@ nginxconf-nix:
 
 service:
 	make init
-	envsubst < ./scripts/production/grore.service.template > ./scripts/production/output/grore.service
+	envsubst < ./scripts/production/grore.service.template > ./scripts/production/output/${APP_WEB_HOST}.service
 
 service-nix:
 	nix-shell default.nix --command "make service"
@@ -75,17 +81,16 @@ production-prepare-nix:
 	nix-shell default.nix --command "make production-prepare"
 
 production-install:
-	make production-prepare
 	sudo mkdir -p ${DJANGO_MEDIA_ROOT}
 	sudo mkdir -p ${DJANGO_STATIC_ROOT}
 	sudo chown -R ${APP_DJANGO_USER_USER}:${APP_DJANGO_USER_GROUP} ${DJANGO_MEDIA_ROOT} ${DJANGO_STATIC_ROOT}
 	sudo chmod -R 0775 ${DJANGO_MEDIA_ROOT} ${DJANGO_STATIC_ROOT}
 	sudo chmod -R +s ${DJANGO_MEDIA_ROOT} ${DJANGO_STATIC_ROOT}
-	sudo cp ${APP_DJANGO_ROOT}/production/output/grore.service /etc/systemd/system/grore.service
+	sudo cp ${APP_DJANGO_ROOT}/scripts/production/output/${APP_WEB_HOST}.service /etc/systemd/system/${APP_WEB_HOST}.service
 	sudo systemctl daemon-reload
-	sudo systemctl enable --now grore
+	sudo systemctl enable --now ${APP_WEB_HOST}.service
 	sudo nginx -t
-	sudo cp ${APP_DJANGO_ROOT}/production/output/${APP_WEB_HOST}.conf /etc/nginx/sites-available/${APP_WEB_HOST}.conf
+	sudo cp ${APP_DJANGO_ROOT}/scripts/production/output/${APP_WEB_HOST}.conf /etc/nginx/sites-available/${APP_WEB_HOST}.conf
 	sudo ln -s /etc/nginx/sites-available/${APP_WEB_HOST}.conf /etc/nginx/sites-enabled/${APP_WEB_HOST}.conf
 	sudo nginx -t
 	sudo systemctl restart nginx
