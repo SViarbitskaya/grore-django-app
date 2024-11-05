@@ -3,17 +3,23 @@ services:
     build: 
       context: .
       dockerfile: ./scripts/docker/django/Dockerfile
-    command: python manage.py runserver ${DJANGO_HOST}:${DJANGO_PORT}
+    command: python manage.py runserver 0.0.0.0:${DJANGO_PORT}
     volumes:
       - .:/usr/src/grore/
     ports:
       - ${DJANGO_PORT}:${DJANGO_PORT}
+    # expose:
+    #   - ${DJANGO_PORT}
     env_file:
       - ./.env
     environment:
       DATABASE: "postgres"
       DB_HOST: "postgres"
       DB_PORT: 5432
+      DJANGO_MEDIA_ROOT: /home/grore/web/cache/media
+      DJANGO_MEDIA_URL: media
+      DJANGO_STATIC_ROOT: /home/grore/web/cache/staticfiles
+      DJANGO_STATIC_URL: static
     depends_on:
       - db
   db:
@@ -23,8 +29,8 @@ services:
     env_file:
       - ./.env
     environment:
-      POSTGRES_DB: ${DB_DATABASE}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: grore
+      POSTGRES_USER: groreuser
+      POSTGRES_PASSWORD: grorepassword
 volumes:
   postgres_data:
