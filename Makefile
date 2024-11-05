@@ -21,7 +21,7 @@ init-nix:
 	nix-shell default.nix --command "make init"
 
 load-fixtures:
-  $(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py flush --no-input
+	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py flush --no-input
 	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py migrate
 	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py loaddata scripts/data/classeur.json 
 
