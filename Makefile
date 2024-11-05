@@ -13,16 +13,17 @@ init:
 	$(EXEC_CMD) mkdir -p ${APP_WEB_ROOT}
 	$(EXEC_CMD) mkdir -p ${DJANGO_MEDIA_ROOT}
 	$(EXEC_CMD) mkdir -p ${DJANGO_STATIC_ROOT}
-	$(EXEC_CMD) mkdir -p ${DOCKER_POSTGRES_ROOT}
 	$(EXEC_CMD) touch ./grore/settings_local.py
 	$(EXEC_CMD) python -m venv venv  # Not sure about this in docker
+	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py flush --no-input
+	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py migrate
+	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py loaddata scripts/data/classeur.json 
 
 init-nix:
 	nix-shell default.nix --command "make init"
 
 up:
 	make init
-	$(EXEC_CMD) git pull
 	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/pip install -r requirements.txt
 	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py makemigrations --noinput
 	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py migrate --noinput
@@ -30,6 +31,13 @@ up:
 
 up-nix:
 	nix-shell default.nix --command "make up"
+
+git-up:
+	$(EXEC_CMD) git pull
+	make up
+
+git-up-nix:
+	nix-shell default.nix --command "make git-up"
 
 restart: 
 	make init
