@@ -19,10 +19,15 @@ init:
 init-nix:
 	nix-shell default.nix --command "make init"
 
+init-admin-user:
+	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py createsuperuser --username ${DJANGO_ADMIN_USER} --email ${DJANGO_ADMIN_EMAIL} --noinput 
+
 load-fixtures:
 	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py flush --no-input
 	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py migrate
 	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py loaddata scripts/data/classeur.json 
+	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py loaddata scripts/data/page_fixtures.json 
+	make init-admin-user
 
 load-fixtures-nix:
 	nix-shell default.nix --command "make load-fixtures"
