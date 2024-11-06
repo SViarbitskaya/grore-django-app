@@ -12,6 +12,7 @@ services:
       - ${DJANGO_PORT}:${DJANGO_PORT}
     env_file:
       - ./.env
+    user: "${SYS_UID}:${SYS_GID}"
     environment:
       DB_HOST: db
       DB_PORT: 5432
