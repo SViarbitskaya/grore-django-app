@@ -90,6 +90,11 @@ test-uploaded-images:
 docker-compose-up:
 	docker-compose up -d 
 
+docker-rebuild-recompose-up:
+	docker compose rm -fsv
+	docker image rm -f grore-django-app-django:latest
+	docker compose up -d
+
 sys-install-nix-profile:
 	mkdir -p ~/.config/nix
 	! test -s ~/.config/nix/nix.conf && echo "experimental-features = nix-command flakes" > ~/.config/nix/nix.conf

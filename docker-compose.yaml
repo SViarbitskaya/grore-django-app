@@ -5,19 +5,23 @@ services:
       dockerfile: ${APP_DJANGO_ROOT}/Dockerfile
       args: 
         APP_DJANGO_ROOT: ${APP_DJANGO_ROOT}
+        DOCKER_USER: ${DOCKER_USER}
+        DOCKER_GROUP: ${DOCKER_GROUP}
+        DOCKER_UID: ${DOCKER_UID}
+        DOCKER_GID: ${DOCKER_GID}
     command: sh ${APP_DJANGO_ROOT}/entrypoint.sh
+    user: ${DOCKER_UID}:${DOCKER_GID}
     volumes:
       - ./:${APP_DJANGO_ROOT}:rw
     ports:
       - ${DJANGO_PORT}:${DJANGO_PORT}
     env_file:
       - ./.env
-    user: "${SYS_UID}:${SYS_GID}"
     environment:
       DB_HOST: db
       DB_PORT: 5432
       ENVIRONEMENT: "docker"
-      DEBUG: True
+      DEBUG: True 
     depends_on:
       - db
   db:
