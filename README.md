@@ -69,7 +69,7 @@ Voici les variables de configuration :
 |  | ${APP_DJANGO_ROOT}/cache/www/staticfiles ou /var/www/html/grore/staticfiles  |
 | DJANGO_STATIC_URL |  **ni "/" avant ni "/" après**  |
 |  |  static  |
-| DOCKER_ENABLE |  Est-ce que nous utilisons le docker-compose ?  True ou False |
+| ENVIRONEMENT |  Est-ce que nous utilisons le docker-compose ?  True ou False |
 |  |  False  |
 | NGINX_DOMAINS |  Configuration de proxy NGINX partie après "://" et avant premier / |
 |  |  www.grore-images.com grore-images.com et éventuellement ${APP_WEB_HOST} / ${DJANGO_HOST} |

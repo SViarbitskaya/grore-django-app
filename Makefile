@@ -2,8 +2,10 @@ include .env
 export
 
 # Je pourrais intégrer docker dans les commandes make ... par le fait de prefixer ${EXEC_CMD} avant toutes les opérations 
-ifeq (`echo $(DOCKER_ENABLE) | tr A-Z a-z`,"true")
+ifeq (`echo $(ENVIRONMENT) | tr A-Z a-z`,"docker")
 	EXEC_CMD := docker-compose exec -ti django
+else ifeq (`echo $(ENVIRONMENT) | tr A-Z a-z`,"nix")
+	EXEC_CMD := nix-shell default.nix --command 
 else
 	EXEC_CMD :=
 endif
@@ -14,10 +16,7 @@ init:
 	$(EXEC_CMD) mkdir -p ${DJANGO_STATIC_ROOT}
 	$(EXEC_CMD) touch ./grore/settings_local.py
 	$(EXEC_CMD) python -m venv ${APP_CACHE_ROOT}/.venv
-	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/pip install -r requirements
-
-init-nix:
-	nix-shell default.nix --command "make init"
+	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/pip install -r requirements.txt
 
 init-admin-user:
 	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py createsuperuser --username ${DJANGO_ADMIN_USER} --email ${DJANGO_ADMIN_EMAIL} --noinput 
@@ -29,9 +28,6 @@ load-fixtures:
 	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py loaddata scripts/data/page_fixtures.json 
 	make init-admin-user
 
-load-fixtures-nix:
-	nix-shell default.nix --command "make load-fixtures"
-
 up:
 	make init
 	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/pip install -r requirements.txt
@@ -39,50 +35,29 @@ up:
 	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py migrate --noinput
 	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py collectstatic --noinput
 
-up-nix:
-	nix-shell default.nix --command "make up"
-
 git-up:
 	$(EXEC_CMD) git pull
 	make up
- 
-git-up-nix:
-	nix-shell default.nix --command "make git-up"
 
 restart: 
 	make init
 	$(EXEC_CMD) sudo /usr/bin/systemctl restart grore
 
-restart-nix: 
-	nix-shell default.nix --command "make restart"
-
 runserver:
 	make init
 	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py runserver
-
-runserver-nix:
-	nix-shell default.nix --command "make runserver"
 
 nginxconf:
 	make init
 	envsubst < ./scripts/production/grore-nginx.conf.template > ./scripts/production/output/${APP_WEB_HOST}.conf
 
-nginxconf-nix:
-	nix-shell default.nix --command "make nginxconf"
-
 service:
 	make init
 	envsubst < ./scripts/production/grore.service.template > ./scripts/production/output/${APP_WEB_HOST}.service
 
-service-nix:
-	nix-shell default.nix --command "make service"
-
 production-prepare:
 	make service
 	make nginxconf
-
-production-prepare-nix:
-	nix-shell default.nix --command "make production-prepare"
 
 production-install:
 	sudo mkdir -p ${DJANGO_MEDIA_ROOT}
@@ -101,15 +76,9 @@ production-install:
 	certbot --nginx -d ${APP_WEB_HOST} -d www.${APP_WEB_HOST}
 	sudo systemctl restart grore nginx
 
-production-install-nix:
-	nix-shell default.nix --command "make production-install"
-
 default-pages:
 	make up
 	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py loaddata scripts/data/page_fixtures.json
-
-default-pages-nix:
-	nix-shell default.nix --command "make default-pages"
 
 test-uploaded-images:
 	echo "DOESN'T WORK"
@@ -117,14 +86,8 @@ test-uploaded-images:
 	$(EXEC_CMD) PYTHONPATH="$PYTONPATH:`pwd`/images/";${APP_CACHE_ROOT}/.venv/bin/python scripts/tests/test_uploaded_images.py
 	echo "DOESN'T WORK"
 
-test-uploaded-images-nix:
-	nix-shell default.nix --command "make test-uploaded-images"
-
 docker-compose-up:
 	docker-compose up -d 
-
-docker-compose-up-nix:
-	nix-shell default.nix --command "make docker-compose-up"
 
 sys-install-nix-profile:
 	mkdir -p ~/.config/nix
