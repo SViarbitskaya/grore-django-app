@@ -15,7 +15,7 @@ init:
 	$(EXEC_CMD) mkdir -p ${DJANGO_STATIC_ROOT}
 	$(EXEC_CMD) touch ./grore/settings_local.py
 	$(EXEC_CMD) python -m venv venv  # Not sure about this in docker
-	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/pip install -r requirements
+	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/pip install -r requirements.txt
 
 init-nix:
 	nix-shell default.nix --command "make init"
