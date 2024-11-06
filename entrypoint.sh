@@ -9,8 +9,10 @@ done
 echo "PostgreSQL started"
 
 # Python virtual environtment
-python -m venv $APP_CACHE_ROOT/.venv
-$APP_CACHE_ROOT/.venv/bin/pip install --upgrade pip
-$APP_CACHE_ROOT/.venv/bin/pip install -r $APP_DJANGO_ROOT/requirements.txt
-$APP_CACHE_ROOT/.venv/bin/python manage.py migrate
-$APP_CACHE_ROOT/.venv/bin/python manage.py runserver ${DJANGO_HOST}:${DJANGO_PORT}
+pip install --upgrade pip
+pip install -r $APP_DJANGO_ROOT/requirements.txt
+python manage.py flush --no-input
+python manage.py migrate
+python manage.py loaddata classeur.json
+python manage.py loaddata page_fixtures.json 
+python manage.py runserver ${DJANGO_HOST}:${DJANGO_PORT}
