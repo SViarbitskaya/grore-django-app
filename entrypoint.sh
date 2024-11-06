@@ -12,5 +12,5 @@ echo "PostgreSQL started"
 python manage.py flush --no-input
 python manage.py migrate
 python manage.py loaddata ./scripts/data/classeur.json
-python manage.py loaddata ./scripts/data/ page_fixtures.json 
+python manage.py loaddata ./scripts/data/page_fixtures.json 
 python manage.py runserver ${DJANGO_HOST}:${DJANGO_PORT}
