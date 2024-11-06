@@ -18,3 +18,5 @@ production/output/*.service
 production/output/*.sh
 .env.prod.db
 cache/
+.cache/
+.venv/

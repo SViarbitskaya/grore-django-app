@@ -21,6 +21,8 @@ Voici les variables de configuration :
 | --- | --- | 
 | APP_DJANGO_ROOT |  Le dossier depuis dans lequel on trouve `manage.py`  **démarre avec "/" et termine sans "/"**. ${PWD} est habituellement le dossier courant. |
 |  |  ${PWD}  |
+| APP_CACHE_ROOT |  Le dossier pour des fichiers volatiles  **démarre avec "/" et termine sans "/"**. ${PWD} est habituellement le dossier courant. |
+|  |  ${APP_DJANGO_ROOT}/.cache  |
 | APP_DJANGO_USER_USER | Pour le service systemd  |
 |  |  django  |
 | APP_DJANGO_USER_GROUP |  Pour le service systemd |
@@ -67,6 +69,8 @@ Voici les variables de configuration :
 |  | ${APP_DJANGO_ROOT}/cache/www/staticfiles ou /var/www/html/grore/staticfiles  |
 | DJANGO_STATIC_URL |  **ni "/" avant ni "/" après**  |
 |  |  static  |
+| DOCKER_ENABLE |  Est-ce que nous utilisons le docker-compose ?  True ou False |
+|  |  False  |
 | NGINX_DOMAINS |  Configuration de proxy NGINX partie après "://" et avant premier / |
 |  |  www.grore-images.com grore-images.com et éventuellement ${APP_WEB_HOST} / ${DJANGO_HOST} |
 | NGINX_MAX_SIZE | Taille max des fichiers  |

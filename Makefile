@@ -1,10 +1,9 @@
 include .env
 export
 
-USE_DOCKER := 0
 # Je pourrais intégrer docker dans les commandes make ... par le fait de prefixer ${EXEC_CMD} avant toutes les opérations 
-ifeq ($(USE_DOCKER),1)
-	EXEC_CMD := docker-compose -f ./scripts/docker/docker-compose.yml exec -ti web
+ifeq (`echo $(DOCKER_ENABLE) | tr A-Z a-z`,"true")
+	EXEC_CMD := docker-compose exec -ti django
 else
 	EXEC_CMD :=
 endif
@@ -14,26 +13,26 @@ init:
 	$(EXEC_CMD) mkdir -p ${DJANGO_MEDIA_ROOT}
 	$(EXEC_CMD) mkdir -p ${DJANGO_STATIC_ROOT}
 	$(EXEC_CMD) touch ./grore/settings_local.py
-	$(EXEC_CMD) python -m venv venv  # Not sure about this in docker
-	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/pip install -r requirements
+	$(EXEC_CMD) python -m venv ${APP_CACHE_ROOT}/.venv
+	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/pip install -r requirements
 
 init-nix:
 	nix-shell default.nix --command "make init"
 
 load-fixtures:
-	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py flush --no-input
-	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py migrate
-	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py loaddata scripts/data/classeur.json 
+	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py flush --no-input
+	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py migrate
+	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py loaddata scripts/data/classeur.json 
 
 load-fixtures-nix:
 	nix-shell default.nix --command "make load-fixtures"
 
 up:
 	make init
-	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/pip install -r requirements.txt
-	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py makemigrations --noinput
-	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py migrate --noinput
-	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py collectstatic --noinput
+	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/pip install -r requirements.txt
+	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py makemigrations --noinput
+	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py migrate --noinput
+	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py collectstatic --noinput
 
 up-nix:
 	nix-shell default.nix --command "make up"
@@ -41,7 +40,7 @@ up-nix:
 git-up:
 	$(EXEC_CMD) git pull
 	make up
-
+ 
 git-up-nix:
 	nix-shell default.nix --command "make git-up"
 
@@ -54,7 +53,7 @@ restart-nix:
 
 runserver:
 	make init
-	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py runserver
+	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py runserver
 
 runserver-nix:
 	nix-shell default.nix --command "make runserver"
@@ -102,7 +101,7 @@ production-install-nix:
 
 default-pages:
 	make up
-	$(EXEC_CMD) ${APP_DJANGO_ROOT}/venv/bin/python manage.py loaddata scripts/data/page_fixtures.json
+	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py loaddata scripts/data/page_fixtures.json
 
 default-pages-nix:
 	nix-shell default.nix --command "make default-pages"
@@ -110,35 +109,17 @@ default-pages-nix:
 test-uploaded-images:
 	echo "DOESN'T WORK"
 	make init
-	$(EXEC_CMD) PYTHONPATH="$PYTONPATH:`pwd`/images/";${APP_DJANGO_ROOT}/venv/bin/python scripts/tests/test_uploaded_images.py
+	$(EXEC_CMD) PYTHONPATH="$PYTONPATH:`pwd`/images/";${APP_CACHE_ROOT}/.venv/bin/python scripts/tests/test_uploaded_images.py
 	echo "DOESN'T WORK"
 
 test-uploaded-images-nix:
 	nix-shell default.nix --command "make test-uploaded-images"
 
 docker-compose-up:
-	make init
-	cd ./scripts/docker
 	docker-compose up -d 
-	cd ../..
 
 docker-compose-up-nix:
 	nix-shell default.nix --command "make docker-compose-up"
-
-docker-nginx:
-	make init
-	echo "I don't know how to execute this file scripts/docker/nginx/Dockerfile"
-
-docker-nginx-nix:
-	nix-shell default.nix --command "make docker-nginx"
-
-docker-postgres:
-	make init
-	echo "I don't know how to execute this file scripts/docker/Dockerfile"
-
-docker-postgres-nix:
-	nix-shell default.nix --command "make docker-postgres"
-
 
 sys-install-nix-profile:
 	mkdir -p ~/.config/nix
