@@ -17,8 +17,6 @@ RUN apt-get update && apt-get install -y netcat sudo
 
 RUN addgroup --system --gid $DOCKER_GID $DOCKER_GROUP && adduser --system --uid $DOCKER_UID --group $DOCKER_USER
 
-
-
 # install dependencies
 RUN pip install --upgrade pip
 COPY ./requirements.txt .
