@@ -69,6 +69,14 @@ Voici les variables de configuration :
 |  | ${APP_DJANGO_ROOT}/cache/www/staticfiles ou /var/www/html/grore/staticfiles  |
 | DJANGO_STATIC_URL |  **ni "/" avant ni "/" après**  |
 |  |  static  |
+| DOCKER_USER | User known to docker |
+| | grore |
+| DOCKER_GROUP | Group known to docker |
+| | grore |
+| DOCKER_UID | UID known to docker |
+| | 1000 |
+| DOCKER_GID | GID known to docker |
+| | 1000 |
 | ENVIRONEMENT |  Est-ce que nous utilisons le docker-compose ?  True ou False |
 |  |  False  |
 | NGINX_DOMAINS |  Configuration de proxy NGINX partie après "://" et avant premier / |
