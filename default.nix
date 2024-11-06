@@ -78,6 +78,7 @@ mkShell {
     wget
     lynx
     tmux
+    netcat
     # Convenance
     dig
     killall
@@ -87,8 +88,6 @@ mkShell {
     docker-compose
     # sqlite
     postgresql_15
-    # apparmor-bin-utils    
-    # cowsay
   ];
   shellHook = ''
     export LC_ALL="C"
