@@ -2,10 +2,10 @@
 FROM python:3.11.4-slim-buster AS builder
  
 ARG APP_DJANGO_ROOT
-ARG DOCKER_USER
-ARG DOCKER_GROUP
-ARG DOCKER_UID
-ARG DOCKER_GID
+ARG APP_DJANGO_USER_USER
+ARG APP_DJANGO_USER_GROUP
+ARG APP_DJANGO_USER_UID
+ARG APP_DJANGO_USER_GID
 
 # set work directory
 WORKDIR $APP_DJANGO_ROOT
@@ -15,11 +15,11 @@ ENV PYTHONUNBUFFERED 1
 # install system dependencies
 RUN apt-get update && apt-get install -y netcat sudo
 
-RUN addgroup --system --gid $DOCKER_GID $DOCKER_GROUP && adduser --system --uid $DOCKER_UID --group $DOCKER_USER
+RUN addgroup --system --gid $APP_DJANGO_USER_GID $APP_DJANGO_USER_GROUP && adduser --system --uid $APP_DJANGO_USER_UID --group $APP_DJANGO_USER_USER
 
 # install dependencies
 RUN pip install --upgrade pip
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
-USER $DOCKER_UID
+USER $APP_DJANGO_USER_UID

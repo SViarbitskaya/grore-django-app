@@ -23,10 +23,14 @@ Voici les variables de configuration :
 |  |  ${PWD}  |
 | APP_CACHE_ROOT |  Le dossier pour des fichiers volatiles  **démarre avec "/" et termine sans "/"**. ${PWD} est habituellement le dossier courant. |
 |  |  ${APP_DJANGO_ROOT}/.cache  |
-| APP_DJANGO_USER_USER | Pour le service systemd  |
+| APP_DJANGO_USER_GROUP |  Pour le service Systemd et pour Docker |
+|  |  Django  |
+| APP_DJANGO_USER_GID | GID known to Docker from `id -g` |
+| | 1000 |
+| APP_DJANGO_USER_UID | UID known to Docker from `id -u` |
+| | 1000 |
+| APP_DJANGO_USER_USER | Pour le service Systemd et pour Docker |
 |  |  django  |
-| APP_DJANGO_USER_GROUP |  Pour le service systemd |
-|  |  www-data  |
 | APP_WEB_HOST | Partie externe après "://" et avant "/" peut être directement Django. Peut être le même que DJANGO_HOST. Utilisé par NGINX aussi. |
 |  |  grore-images.com ou 127.0.0.1 ou localhost |
 | APP_WEB_PORT | Le port visible à l'extérieur (identique que intérieur si absence proxy)  |
@@ -69,14 +73,6 @@ Voici les variables de configuration :
 |  | ${APP_DJANGO_ROOT}/cache/www/staticfiles ou /var/www/html/grore/staticfiles  |
 | DJANGO_STATIC_URL |  **ni "/" avant ni "/" après**  |
 |  |  static  |
-| DOCKER_USER | User known to docker |
-| | grore |
-| DOCKER_GROUP | Group known to docker |
-| | grore |
-| DOCKER_UID | UID known to docker from `id -u` |
-| | 1000 |
-| DOCKER_GID | GID known to docker from `id -g` |
-| | 1000 |
 | ENVIRONEMENT |  Est-ce que nous utilisons le docker-compose ?  True ou False |
 |  |  False  |
 | NGINX_DOMAINS |  Configuration de proxy NGINX partie après "://" et avant premier / |
