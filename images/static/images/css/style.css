@@ -1,3 +1,7 @@
+body{
+  width: 100vw;
+  overflow-x: hidden;
+}
 .navbar-header{
   display: flex;
 }
@@ -11,7 +15,7 @@
   position: absolute; /* Position items absolutely */
   cursor: pointer;
   margin: 10px;
-  min-width:5wh;
+  min-width: 10vh;
   z-index: 1000;
   opacity: 0;
   transition: opacity 0.5s ease-in;
@@ -19,6 +23,11 @@
 
 .text-item:hover {
   color: #007bff; /* Optional: Change text color on hover */
+}
+
+.navbar{
+  width: 100vw;
+  padding: 1rem;
 }
 
 .navbar-nav{
@@ -46,4 +55,13 @@
   height: 5rem;
   display: block;  /* Makes the image a block element for centering */
   margin: 0 auto; /* Center the image */
+}
+
+#content{
+  margin-top: 5rem;
+}
+
+#imageModal{
+  width: 100vw;
+  height: 100vh;
 }
