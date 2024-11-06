@@ -73,9 +73,9 @@ Voici les variables de configuration :
 | | grore |
 | DOCKER_GROUP | Group known to docker |
 | | grore |
-| DOCKER_UID | UID known to docker |
+| DOCKER_UID | UID known to docker from `id -u` |
 | | 1000 |
-| DOCKER_GID | GID known to docker |
+| DOCKER_GID | GID known to docker from `id -g` |
 | | 1000 |
 | ENVIRONEMENT |  Est-ce que nous utilisons le docker-compose ?  True ou False |
 |  |  False  |
