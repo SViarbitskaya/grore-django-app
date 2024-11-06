@@ -15,7 +15,7 @@ ENV PYTHONUNBUFFERED 1
 # install system dependencies
 RUN apt-get update && apt-get install -y netcat sudo
 
-RUN addgroup --system --gid $SYS_GID $DOCKER_GROUP && adduser --system --uid $SYS_UID --group $DOCKER_USER
+RUN addgroup --system --gid $DOCKER_GID $DOCKER_GROUP && adduser --system --uid $DOCKER_UID --group $DOCKER_USER
 
 
 
