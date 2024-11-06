@@ -4,8 +4,9 @@ export
 # Je pourrais intégrer docker dans les commandes make ... par le fait de prefixer ${EXEC_CMD} avant toutes les opérations 
 ifeq (`echo $(ENVIRONMENT) | tr A-Z a-z`,"docker")
 	EXEC_CMD := docker-compose exec -ti django
-else ifeq (`echo $(ENVIRONMENT) | tr A-Z a-z`,"nix")
-	EXEC_CMD := nix-shell default.nix --command 
+# Actually if the environment is nix, we will call make from nix
+# else ifeq (`echo $(ENVIRONMENT) | tr A-Z a-z`,"nix")
+# 	EXEC_CMD := nix-shell default.nix --command 
 else
 	EXEC_CMD :=
 endif
