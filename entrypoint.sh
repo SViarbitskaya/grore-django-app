@@ -8,6 +8,8 @@ done
 
 echo "PostgreSQL started"
 
+echo "Hi Sviatlana" > hello.txt
+
 # Python virtual environtment
 python manage.py flush --no-input
 python manage.py migrate
