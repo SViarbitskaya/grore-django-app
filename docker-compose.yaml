@@ -2,11 +2,10 @@ services:
   django:
     build: 
       context: ${APP_DJANGO_ROOT}
-      dockerfile: ${APP_DJANGO_ROOT}/scripts/docker/django/Dockerfile
+      dockerfile: ${APP_DJANGO_ROOT}/Dockerfile
       args: 
         APP_DJANGO_ROOT: ${APP_DJANGO_ROOT}
-    # command: "python -m http.server"
-    command: sh ${APP_DJANGO_ROOT}/scripts/docker/django/entrypoint.sh
+    command: sh ${APP_DJANGO_ROOT}/entrypoint.sh
     volumes:
       - ./:${APP_DJANGO_ROOT}:rw
     ports:

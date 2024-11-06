@@ -11,7 +11,4 @@ ENV PYTHONUNBUFFERED 1
 # install system dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends gcc netcat
-# Verify essential directories
-# RUN mkdir -p $DJANGO_STATIC_ROOT
-# RUN mkdir -p $DJANGO_MEDIA_ROOT
-# RUN mkdir -p $APP_CACHE_ROOT
+
