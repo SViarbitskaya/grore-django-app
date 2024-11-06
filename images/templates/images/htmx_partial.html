@@ -1,6 +1,6 @@
 <div id="{{ page_obj.number }}" class="subcontainer">
 {% for image in images %}
-    <div class="text-item" data-id="{{ image.id }}" onclick="showModal({{ image.id }}, '{{ image.file.url }}', '{{ image.note }}')">
+    <div class="text-item" data-id="{{ image.id }}" onclick='showModal({{ image.id }}, "{{ image.file.url }}", "{{ image.note }}")'>
         {{ image.note }}
     </div>
 {% endfor %}
