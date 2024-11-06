@@ -9,8 +9,6 @@ done
 echo "PostgreSQL started"
 
 # Python virtual environtment
-pip install --upgrade pip
-pip install -r $APP_DJANGO_ROOT/requirements.txt
 python manage.py flush --no-input
 python manage.py migrate
 python manage.py loaddata classeur.json
