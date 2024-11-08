@@ -24,7 +24,7 @@ pkgs.stdenv.mkDerivation {
     echo "  echo \"Directory must be empty for $name\"" >> $out/bin/getgrore 
     echo "  exit 1" >> $out/bin/getgrore 
     echo "fi" >> $out/bin/getgrore 
-    echo "cp -a $out $name" >> $out/bin/getgrore 
+    echo "cp -r $out $name" >> $out/bin/getgrore 
     echo "mkdir -p ./$name/.cache" >> $out/bin/getgrore 
     echo "python -m venv ./$name/.cache/.venv" >> $out/bin/getgrore 
     echo "./$name/.cache/.venv/bin/pip install --upgrade pip" >> $out/bin/getgrore 
