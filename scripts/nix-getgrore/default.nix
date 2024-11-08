@@ -7,7 +7,7 @@ pkgs.stdenv.mkDerivation {
     owner = "SViarbitskaya";
     repo = "grore-django-app";
     rev = "695865fde1a5c1a8328ff3be6a272d2a08e17be0";
-    hash = "sha256-v/HUnBljhWdfuu3EKRXLJTXGl1bueXVoXIA1TfUiRtE=";
+    hash = "sha256-aiuhZYTAtF4uic40J9KjrexBsc9NlMWMSRIfInA/t+A=";
   };
   dontBuild = true;
   buildInputs = (import ./includes/build-inputs.nix { inherit pkgs; });
