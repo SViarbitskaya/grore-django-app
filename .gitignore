@@ -20,3 +20,4 @@ production/output/*.sh
 cache/
 .cache/
 .venv/
+result
