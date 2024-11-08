@@ -19,38 +19,38 @@ pkgs.stdenv.mkDerivation {
   installPhase = ''
     mkdir -p $out/bin
     cp -r $src $out
-    echo "#!/bin/bash" > $out/bin/getgrore 
-    echo "if ! [ -z \"\$( ls -A './' )\" ]; then" >> $out/bin/getgrore 
-    echo "  echo \"Directory must be empty for $name\"" >> $out/bin/getgrore 
-    echo "  exit 1" >> $out/bin/getgrore 
-    echo "fi" >> $out/bin/getgrore 
-    echo "cp -r $out $name" >> $out/bin/getgrore 
-    echo "chmod ug+w -R $name" >> $out/bin/getgrore 
-    echo "mkdir -p ./$name/.cache" >> $out/bin/getgrore 
-    echo "python -m venv ./$name/.cache/.venv" >> $out/bin/getgrore 
-    echo "./$name/.cache/.venv/bin/pip install --upgrade pip" >> $out/bin/getgrore 
-    echo "./$name/.cache/.venv/bin/pip install -r $name/requirements.txt" >> $out/bin/getgrore 
-    echo "cp $name/scripts/sample.env $name/.env" >> $out/bin/getgrore 
-    echo "source $name/.cache/.venv/bin/activate" >> $out/bin/getgrore 
-    echo "echo \"\"" >> $out/bin/getgrore 
-    echo "echo \"\"" >> $out/bin/getgrore 
-    echo "echo \"To use $name, execute the following lines\"" >> $out/bin/getgrore 
-    echo "echo \"\"" >> $out/bin/getgrore 
-    echo "echo \"source \`pwd\`/$name/.cache/.venv/bin/activate\"" >> $out/bin/getgrore 
-    echo "echo \"cd $name \"" >> $out/bin/getgrore 
-    echo "echo \"vi .env \"" >> $out/bin/getgrore 
-    echo "echo \"python manage.py migrate \"" >> $out/bin/getgrore 
-    echo "echo \"python manage.py loaddata scripts/data/classeur.json \"" >> $out/bin/getgrore 
-    echo "echo \"python manage.py loaddata scripts/data/page_fixtures.json \"" >> $out/bin/getgrore 
-    echo "echo \"python manage.py runserver \"" >> $out/bin/getgrore 
-    echo "cd ./$name" >> $out/bin/getgrore 
-    echo "echo \"\"" >> $out/bin/getgrore 
-    echo "echo \"\"" >> $out/bin/getgrore 
-    chmod +x $out/bin/getgrore
+    echo "#!/bin/bash" > $out/bin/grore-init 
+    echo "if ! [ -z \"\$( ls -A './' )\" ]; then" >> $out/bin/grore-init 
+    echo "  echo \"Directory must be empty for $name\"" >> $out/bin/grore-init 
+    echo "  exit 1" >> $out/bin/grore-init 
+    echo "fi" >> $out/bin/grore-init 
+    echo "cp -r $out $name" >> $out/bin/grore-init 
+    echo "chmod ug+w -R $name" >> $out/bin/grore-init 
+    echo "mkdir -p ./$name/.cache" >> $out/bin/grore-init 
+    echo "python -m venv ./$name/.cache/.venv" >> $out/bin/grore-init 
+    echo "./$name/.cache/.venv/bin/pip install --upgrade pip" >> $out/bin/grore-init 
+    echo "./$name/.cache/.venv/bin/pip install -r $name/requirements.txt" >> $out/bin/grore-init 
+    echo "cp $name/scripts/sample.env $name/.env" >> $out/bin/grore-init 
+    echo "source $name/.cache/.venv/bin/activate" >> $out/bin/grore-init 
+    echo "echo \"\"" >> $out/bin/grore-init 
+    echo "echo \"\"" >> $out/bin/grore-init 
+    echo "echo \"To use $name, execute the following lines\"" >> $out/bin/grore-init 
+    echo "echo \"\"" >> $out/bin/grore-init 
+    echo "echo \"source \`pwd\`/$name/.cache/.venv/bin/activate\"" >> $out/bin/grore-init 
+    echo "echo \"cd $name \"" >> $out/bin/grore-init 
+    echo "echo \"vi .env \"" >> $out/bin/grore-init 
+    echo "echo \"python manage.py migrate \"" >> $out/bin/grore-init 
+    echo "echo \"python manage.py loaddata scripts/data/classeur.json \"" >> $out/bin/grore-init 
+    echo "echo \"python manage.py loaddata scripts/data/page_fixtures.json \"" >> $out/bin/grore-init 
+    echo "echo \"python manage.py runserver \"" >> $out/bin/grore-init 
+    echo "cd ./$name" >> $out/bin/grore-init 
+    echo "echo \"\"" >> $out/bin/grore-init 
+    echo "echo \"\"" >> $out/bin/grore-init 
+    chmod +x $out/bin/grore-init
   '';
 
   postFixup = ''
-    wrapProgram $out/bin/getgrore \
+    wrapProgram $out/bin/grore-init \
       --set PATH ${pkgs.lib.makeBinPath [ pkgs.gnutar pkgs.gzip pkgs.coreutils  (import ./includes/pypackages.nix {inherit pkgs;}) ]}
   '';
 
