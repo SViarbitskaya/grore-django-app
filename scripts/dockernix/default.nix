@@ -10,19 +10,26 @@ pkgs.stdenv.mkDerivation {
   dontBuild = true;
   buildInputs = (import ./includes/build-inputs.nix { inherit pkgs; });
 
-  outputs = ["bin" "grore-django-app"];
+  nativeBuildInputs = [
+    pkgs.makeWrapper
+  ];
 
   installPhase = ''
-    mkdir -p $bin
-    mkdir -p $grore-django-app
-    cp $src $grore-django-app/$pname.tar.gz
-    echo "tar -xzf $grore-django-app/$pname.tar.gz" > $bin/getgrore.sh
-    chmod +x $bin/getgrore.sh
+    mkdir -p $out/bin
+    cp $src $out/$pname.tar.gz
+    echo "#!/bin/bash" > $out/bin/getgrore 
+    echo "tar -xzf $out/$pname.tar.gz" >> $out/bin/getgrore 
+    chmod +x $out/bin/getgrore
+  '';
+
+  postFixup = ''
+    wrapProgram $out/bin/getgrore \
+      --set PATH ${pkgs.lib.makeBinPath []}
   '';
 
   meta = with pkgs.lib; {
     description = "Django site on grore-images.com";
-    homepage = "https://github.com/SViarbitskaya/grore-django-app";
+    homepage = "https://github.com/SViarbitskaya/app";
     platforms = platforms.unix;
   };
 
