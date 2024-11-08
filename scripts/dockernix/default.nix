@@ -19,16 +19,18 @@ pkgs.stdenv.mkDerivation {
     cp $src $out/$pname.tar.gz
     echo "#!/bin/bash" > $out/bin/getgrore 
     echo "tar -xzf $out/$pname.tar.gz" >> $out/bin/getgrore 
-    echo "python -m venv .venv" >> $out/bin/getgrore 
-    echo "./.venv/bin/pip install -r $name/requirements.txt" >> $out/bin/getgrore 
-    echo "cat $name/scripts/sample.env > $name/.env" >> $out/bin/getgrore 
+    echo "mkdir -p ./$name/.cache" >> $out/bin/getgrore 
+    echo "python -m venv ./$name/.cache/.venv" >> $out/bin/getgrore 
+    echo "./$name/.cache/.venv/bin/pip install -r $name/requirements.txt" >> $out/bin/getgrore 
+    echo "cp $name/scripts/sample.env $name/.env" >> $out/bin/getgrore 
+    echo "source $name/.cache/.venv/bin/activate" >> $out/bin/getgrore 
     echo "cd ./$name" >> $out/bin/getgrore 
     chmod +x $out/bin/getgrore
   '';
 
   postFixup = ''
     wrapProgram $out/bin/getgrore \
-      --set PATH ${pkgs.lib.makeBinPath [ pkgs.gnutar pkgs.gzip pkgs.coreutils (import ./includes/pypackages.nix {inherit pkgs;}) ]}
+      --set PATH ${pkgs.lib.makeBinPath [ pkgs.gnutar pkgs.gzip pkgs.coreutils  (import ./includes/pypackages.nix {inherit pkgs;}) ]}
   '';
 
   meta = with pkgs.lib; {
