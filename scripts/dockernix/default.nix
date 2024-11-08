@@ -24,7 +24,7 @@ pkgs.stdenv.mkDerivation {
 
   postFixup = ''
     wrapProgram $out/bin/getgrore \
-      --set PATH ${pkgs.lib.makeBinPath []}
+      --set PATH ${pkgs.lib.makeBinPath [ pkgs.gnutar pkgs.gzip ]}
   '';
 
   meta = with pkgs.lib; {
