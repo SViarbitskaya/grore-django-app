@@ -17,14 +17,15 @@ pkgs.stdenv.mkDerivation {
   ];
 
   installPhase = ''
+    mkdir -p $out/$name
     mkdir -p $out/bin
-    cp -r $src $out
+    cp -r $src/* $out/$name
     echo "#!/bin/bash" > $out/bin/getgrore 
     echo "if ! [ -z \"\$( ls -A './' )\" ]; then" >> $out/bin/getgrore 
     echo "  echo \"Directory must be empty for $name\"" >> $out/bin/getgrore 
     echo "  exit 1" >> $out/bin/getgrore 
     echo "fi" >> $out/bin/getgrore 
-    echo "cp -r $out $name" >> $out/bin/getgrore 
+    echo "cp -r $out/$name $name" >> $out/bin/getgrore 
     echo "chmod ug+w -R $name" >> $out/bin/getgrore 
     echo "mkdir -p ./$name/.cache" >> $out/bin/getgrore     
     echo "python -m venv ./$name/.cache/.venv" >> $out/bin/getgrore 
