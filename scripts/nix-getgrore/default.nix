@@ -18,13 +18,13 @@ pkgs.stdenv.mkDerivation {
 
   installPhase = ''
     mkdir -p $out/bin
-    cp $src $out/$pname.tar.gz
+    cp -r $src $out
     echo "#!/bin/bash" > $out/bin/getgrore 
     echo "if ! [ -z \"\$( ls -A './' )\" ]; then" >> $out/bin/getgrore 
     echo "  echo \"Directory must be empty for $name\"" >> $out/bin/getgrore 
     echo "  exit 1" >> $out/bin/getgrore 
     echo "fi" >> $out/bin/getgrore 
-    echo "tar -xzf $out/$pname.tar.gz" >> $out/bin/getgrore 
+    echo "cp -a $out $name" >> $out/bin/getgrore 
     echo "mkdir -p ./$name/.cache" >> $out/bin/getgrore 
     echo "python -m venv ./$name/.cache/.venv" >> $out/bin/getgrore 
     echo "./$name/.cache/.venv/bin/pip install --upgrade pip" >> $out/bin/getgrore 
