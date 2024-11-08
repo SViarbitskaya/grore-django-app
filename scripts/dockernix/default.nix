@@ -30,11 +30,14 @@ pkgs.stdenv.mkDerivation {
     echo "cp $name/scripts/sample.env $name/.env" >> $out/bin/getgrore 
     echo "source $name/.cache/.venv/bin/activate" >> $out/bin/getgrore 
     echo "echo \"\"" >> $out/bin/getgrore 
-    echo "echo \"To use #name, execute the two following lines\"" >> $out/bin/getgrore 
-    echo "echo \"source $name/.cache/.venv/bin/activate\"" >> $out/bin/getgrore 
-    echo "echo \"cd $name \"" >> $out/bin/getgrore 
     echo "echo \"\"" >> $out/bin/getgrore 
+    echo "echo \"To use #name, execute the two following lines\"" >> $out/bin/getgrore 
+    echo "echo \"\"" >> $out/bin/getgrore 
+    echo "echo \"source \`pwd\`/$name/.cache/.venv/bin/activate\"" >> $out/bin/getgrore 
+    echo "echo \"cd $name \"" >> $out/bin/getgrore 
     echo "cd ./$name" >> $out/bin/getgrore 
+    echo "echo \"\"" >> $out/bin/getgrore 
+    echo "echo \"\"" >> $out/bin/getgrore 
     chmod +x $out/bin/getgrore
   '';
 
