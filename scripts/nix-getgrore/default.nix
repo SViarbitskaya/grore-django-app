@@ -3,9 +3,11 @@ pkgs.stdenv.mkDerivation {
   name = "grore-django-app-0.1.1";
   pname = "grore-django-app";
   version = "0.1.1";
-  src = pkgs.fetchurl {
-    url = "https://github.com/SViarbitskaya/grore-django-app/archive/refs/tags/0.1.1.tar.gz";
-    sha256 = "sha256-v/HUnBljhWdfuu3EKRXLJTXGl1bueXVoXIA1TfUiRtE=";
+  src = pkgs.fetchFromGitHub {
+    owner = "SViarbitskaya";
+    repo = "grore-django-app";
+    rev = "695865fde1a5c1a8328ff3be6a272d2a08e17be0";
+    hash = "sha256-v/HUnBljhWdfuu3EKRXLJTXGl1bueXVoXIA1TfUiRtE=";
   };
   dontBuild = true;
   buildInputs = (import ./includes/build-inputs.nix { inherit pkgs; });
