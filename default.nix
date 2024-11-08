@@ -61,7 +61,10 @@ mkShell {
     pyPkgs.pip
     pyPkgs.venvShellHook
     pyPkgs.pylibjpeg-libjpeg
-    pyPkgs.pypdf2
+    pyPkgs.pypdf2src = pkgs.fetchurl {
+    url = "https://github.com/SViarbitskaya/grore-django-app/archive/refs/tags/0.1.1.tar.gz";
+    sha256 = "sha256-v/HUnBljhWdfuu3EKRXLJTXGl1bueXVoXIA1TfUiRtE=";
+  };
     pyPkgs.pq
     pyPkgs.aiosasl
     pyPkgs.psycopg2

@@ -1,43 +1,26 @@
 { pkgs ? import <nixpkgs> { }, ... }:
-let 
-  myDockerImage = pkgs.callPackage ./includes/docker.nix { };
-in 
 pkgs.stdenv.mkDerivation {
-  name = "grore";
-  src = ./.;
-  buildInputs = with pkgs; [
-    (import ./includes/vim-configurable.nix {inherit pkgs;})   
-    (import ./includes/pypackages.nix {inherit pkgs;})   
-    # Necessities
-    git
-    zlib
-    lzlib
-    gettext
-    # Utilities
-    openssl
-    curl
-    wget
-    lynx
-    tmux
-    netcat
-    # Convenance
-    dig
-    killall
-    pwgen
-    # Experimentation
-    docker
-    docker-compose
-    # sqlite
-    postgresql_15
-  ];
-  
-  phases = ["unpackPhase" "installPhase"];
+  name = "grore-django-app-0.1.1";
+  pname = "grore-django-app";
+  version = "0.1.1";
+  src = pkgs.fetchurl {
+    url = "https://github.com/SViarbitskaya/grore-django-app/archive/refs/tags/0.1.1.tar.gz";
+    sha256 = "sha256-v/HUnBljhWdfuu3EKRXLJTXGl1bueXVoXIA1TfUiRtE=";
+  };
+  dontBuild = true;
+  buildInputs = (import ./includes/build-inputs.nix { inherit pkgs; });
+
   installPhase = ''
-    mkdir -p $out/
-    cp ${myDockerImage} $out/docker-grore-django-app.tar.gz 
-  ''; 
-  shellHook = ''
-    mkdir -p .cache
-    echo ${myDockerImage}
+    mkdir -p $out/bin
+    cd $out
+    cp $src $out/$name.tar.gz
+    echo "tar -xzf $out/$name.tar.gz" > $out/bin/getgrore.sh
+    chmod +x $out/bin/getgrore.sh
   '';
-}
+
+  meta = with pkgs.lib; {
+    description = "Django site on grore-images.com";
+    homepage = "https://github.com/SViarbitskaya/grore-django-app";
+    platforms = platforms.unix;
+  };
+} 

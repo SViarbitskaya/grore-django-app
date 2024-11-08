@@ -9,10 +9,9 @@
     system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
-      myDockerImage = pkgs.callPackage ./includes/docker.nix { };
     in
     {
-      packages.default = pkgs.callPackage ./default.nix { myDockerImage = myDockerImage };
+      packages.default = pkgs.callPackage ./default.nix { inherit pkgs; };
     }
   );
 }
