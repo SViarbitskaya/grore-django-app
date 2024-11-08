@@ -18,7 +18,7 @@ pkgs.stdenv.mkDerivation {
     mkdir -p $out/bin
     cp $src $out/$pname.tar.gz
     echo "#!/bin/bash" > $out/bin/getgrore 
-    echo "if ! [ -z \"\$( ls -A `pwd` )\" ]; then" >> $out/bin/getgrore 
+    echo "if ! [ -z \"\$( ls -A './' )\" ]; then" >> $out/bin/getgrore 
     echo "  echo \"Directory must be empty for $name\"" >> $out/bin/getgrore 
     echo "  exit 1" >> $out/bin/getgrore 
     echo "fi" >> $out/bin/getgrore 
