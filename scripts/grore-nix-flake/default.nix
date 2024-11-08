@@ -1,8 +1,8 @@
 { pkgs ? import <nixpkgs> { }, ... }:
 pkgs.stdenv.mkDerivation {
-  name = "grore-django-app-0.1.1";
+  name = "grore-django-app-0.1.2-alpha";
   pname = "grore-django-app";
-  version = "0.1.1";
+  version = "0.1.2-alpha";
   src = pkgs.fetchFromGitHub {
     owner = "SViarbitskaya";
     repo = "grore-django-app";
