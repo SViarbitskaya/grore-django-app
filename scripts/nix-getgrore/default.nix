@@ -31,10 +31,15 @@ pkgs.stdenv.mkDerivation {
     echo "source $name/.cache/.venv/bin/activate" >> $out/bin/getgrore 
     echo "echo \"\"" >> $out/bin/getgrore 
     echo "echo \"\"" >> $out/bin/getgrore 
-    echo "echo \"To use #name, execute the two following lines\"" >> $out/bin/getgrore 
+    echo "echo \"To use $name, execute the following lines\"" >> $out/bin/getgrore 
     echo "echo \"\"" >> $out/bin/getgrore 
     echo "echo \"source \`pwd\`/$name/.cache/.venv/bin/activate\"" >> $out/bin/getgrore 
     echo "echo \"cd $name \"" >> $out/bin/getgrore 
+    echo "echo \"vi .env \"" >> $out/bin/getgrore 
+    echo "echo \"python manage.py migrate \"" >> $out/bin/getgrore 
+    echo "echo \"python manage.py loaddata scripts/data/classeur.json \"" >> $out/bin/getgrore 
+    echo "echo \"python manage.py loaddata scripts/data/page_fixtures.json \"" >> $out/bin/getgrore 
+    echo "echo \"python manage.py runserver \"" >> $out/bin/getgrore 
     echo "cd ./$name" >> $out/bin/getgrore 
     echo "echo \"\"" >> $out/bin/getgrore 
     echo "echo \"\"" >> $out/bin/getgrore 
