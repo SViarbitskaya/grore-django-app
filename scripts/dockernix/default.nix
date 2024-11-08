@@ -20,9 +20,9 @@ pkgs.stdenv.mkDerivation {
     echo "#!/bin/bash" > $out/bin/getgrore 
     echo "tar -xzf $out/$pname.tar.gz" >> $out/bin/getgrore 
     echo "python -m venv .venv" >> $out/bin/getgrore 
-    echo "cd $name" >> $out/bin/getgrore 
     echo "../.venv/bin/pip install -r requirements.txt" >> $out/bin/getgrore 
-    echo "cp scripts/sample.env .env" >> $out/bin/getgrore 
+    echo "cp $name/scripts/sample.env $name/.env" >> $out/bin/getgrore 
+    echo "cd ./$name" >> $out/bin/getgrore 
     chmod +x $out/bin/getgrore
   '';
 
