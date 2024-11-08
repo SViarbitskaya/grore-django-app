@@ -10,12 +10,14 @@ pkgs.stdenv.mkDerivation {
   dontBuild = true;
   buildInputs = (import ./includes/build-inputs.nix { inherit pkgs; });
 
+  outputs = ["bin" "grore-django-app"];
+
   installPhase = ''
-    mkdir -p $out/bin
-    cd $out
-    cp $src $out/$name.tar.gz
-    echo "tar -xzf $out/$name.tar.gz" > $out/bin/getgrore.sh
-    chmod +x $out/bin/getgrore.sh
+    mkdir -p $bin
+    mkdir -p $grore-django-app
+    cp $src $grore-django-app/$pname.tar.gz
+    echo "tar -xzf $grore-django-app/$pname.tar.gz" > $bin/getgrore.sh
+    chmod +x $bin/getgrore.sh
   '';
 
   meta = with pkgs.lib; {
@@ -23,4 +25,6 @@ pkgs.stdenv.mkDerivation {
     homepage = "https://github.com/SViarbitskaya/grore-django-app";
     platforms = platforms.unix;
   };
+
+
 } 
