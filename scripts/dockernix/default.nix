@@ -24,6 +24,7 @@ pkgs.stdenv.mkDerivation {
     echo "./$name/.cache/.venv/bin/pip install -r $name/requirements.txt" >> $out/bin/getgrore 
     echo "cp $name/scripts/sample.env $name/.env" >> $out/bin/getgrore 
     echo "source $name/.cache/.venv/bin/activate" >> $out/bin/getgrore 
+    echo "echo \"source $name/.cache/.venv/bin/activate\"" >> $out/bin/getgrore 
     echo "cd ./$name" >> $out/bin/getgrore 
     chmod +x $out/bin/getgrore
   '';
