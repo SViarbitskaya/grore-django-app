@@ -25,7 +25,8 @@ pkgs.stdenv.mkDerivation {
     echo "  exit 1" >> $out/bin/getgrore 
     echo "fi" >> $out/bin/getgrore 
     echo "cp -r $out $name" >> $out/bin/getgrore 
-    echo "mkdir -p ./$name/.cache" >> $out/bin/getgrore 
+    echo "chmod ug+w -R $name" >> $out/bin/getgrore 
+    echo "mkdir -p ./$name/.cache" >> $out/bin/getgrore     
     echo "python -m venv ./$name/.cache/.venv" >> $out/bin/getgrore 
     echo "./$name/.cache/.venv/bin/pip install --upgrade pip" >> $out/bin/getgrore 
     echo "./$name/.cache/.venv/bin/pip install -r $name/requirements.txt" >> $out/bin/getgrore 
