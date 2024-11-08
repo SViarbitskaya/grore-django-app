@@ -1,0 +1,46 @@
+{
+  "architecture": "amd64",
+  "config": {
+    "Cmd": [
+      "/bin/hello"
+    ],
+    "Env": [
+      {
+        "APP_DJANGO_ROOT": ""
+      },
+      {
+        "APP_DJANGO_USER_USER": ""
+      },
+      {
+        "APP_DJANGO_USER_GROUP": ""
+      },
+      {
+        "APP_DJANGO_USER_UID": ""
+      },
+      {
+        "APP_DJANGO_USER_GID": ""
+      },
+      {
+        "PYTHONDONTWRITEBYTECODE": 1
+      },
+      {
+        "PYTHONUNBUFFERED": 1
+      }
+    ],
+    "WorkingDir": ""
+  },
+  "created": "1970-01-01T00:00:01Z",
+  "os": "linux",
+  "preferLocalBuild": true,
+  "rootfs": {
+    "diff_ids": [
+      "sha256:fb957104d716da4fce75cced7bc98fcb66f80af13100707458f573d090e69161"
+    ],
+    "type": "layers"
+  },
+  "history": [
+    {
+      "created": "1970-01-01T00:00:01Z"
+    }
+  ]
+}
