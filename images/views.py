@@ -15,7 +15,7 @@ class HomeView(SelectionMixin, generic.ListView):
     model = Image
     template_name = "images/index.html"
     context_object_name = "images"
-    paginate_by = 25
+    paginate_by = 15
 
     def get_template_names(self, *args, **kwargs):
         if self.request.htmx:
