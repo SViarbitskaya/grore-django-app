@@ -1,70 +1,144 @@
-import { toggleSelection } from './toggle-selection.js';
-
 document.addEventListener("DOMContentLoaded", () => {
-    positionTextItems();
+    // Initialize existing .subcontainer elements on page load
+    const existingSubcontainers = document.querySelectorAll('.subcontainer');
+    existingSubcontainers.forEach(subcontainer => {
+        positionTextItems(subcontainer);
+    });
+
+    // Setup the visibility change handler
+    setupVisibilityChangeHandler();
 });
 
-function positionTextItems(container = document.querySelector('.text-container')) {
+function positionTextItems(container) {
     const textItems = container.querySelectorAll('.text-item');
-
     const containerHeight = container.scrollHeight;
     const containerWidth = container.clientWidth;
 
+    // Create an IntersectionObserver for the subcontainer itself (not individual items)
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && !document.hidden) {
+                // Start movement for all items in the container when the container is partly visible
+                startLinearMovementForContainer(container, containerWidth, containerHeight);
+            } else {
+                // Stop movement for all items in the container when the container is not visible
+                stopLinearMovementForContainer(container);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    // Observe the visibility of the container itself, not the individual items
+    observer.observe(container);
+
+    // Set up the initial positions and random styles for text items
     textItems.forEach(item => {
+        // Set a random font size between 14px and 36px
         const randomFontSize = Math.floor(Math.random() * (36 - 14 + 1)) + 14;
         item.style.fontSize = `${randomFontSize}px`;
 
-        const randomX = Math.floor(Math.random() * (containerWidth - 100));
-        const randomY = Math.floor(Math.random() * (containerHeight - 50));
+        // Ensure the text item is rendered to get accurate dimensions
+        const itemWidth = item.offsetWidth;
+        const itemHeight = item.offsetHeight;
 
+        // Calculate random positions ensuring no overflow on the right or bottom
+        const randomX = Math.floor(Math.random() * (containerWidth - itemWidth));
+        const randomY = Math.floor(Math.random() * (containerHeight - itemHeight - 10)); // 10px padding at bottom
+
+        // Position the text item absolutely within the container
         item.style.position = 'absolute';
         item.style.left = `${randomX}px`;
         item.style.top = `${randomY}px`;
-        item.style.opacity = '1';  // Set opacity directly to avoid flickering
 
-        moveTextItemRandomly(item, containerWidth, containerHeight);
-
-        item.addEventListener('mouseenter', () => {
-            if (item.dataset.isMoving === "false") {
-                moveTextItemRandomly(item, containerWidth, containerHeight);
-            }
-        });
+        item.style.opacity = '1'; // Ensure items are visible
     });
 }
 
-function moveTextItemRandomly(item, containerWidth, containerHeight) {
-    const speed = 0.75;
-    let directionX = Math.random() < 0.5 ? -1 : 1;
-    let directionY = Math.random() < 0.5 ? -1 : 1;
+function startLinearMovementForContainer(container, containerWidth, containerHeight) {
+    const textItems = container.querySelectorAll('.text-item');
 
-    function animate() {
-        let currentX = parseFloat(item.style.left);
-        let currentY = parseFloat(item.style.top);
+    textItems.forEach(item => {
+        if (item.dataset.isMoving === "true") return;
 
-        currentX = Math.max(0, Math.min(currentX + directionX * speed, containerWidth - item.offsetWidth));
-        currentY = Math.max(0, Math.min(currentY + directionY * speed, containerHeight - item.offsetHeight));
+        const speed = 2; // Fixed speed
+        let directionX = Math.random() > 0.5 ? 1 : -1;
+        let directionY = Math.random() > 0.5 ? 1 : -1;
 
-        item.style.left = `${currentX}px`;
-        item.style.top = `${currentY}px`;
+        // Define the animation logic
+        const animate = () => {
+            if (item.dataset.isMoving !== "true") return;
 
-        if (currentX <= 0 || currentX >= (containerWidth - item.offsetWidth)) {
-            directionX *= -1;
+            const itemWidth = item.offsetWidth;
+            const itemHeight = item.offsetHeight;
+
+            let currentX = parseFloat(item.style.left) || 0;
+            let currentY = parseFloat(item.style.top) || 0;
+
+            let nextX = currentX + directionX * speed;
+            let nextY = currentY + directionY * speed;
+
+            // Boundary collision detection to stay within subcontainer
+            if (nextX <= 0) {
+                directionX = 1;
+                nextX = 0;
+            } else if (nextX >= containerWidth - itemWidth) {
+                directionX = -1;
+                nextX = containerWidth - itemWidth;
+            }
+
+            if (nextY <= 0) {
+                directionY = 1;
+                nextY = 0;
+            } else if (nextY >= containerHeight - itemHeight) {
+                directionY = -1;
+                nextY = containerHeight - itemHeight;
+            }
+
+            // Update the item's position
+            item.style.left = `${nextX}px`;
+            item.style.top = `${nextY}px`;
+
+            // Continue animation
+            requestAnimationFrame(animate);
+        };
+
+        // Mark item as moving and start animation
+        item.dataset.isMoving = "true";
+        animate();
+    });
+}
+
+function stopLinearMovementForContainer(container) {
+    const textItems = container.querySelectorAll('.text-item');
+    textItems.forEach(item => {
+        if (item.dataset.isMoving === "true") {
+            item.dataset.isMoving = "false"; // Stop animation
         }
-        if (currentY <= 0 || currentY >= (containerHeight - item.offsetHeight)) {
-            directionY *= -1;
+    });
+}
+
+
+function setupVisibilityChangeHandler() {
+    document.addEventListener('visibilitychange', () => {
+        const textItems = document.querySelectorAll('.text-item');
+
+        if (document.hidden) {
+            // Pause all animations when the page is not active
+            textItems.forEach(item => stopLinearMovement(item));
         }
-
-        requestAnimationFrame(animate);
-    }
-
-    item.dataset.isMoving = "true";
-    requestAnimationFrame(animate);
+    });
 }
 
 document.addEventListener('htmx:afterSwap', (event) => {
-    if (event.target.classList.contains('text-container')) {
+    // If the swapped content itself is a .subcontainer
+    if (event.target.classList.contains('subcontainer')) {
         positionTextItems(event.target);
     }
+
+    // Also find any .subcontainer elements within the swapped content
+    const newSubcontainers = event.target.querySelectorAll('.subcontainer');
+    newSubcontainers.forEach(subcontainer => {
+        positionTextItems(subcontainer);
+    });
 });
 
 document.addEventListener('htmx:beforeRequest', function(event) {
@@ -80,7 +154,6 @@ document.addEventListener('htmx:beforeRequest', function(event) {
     }
 });
 
-// Function to display the modal with the image and buttons
 function showModal(imageId, imageUrl, imageNote) {
     const modalImage = document.getElementById('modalImage');
     const selectButton = document.getElementById('selectButton');

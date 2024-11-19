@@ -8,14 +8,14 @@ body{
 
 .subcontainer {
   position: relative; /* Container should be relative */
-  height: 110vh;
+  height: 100vh;
 }
 
 .text-item {
   position: absolute; /* Position items absolutely */
   cursor: pointer;
   margin: 10px;
-  min-width: 10vh;
+  min-width: 50vw;
   z-index: 1000;
   opacity: 0;
   transition: opacity 0.5s ease-in;
@@ -28,6 +28,9 @@ body{
 .navbar{
   width: 100vw;
   padding: 1rem;
+  position: absolute;
+  top:0;
+  left:0;
 }
 
 .navbar-nav{
@@ -55,10 +58,6 @@ body{
   height: 5rem;
   display: block;  /* Makes the image a block element for centering */
   margin: 0 auto; /* Center the image */
-}
-
-#content{
-  margin-top: 5rem;
 }
 
 #imageModal{
