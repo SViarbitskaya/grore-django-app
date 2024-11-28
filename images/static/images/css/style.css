@@ -6,6 +6,10 @@ body{
   display: flex;
 }
 
+.container{
+  padding-top:5vh;
+}
+
 .subcontainer {
   position: relative; /* Container should be relative */
   height: 100vh;
@@ -48,19 +52,37 @@ body{
   border: 0;
 }
 
-#imageNote{
+.imageNote{
   color: black;
   margin-top: 2rem;
 }
 
 .img-thumbnail{
-  width: 5rem;
-  height: 5rem;
+  width: 10rem;
+  height: 10rem;
   display: block;  /* Makes the image a block element for centering */
   margin: 0 auto; /* Center the image */
 }
 
-#imageModal{
+.modal{
   width: 100vw;
   height: 100vh;
 }
+
+@media (max-width: 991.98px) {
+  .img-thumbnail{
+    width: 4rem;
+    height: 4rem;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .img-thumbnail{
+    width: 2rem;
+    height: 2rem;
+  }
+}
+
+
+
+

@@ -30,5 +30,5 @@ export function toggleSelection(imageId, action, selectButton) {
 
 export function updateSelectButton(button, isSelected) {
     button.dataset.selected = isSelected ? "true" : "false";
-    button.textContent = isSelected ? "Deselect Image" : "Select";
+    button.textContent = isSelected ? "Remove from Your Selection" : "Select";
 }

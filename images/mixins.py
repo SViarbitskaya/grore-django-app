@@ -51,36 +51,6 @@ class SelectionMixin:
             return {'status': 'Invalid request: not ajax!'}
 
 
-        # image_id = request.POST.get('image_id')
-        # action = request.POST.get('action')
-
-        # # Initialize or retrieve the list of selected images in the session
-        # selected_images = request.session.get('selected_images', [])
-
-        # if action == 'select':
-        #     if image_id not in selected_images:
-        #         # Add the image to the selection if it's not already selected
-        #         selected_images.append(image_id)
-        #         message = 'Image selected.'
-        #     else:
-        #         message = 'Image already selected.'
-        
-        # elif action == 'deselect':
-        #     if image_id in selected_images:
-        #         # Remove the image from the selection if it's selected
-        #         selected_images.remove(image_id)
-        #         message = 'Image deselected.'
-        #     else:
-        #         message = 'Image was not selected.'
-        # else:
-        #     # Handle invalid action
-        #     return {'status': 'error', 'message': 'Invalid action.', 'image_id': json.dumps(request.POST.dict(), indent=4), 'action' : action}
-
-        # # Update the session with the new selection
-        # request.session['selected_images'] = selected_images
-
-        # return {'status': 'success', 'message': message}
-
     def get_selected_images(self, request):
         """
         Retrieves the list of selected images based on the session data.
@@ -88,4 +58,28 @@ class SelectionMixin:
         selected_images_ids = request.session.get('selected_images', [])
         return Image.objects.filter(id__in=selected_images_ids)
 
+    def is_selected(self, request):
+        """
+        Checks if the image has already been selected.
+        """
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
+        if is_ajax:
+            if request.method == 'GET':
+                data = json.load(request)
+                image_id = data.get('image_id')
+
+                # Initialize or retrieve the list of selected images in the session
+                selected_images = request.session.get('selected_images', [])
+
+                if image_id in selected_images:
+                    # Remove the image from the selection if it's selected
+                    message = 'selected.'
+                else:
+                    message = 'not selected'
+
+                return {'status': 'success', 'message': message}
+
+            return {'status': 'Invalid request: not GET!'}
+        else:
+            return {'status': 'Invalid request: not ajax!'}

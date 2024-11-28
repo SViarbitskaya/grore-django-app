@@ -3,6 +3,34 @@
     <div class="text-item" data-id="{{ image.id }}" onclick='showModal({{ image.id }}, "{{ image.file.url }}", "{{ image.note }}")'>
         {{ image.note }}
     </div>
+    <!-- Modal Structure -->
+    <div class="modal fade" id="imageModal_{{ image.id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <img src="{{ image.file.url }}" id="modalImage_{{ image.id}}" alt="{{ image.note }}" class="img-fluid">
+                    <p id="imageNote_{{ image.id}}">
+                        {{ image.note}}
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <a id="goToSelection" class="btn btn-light" href="{% url 'selection' %}">Your Selection</a>
+                    <button type="button" class="btn btn-dark selectButton" id="selectButton_{{ image.id}}" 
+                        data-selected="{% if image.id in selected_images_ids %}true{% else %}false{% endif %}" 
+                        data-image-id="{{ image.id }}">
+                        {% if image.id in selected_images_ids %}Remove from Your Selection{% else %}Select{% endif %}
+                    </button>
+                
+                    <a id="downloadButton_{{ image.id}}" class="btn btn-light" href="{{ image.file.url }}" download style="display: none;">Download</a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endfor %}
 
     <!-- Load more trigger with HTMX -->

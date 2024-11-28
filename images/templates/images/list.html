@@ -2,25 +2,3 @@
 <div id="text-items-container" class="text-container htmx">
     {% include 'images/htmx_partial.html' with images=images %}
 </div>
-
-<!-- Modal Structure -->
-<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <img src="{{ image.file.url }}" id="modalImage" alt="{{ image.note }}" class="img-fluid">
-                <p id="imageNote">
-                    {{ image.note}}
-                </p>
-            </div>
-            <div class="modal-footer">
-                <a id="goToSelection" class="btn btn-secondary" href="{% url 'selection' %}">Your Selection</a>
-                <button type="button" class="btn btn-primary" id="selectButton" data-selected="false" data-image-id="">Add to Your Selection</button>
-                <a id="downloadButton" class="btn btn-secondary" href="{{ image.file.url }}" download style="display: none;">Download</a>
-            </div>
-        </div>
-    </div>
-</div>

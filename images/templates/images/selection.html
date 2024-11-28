@@ -15,8 +15,8 @@
 
     <div>
         {% if request.session.selected_images %}
-            <a href="{% url 'download_images' %}" class="btn btn-primary">Download Selected Images</a>
-            <table class="image-gallery">
+            <a href="{% url 'download_images' %}" class="btn btn-dark">Download Selected Images</a>
+            <table class="image-gallery table">
                 <thead>
                 </thead>
                 <tbody 
@@ -27,14 +27,14 @@
                 >
                 {% for image in images %}
                 <tr id="{{ image.id }}" class="image-item">
-                    <td>
+                    <td class="align-middle">
                         <img class="img-thumbnail" src="{{ image.file.url }}" alt="{{ image.note }}">
                     </td>
-                    <td>
+                    <td class="align-middle">
                         {{image.note}}
                     </td>
-                    <td>
-                        <button class="btn danger" hx-delete="{% url "delete_image_from_selection" image.id %}">
+                    <td class="align-middle">
+                        <button class="btn btn-light" hx-delete="{% url "delete_image_from_selection" image.id %}">
                             Delete
                         </button>
                     </td>

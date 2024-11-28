@@ -1,3 +1,5 @@
+import { toggleSelection } from './toggle-selection.js';
+
 document.addEventListener("DOMContentLoaded", () => {
     // Initialize existing .subcontainer elements on page load
     const existingSubcontainers = document.querySelectorAll('.subcontainer');
@@ -5,8 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
         positionTextItems(subcontainer);
     });
 
-    // Setup the visibility change handler
-    setupVisibilityChangeHandler();
+    // // Setup the visibility change handler
+    // setupVisibilityChangeHandler();
 });
 
 function positionTextItems(container) {
@@ -117,16 +119,18 @@ function stopLinearMovementForContainer(container) {
 }
 
 
-function setupVisibilityChangeHandler() {
-    document.addEventListener('visibilitychange', () => {
-        const textItems = document.querySelectorAll('.text-item');
+// function setupVisibilityChangeHandler() {
+//     document.addEventListener('visibilitychange', () => {
+//         const textItems = document.querySelectorAll('.text-item');
 
-        if (document.hidden) {
-            // Pause all animations when the page is not active
-            textItems.forEach(item => stopLinearMovement(item));
-        }
-    });
-}
+//         if (document.hidden) {
+//             // Pause all animations when the page is not active
+//             textItems.forEach(item => item.dataset.isMoving = "false");
+//         }else{
+//             textItems.forEach(item => item.dataset.isMoving = "true");
+//         }
+//     });
+// }
 
 document.addEventListener('htmx:afterSwap', (event) => {
     // If the swapped content itself is a .subcontainer
@@ -155,10 +159,10 @@ document.addEventListener('htmx:beforeRequest', function(event) {
 });
 
 function showModal(imageId, imageUrl, imageNote) {
-    const modalImage = document.getElementById('modalImage');
-    const selectButton = document.getElementById('selectButton');
-    const downloadButton = document.getElementById('downloadButton');
-    const pNote = document.getElementById('imageNote');
+    const modalImage = document.getElementById('modalImage_' + imageId);
+    const selectButton = document.getElementById('selectButton_' + imageId);
+    const downloadButton = document.getElementById('downloadButton_' + imageId);
+    const pNote = document.getElementById('imageNote_' + imageId);
 
     modalImage.src = imageUrl;
     downloadButton.href = imageUrl;
@@ -166,17 +170,15 @@ function showModal(imageId, imageUrl, imageNote) {
     pNote.textContent = imageNote;
 
     selectButton.dataset.imageId = imageId;
-    selectButton.dataset.selected = 'false';
-    selectButton.textContent = 'Select';
 
-    const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+    const modal = new bootstrap.Modal(document.getElementById('imageModal_' + imageId));
     modal.show();
 }
 
 window.showModal = showModal;
 
 document.addEventListener('click', function(event) {
-    if (event.target && event.target.id === 'selectButton') {
+    if (event.target && event.target.id.indexOf("selectButton") === 0) {
         event.preventDefault();
 
         const selectButton = event.target;
