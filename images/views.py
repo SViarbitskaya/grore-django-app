@@ -52,8 +52,20 @@ class HomeView(SelectionMixin, generic.ListView):
         context['search_form'] = ImageSearchForm(self.request.GET)
         context['language'] = self.request.LANGUAGE_CODE
         context['redirect_to'] = self.request.path
-        # Add selected images to the context
-        context['selected_images_ids'] = self.request.session.get('selected_images', [])
+        # Convert stored IDs in the session to integers
+        selected_images = self.request.session.get('selected_images', [])
+
+        # Safely convert to integers, catching any invalid data
+        selected_images_ids = []
+
+        for item in selected_images:
+            try:
+                if item is not None:  # Make sure item is not None
+                    selected_images_ids.append(int(item))
+            except (ValueError, TypeError):  # Handle any conversion issues
+                pass  # Skip invalid items, optionally log them
+
+        context['selected_images_ids'] = selected_images_ids
         page_number = self.request.GET.get('page', 1)
         context['calculated_height'] = 100 * int(page_number)
         return context

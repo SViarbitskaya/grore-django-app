@@ -1,9 +1,16 @@
+html {
+  font-size: 16px;
+}
 body{
   width: 100vw;
   overflow-x: hidden;
 }
 .navbar-header{
   display: flex;
+}
+
+.container{
+  padding-top:5vh;
 }
 
 .subcontainer {
@@ -48,19 +55,43 @@ body{
   border: 0;
 }
 
-#imageNote{
+.imageNote{
   color: black;
   margin-top: 2rem;
 }
 
 .img-thumbnail{
-  width: 5rem;
-  height: 5rem;
+  width: 10rem;
+  height: 10rem;
   display: block;  /* Makes the image a block element for centering */
   margin: 0 auto; /* Center the image */
 }
 
-#imageModal{
+.modal{
   width: 100vw;
   height: 100vh;
 }
+
+@media (max-width: 991.98px) {
+  html {
+    font-size: 14px;
+  }
+  .img-thumbnail{
+    width: 4rem;
+    height: 4rem;
+  }
+}
+
+@media (max-width: 767.98px) {
+  html {
+    font-size: 12px;
+  }
+  .img-thumbnail{
+    width: 2rem;
+    height: 2rem;
+  }
+}
+
+
+
+
