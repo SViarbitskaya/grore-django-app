@@ -26,19 +26,11 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-    
-                <li class="nav-item active">
-                    <a class="nav-link active" aria-current="page" href="/"><span class="sr-only">{% trans 'home' %}</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'pages' slug='info' %}">{% trans 'info' %}</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'pages' slug='legal-advice' %}">{% trans 'legal advice' %}</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'selection' %}">{% trans 'my selection' %}</a>
-                </li>
+                {% for item in navigation_items %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ item.url }}">{{ item.title }}</a>
+                    </li>
+                {% endfor %}
             </ul>
              {% block searchbar %}{% endblock %}
             <form class="language-switch" action="{% url 'set_language' %}" method="post">{% csrf_token %}

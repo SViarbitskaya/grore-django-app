@@ -70,11 +70,6 @@ class HomeView(SelectionMixin, generic.ListView):
         context['calculated_height'] = 100 * int(page_number)
         return context
 
-
-class ImageView(generic.DetailView):
-    template_name = "images/image.html"
-    model = Image
-
 class SelectionView(SelectionMixin, View):
     template_name = "images/selection.html"
 

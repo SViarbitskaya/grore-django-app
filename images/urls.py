@@ -10,5 +10,4 @@ urlpatterns = [
     path("selection/delete/<int:image_id>/", views.SelectionView.as_view(), name="delete_image_from_selection"),  # Same view for delete
     path('download-images/', download_images, name='download_images'),
     path("toggle-selection", views.ToggleSelectionView.as_view(), name="toggle_selection"),
-    path("images/<slug:slug>", views.ImageView.as_view(), name="image"),
 ]
