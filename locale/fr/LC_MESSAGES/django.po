@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-12 14:07+0000\n"
+"POT-Creation-Date: 2024-12-16 11:17+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,42 +18,41 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: grore/settings.py:155
-msgid "English"
-msgstr ""
-
 #: grore/settings.py:156
+msgid "English"
+msgstr "anglais"
+
+#: grore/settings.py:157
 msgid "French"
-msgstr ""
+msgstr "français"
 
-#: images/templates/base.html:31
-msgid "home"
-msgstr ""
+#: images/forms.py:8
+msgid "Search"
+msgstr "Rechercher"
 
-#: images/templates/base.html:34
-msgid "info"
-msgstr "a propos"
+#: images/navigation.py:10
+msgid "Home"
+msgstr "Accueil"
 
-#: images/templates/base.html:37
-msgid "legal advice"
-msgstr ""
+#: images/navigation.py:11 images/templates/images/htmx_partial.html:21
+msgid "Selection"
+msgstr "Sélection"
 
-#: images/templates/base.html:40
-msgid "my selection"
-msgstr ""
+#: images/templates/images/htmx_partial.html:12
+msgid "Close"
+msgstr "Fermer"
 
-#~ msgid "about grore site"
-#~ msgstr "à propos du site Grore"
+#: images/templates/images/htmx_partial.html:25
+msgid "Remove from Selection"
+msgstr "Supprimer de la sélection"
 
-#~ msgid ""
-#~ "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod "
-#~ "tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim "
-#~ "veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea "
-#~ "commodo consequat. Duis aute irure dolor in reprehenderit in voluptate "
-#~ "velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint "
-#~ "occaecat cupidatat non proident, sunt in culpa qui officia deserunt "
-#~ "mollit anim id est laborum."
-#~ msgstr "French à propos"
+#: images/templates/images/htmx_partial.html:25
+msgid "Select"
+msgstr "Sélectionner"
 
-#~ msgid "about"
-#~ msgstr "à propos"
+#: images/templates/images/htmx_partial.html:28
+msgid "Download"
+msgstr "Télécharger"
+
+#~ msgid "Your Selection"
+#~ msgstr "Votre sélection "
