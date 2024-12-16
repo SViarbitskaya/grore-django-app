@@ -1,5 +1,5 @@
 html {
-  font-size: 16px;
+  font-size: 18px;
 }
 body{
   width: 100vw;
@@ -38,6 +38,13 @@ body{
   position: absolute;
   top:0;
   left:0;
+  font-family: 'Courier New', Courier, monospace;
+  text-transform: lowercase;
+}
+
+.nav-link.active {
+  text-decoration: underline;
+  font-weight: bold;
 }
 
 .navbar-nav{
