@@ -5,6 +5,7 @@ from django.views import generic, View
 from django.views.decorators.http import require_POST
 from django.db.models import Q
 from django.utils import translation
+from django.template.loader import render_to_string
 import json, re, random, zipfile, os
 
 from .models import Image
@@ -86,6 +87,11 @@ class SelectionView(SelectionMixin, View):
         if image_id in selected_images:
             selected_images.remove(image_id)
             request.session['selected_images'] = selected_images
+            # Check if any images are left in the selection
+            if not selected_images:
+                # If no images left, return just the translated "No images selected." message
+                no_images_message = render_to_string("images/no_images.html")
+                return HttpResponse(no_images_message, content_type="text/html", status=200)
             return HttpResponse("", status=200)
 
         return HttpResponse(status=400)

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 11:17+0000\n"
+"POT-Creation-Date: 2024-12-16 12:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,5 +54,20 @@ msgstr "Sélectionner"
 msgid "Download"
 msgstr "Télécharger"
 
-#~ msgid "Your Selection"
-#~ msgstr "Votre sélection "
+#: images/templates/images/no_images.html:2
+#: images/templates/images/selection.html:47
+msgid "No images selected."
+msgstr "Votre sélection est vide."
+
+msgid "Your Image Selection"
+msgstr "Votre sélection d'images"
+
+msgid "Download zip"
+msgstr "Télécharger un zip"
+
+#: images/templates/images/selection.html:25
+msgid "Delete?"
+msgstr "Supprimer?"
+
+msgid "Delete"
+msgstr "Supprimer"
