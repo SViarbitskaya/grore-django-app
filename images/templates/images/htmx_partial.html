@@ -1,3 +1,4 @@
+{% load i18n %}
 <div id="{{ page_obj.number }}" class="subcontainer">
 {% for image in images %}
     <div class="text-item" data-id="{{ image.id }}" onclick='showModal({{ image.id }}, "{{ image.file.url }}", "{{ image.note|escapejs }}")'>
@@ -8,7 +9,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label={% translate "Close" %}></button>
                 </div>
                 <div class="modal-body">
                     <img src="{{ image.file.url }}" id="modalImage_{{ image.id}}" alt="{{ image.note }}" class="img-fluid">
@@ -17,14 +18,14 @@
                     </p>
                 </div>
                 <div class="modal-footer">
-                    <a id="goToSelection" class="btn btn-light" href="{% url 'selection' %}">Your Selection</a>
+                    <a id="goToSelection" class="btn btn-light" href="{% url 'selection' %}">{% translate "Selection" %}</a>
                     <button type="button" class="btn btn-dark selectButton" id="selectButton_{{ image.id}}" 
                         data-selected="{% if image.id in selected_images_ids %}true{% else %}false{% endif %}" 
                         data-image-id="{{ image.id }}">
-                        {% if image.id in selected_images_ids %}Remove from Your Selection{% else %}Select{% endif %}
+                        {% if image.id in selected_images_ids %}{% translate "Remove from Selection" %}{% else %}{% translate "Select" %}{% endif %}
                     </button>
                 
-                    <a id="downloadButton_{{ image.id}}" class="btn btn-light" href="{{ image.file.url }}" download style="display: none;">Download</a>
+                    <a id="downloadButton_{{ image.id}}" class="btn btn-light" href="{{ image.file.url }}" download style="display: none;">{% translate "Download" %}</a>
 
                 </div>
             </div>
