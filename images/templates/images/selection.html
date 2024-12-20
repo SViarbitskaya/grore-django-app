@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load static %}
 
 {% block stylesheets %}
@@ -7,20 +8,21 @@
 
 {% block javascript %}
     <script src="{% static 'images/js/htmx.min.js' %}" defer></script>
+    <script type="module" src="{% static 'images/js/selection.js' %}"></script>
 {% endblock %}
 
 {% block content %}
 <div class="container">
-    <h1>Your Image Selections</h1>
+    <h1>{% translate "Your Image Selection" %}</h1>
 
     <div>
-        {% if request.session.selected_images %}
-            <a href="{% url 'download_images' %}" class="btn btn-dark">Download Selected Images</a>
+        {% if request.session.selected_images and request.session.selected_images|length > 0 %}
+            <a href="{% url 'download_images' %}" class="btn btn-dark">{% translate "Download zip" %}</a>
             <table class="image-gallery table">
                 <thead>
                 </thead>
                 <tbody 
-                    hx-confirm="Are you sure?" 
+                    hx-confirm={% translate "Delete?" %}
                     hx-target="closest tr" 
                     hx-swap="outerHTML"
                     data-hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
@@ -35,15 +37,16 @@
                     </td>
                     <td class="align-middle">
                         <button class="btn btn-light" hx-delete="{% url "delete_image_from_selection" image.id %}">
-                            Delete
+                            {% translate "Delete" %}
                         </button>
                     </td>
                 {% endfor %}
                 </tbody>
             </table>
         {% else %}
-            <p>No images selected.</p>
+            <p id="no-images-message">{% translate "No images selected." %}</p>
         {% endif %}
     </div>
 </div>
 {% endblock %}
+

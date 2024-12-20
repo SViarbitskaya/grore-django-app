@@ -1,5 +1,5 @@
 html {
-  font-size: 16px;
+  font-size: 18px;
 }
 body{
   width: 100vw;
@@ -38,6 +38,13 @@ body{
   position: absolute;
   top:0;
   left:0;
+  font-family: 'Courier New', Courier, monospace;
+  text-transform: lowercase;
+}
+
+.nav-link.active {
+  text-decoration: underline;
+  font-weight: bold;
 }
 
 .navbar-nav{
@@ -62,7 +69,7 @@ body{
 
 .img-thumbnail{
   width: 10rem;
-  height: 10rem;
+  height: auto;
   display: block;  /* Makes the image a block element for centering */
   margin: 0 auto; /* Center the image */
 }
@@ -77,8 +84,8 @@ body{
     font-size: 14px;
   }
   .img-thumbnail{
-    width: 4rem;
-    height: 4rem;
+    width: 100%;
+    height: auto;
   }
 }
 
@@ -87,8 +94,8 @@ body{
     font-size: 12px;
   }
   .img-thumbnail{
-    width: 2rem;
-    height: 2rem;
+    width: 100%;
+    height: auto;
   }
 }
 

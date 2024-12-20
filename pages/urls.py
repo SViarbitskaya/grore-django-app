@@ -5,5 +5,5 @@ from . import views
 
 urlpatterns = [
     path('contact/', ContactPageView.as_view(), name='contact'),
-    path("pages/<slug:slug>/", views.PageView.as_view(), name="pages"),
+    path("<slug:slug>/", views.PageView.as_view(), name="pages"),
 ]
