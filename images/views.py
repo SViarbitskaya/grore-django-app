@@ -7,6 +7,7 @@ from django.db.models import Q
 from django.utils import translation
 from django.template.loader import render_to_string
 import json, re, random, zipfile, os
+import logging
 
 from .models import Image
 from .forms import ImageSearchForm
@@ -108,9 +109,12 @@ def download_images(request):
     response = HttpResponse(content_type='application/zip')
     response['Content-Disposition'] = f'attachment; filename={zip_filename}'
 
+    logger = logging.getLogger(__name__)
+
     with zipfile.ZipFile(response, 'w') as zip_file:
         for image in images:
             # Ensure the image file exists
+            logger.error(image.file.path)
             if os.path.exists(image.file.path):
                 # Add the image to the zip file
                 zip_file.write(image.file.path, arcname=os.path.basename(image.file.path))
