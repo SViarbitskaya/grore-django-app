@@ -114,7 +114,7 @@ def download_images(request):
     with zipfile.ZipFile(response, 'w') as zip_file:
         for image in images:
             # Ensure the image file exists
-            logger.error(image.file.path)
+            logger.info(image.file.path)
             if os.path.exists(image.file.path):
                 # Add the image to the zip file
                 zip_file.write(image.file.path, arcname=os.path.basename(image.file.path))
