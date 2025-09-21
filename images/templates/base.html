@@ -35,7 +35,7 @@
                     </li>
                 {% endfor %}
             </ul>
-             {% block searchbar %}{% endblock %}
+            {% block searchbar %}{% endblock %}
             <form class="language-switch" action="{% url 'set_language' %}" method="post">{% csrf_token %}
                 <input name="next" type="hidden" value="{{ redirect_to }}">
                 <select class="form-select" name="language" onchange="this.form.submit()">

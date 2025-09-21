@@ -1,5 +1,5 @@
 # pull official base image
-FROM python:3.11.4-slim-buster
+FROM python:3.12-bookworm
 # AS builder
  
 ARG APP_DJANGO_ROOT
@@ -14,7 +14,7 @@ WORKDIR $APP_DJANGO_ROOT
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 # install system dependencies
-RUN apt-get update && apt-get install -y gettext netcat sudo
+RUN apt-get update && apt-get install -y gettext netcat-openbsd sudo
 
 # RUN addgroup --system --gid $APP_DJANGO_USER_GID $APP_DJANGO_USER_GROUP && adduser --system --uid $APP_DJANGO_USER_UID --group $APP_DJANGO_USER_USER
 
