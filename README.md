@@ -8,6 +8,8 @@ Integration :
 
 Hébergé par [Hetzner](https://www.hetzner.com), serveur \#54912924 à Nuremberg, Allemagne
 
+En bref, Grore utilize un système de packaging Nixos, mais peut résider sur n'importe quel serveur Linux à partir du moment où Nixpks est accessible. Cela permet un contrôle sur l'environnement d'exécution sans induire une charge trop important en administration système. 
+
 ## Documentation principale
 
 [configuration](./doc/configuration.md)  
