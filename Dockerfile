@@ -1,5 +1,6 @@
 # pull official base image
-FROM python:3.11.4-slim-buster AS builder
+FROM python:3.11.4-slim-buster
+# AS builder
  
 ARG APP_DJANGO_ROOT
 ARG APP_DJANGO_USER_USER

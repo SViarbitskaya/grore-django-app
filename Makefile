@@ -13,6 +13,7 @@ endif
 
 init:
 	$(EXEC_CMD) mkdir -p ${APP_WEB_ROOT}
+	$(EXEC_CMD) mkdir -p ${APP_CACHE_ROOT}
 	$(EXEC_CMD) mkdir -p ${DJANGO_MEDIA_ROOT}
 	$(EXEC_CMD) mkdir -p ${DJANGO_STATIC_ROOT}
 	$(EXEC_CMD) touch ./grore/settings_local.py
