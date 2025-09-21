@@ -7,8 +7,33 @@ document.addEventListener("DOMContentLoaded", () => {
         positionTextItems(subcontainer);
     });
 
-    // // Setup the visibility change handler
-    // setupVisibilityChangeHandler();
+    // Scrolldown button
+    const btn = document.getElementById('scrollDownBtn');
+
+    btn.addEventListener('click', () => {
+      window.scrollBy({
+        top: window.innerHeight / 2, // half screen height
+        behavior: 'smooth'
+      });
+    });
+
+    function toggleButtonVisibility() {
+      const scrollY = window.scrollY;
+      const viewportHeight = window.innerHeight;
+      const fullHeight = document.documentElement.scrollHeight;
+
+      // If we are close to bottom (within 10px), hide the button
+      if (scrollY + viewportHeight >= fullHeight - 10) {
+        btn.classList.add('hidden');
+      } else {
+        btn.classList.remove('hidden');
+      }
+    }
+
+    // Run on scroll and on page load
+    window.addEventListener('scroll', toggleButtonVisibility);
+    window.addEventListener('resize', toggleButtonVisibility);
+    document.addEventListener('DOMContentLoaded', toggleButtonVisibility);
 });
 
 function positionTextItems(container) {
@@ -16,7 +41,7 @@ function positionTextItems(container) {
     const containerHeight = container.scrollHeight;
     const containerWidth = container.clientWidth;
 
-    // Create an IntersectionObserver for the subcontainer itself (not individual items)
+    // Create an IntersectionObserver for the subcontainer itself (not individual items)2
     const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (entry.isIntersecting && !document.hidden) {
@@ -63,9 +88,10 @@ function startLinearMovementForContainer(container, containerWidth, containerHei
     textItems.forEach(item => {
         if (item.dataset.isMoving === "true") return;
 
-        const speed = 2; // Fixed speed
-        let directionX = Math.random() > 0.5 ? 1 : -1;
-        let directionY = Math.random() > 0.5 ? 1 : -1;
+        const speed = Math.random() * 0.6 + 0.2; // between 1 and 4
+
+        let directionX = Math.random() * 2 - 1;
+        let directionY = Math.random() * 2 - 1;
 
         // Define the animation logic
         const animate = () => {

@@ -16,6 +16,7 @@ body{
 .subcontainer {
   position: relative; /* Container should be relative */
   height: 100vh;
+  overflow: hidden;
 }
 
 .text-item {
@@ -35,7 +36,7 @@ body{
 .navbar{
   width: 100vw;
   padding: 1rem;
-  position: absolute;
+  position: fixed;
   top:0;
   left:0;
   font-family: 'Courier New', Courier, monospace;
@@ -97,6 +98,27 @@ body{
     width: 100%;
     height: auto;
   }
+}
+
+#scrollDownBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 10px 15px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      transition: background 0.3s;
+      z-index: 2000;
+    }
+
+
+
+#scrollDownBtn.hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
 
