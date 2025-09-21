@@ -15,7 +15,7 @@
 <div class="container">
     <h1>{% translate "Your Image Selection" %}</h1>
 
-    <div>
+    <div class="page-content">
         {% if request.session.selected_images and request.session.selected_images|length > 0 %}
             <a href="{% url 'download_images' %}" class="btn btn-dark">{% translate "Download zip" %}</a>
             <table class="image-gallery table">
