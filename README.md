@@ -10,7 +10,7 @@ L'ensemble de la configuration se trouve dans le fichier .env. Pour créer ce fi
 
 `cp scripts/sample.env .env`
 
-Il y a des exemples de fichier de confugration dans les dossier  ̀scripts/*.env`.
+Il y a des exemples de fichier de configuration dans les dossier  ̀scripts/*.env`.
 
 **Ne pas mettre aucune valeur entre guillements (") ni simple quotes (')**   
 Le Makefile utilise ce fichier .env et a une habitude de les reprendre de manière littérale.
