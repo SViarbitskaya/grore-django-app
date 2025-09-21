@@ -1,4 +1,4 @@
-# New Grore Installation Strategy
+# Grore Installation Strategy
 
 We use NIXPKGS and not NIXOS. To install Nixpkgs (multi-user daemon) :
 
