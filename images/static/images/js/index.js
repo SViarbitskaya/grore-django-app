@@ -7,33 +7,53 @@ document.addEventListener("DOMContentLoaded", () => {
         positionTextItems(subcontainer);
     });
 
-    // Scrolldown button
-    const btn = document.getElementById('scrollDownBtn');
+    // Scroll buttons
+    const btnDown = document.getElementById('scrollDownBtn');
+    const btnUp = document.getElementById('scrollUpBtn');
 
-    btn.addEventListener('click', () => {
+    btnDown.disabled = false;
+
+    btnDown.addEventListener('click', () => {
       window.scrollBy({
         top: window.innerHeight / 2, // half screen height
         behavior: 'smooth'
       });
     });
 
-    function toggleButtonVisibility() {
-      const scrollY = window.scrollY;
-      const viewportHeight = window.innerHeight;
-      const fullHeight = document.documentElement.scrollHeight;
+    btnUp.addEventListener('click', () => {
+      window.scrollBy({
+        top: -  window.innerHeight / 2, // half screen height
+        behavior: 'smooth'
+      });
+    });
 
-      // If we are close to bottom (within 10px), hide the button
-      if (scrollY + viewportHeight >= fullHeight - 10) {
-        btn.classList.add('hidden');
-      } else {
-        btn.classList.remove('hidden');
-      }
+    // Toggle button states
+    function toggleButtons() {
+      const scrollY = window.scrollY;
+      const fullHeight = document.documentElement.scrollHeight;
+      const viewportHeight = window.innerHeight;
+
+      // Enable "up" when not at the top
+      btnUp.disabled = scrollY < 50;
+
+      // Enable "down" when not at the bottom
+      btnDown.disabled = (scrollY + viewportHeight >= fullHeight - 50)
     }
 
     // Run on scroll and on page load
-    window.addEventListener('scroll', toggleButtonVisibility);
-    window.addEventListener('resize', toggleButtonVisibility);
-    document.addEventListener('DOMContentLoaded', toggleButtonVisibility);
+    window.addEventListener('scroll', toggleButtons);
+    window.addEventListener('resize', toggleButtons);
+
+    const trigger = document.querySelector(".load-more-trigger");
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            // Load earlier: when element is within 200px of viewport
+            if (entry.isIntersecting) {
+                htmx.trigger(trigger, "revealed");
+            }
+        });
+    }, { rootMargin: "200px" }); // 👈 preload distance
+    observer.observe(trigger);
 });
 
 function positionTextItems(container) {
@@ -145,20 +165,6 @@ function stopLinearMovementForContainer(container) {
         }
     });
 }
-
-
-// function setupVisibilityChangeHandler() {
-//     document.addEventListener('visibilitychange', () => {
-//         const textItems = document.querySelectorAll('.text-item');
-
-//         if (document.hidden) {
-//             // Pause all animations when the page is not active
-//             textItems.forEach(item => item.dataset.isMoving = "false");
-//         }else{
-//             textItems.forEach(item => item.dataset.isMoving = "true");
-//         }
-//     });
-// }
 
 document.addEventListener('htmx:afterSwap', (event) => {
     // If the swapped content itself is a .subcontainer

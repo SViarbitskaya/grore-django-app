@@ -64,20 +64,20 @@ body{
 }
 
 .imageNote{
-  color: black;
-  margin-top: 2rem;
+    color: black;
+    margin-top: 2rem;
 }
 
 .img-thumbnail{
-  width: 10rem;
-  height: auto;
-  display: block;  /* Makes the image a block element for centering */
-  margin: 0 auto; /* Center the image */
+    width: 10rem;
+    height: auto;
+    display: block;  /* Makes the image a block element for centering */
+    margin: 0 auto; /* Center the image */
 }
 
 .modal{
-  width: 100vw;
-  height: 100vh;
+    width: 100vw;
+    height: 100vh;
 }
 
 @media (max-width: 991.98px) {
@@ -91,34 +91,42 @@ body{
 }
 
 @media (max-width: 767.98px) {
-  html {
-    font-size: 12px;
-  }
-  .img-thumbnail{
-    width: 100%;
-    height: auto;
-  }
+    html {
+        font-size: 12px;
+    }
+    .img-thumbnail{
+        width: 100%;
+        height: auto;
+    }
 }
 
 #scrollDownBtn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      padding: 10px 15px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-      transition: background 0.3s;
-      z-index: 2000;
-    }
+    position: fixed;
+    bottom: 20px;
+    border-radius: 50%;
+    right: 20px;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    transition: background 0.3s;
+    z-index: 2000;
+}
 
-
-
-#scrollDownBtn.hidden {
-  opacity: 0;
-  pointer-events: none;
+#scrollUpBtn {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    transition: background 0.3s;
+    z-index: 2000;
 }
 
 
