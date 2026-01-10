@@ -30,5 +30,17 @@ export function toggleSelection(imageId, action, selectButton) {
 
 export function updateSelectButton(button, isSelected) {
     button.dataset.selected = isSelected ? "true" : "false";
-    button.textContent = isSelected ? gettext("Remove from Selection") : gettext("Select");
+
+    // Change icon
+    button.innerHTML = isSelected
+        ? '<i class="bi bi-heart-fill"></i>'
+        : '<i class="bi bi-heart"></i>';
+
+    // Change native tooltip
+    const title = isSelected
+        ? gettext("Remove from Selection")
+        : gettext("Select");
+
+    button.setAttribute("title", title);
 }
+
