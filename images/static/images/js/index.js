@@ -212,14 +212,14 @@ function showModal(imageId, imageUrl, imageNote) {
 window.showModal = showModal;
 
 document.addEventListener('click', function(event) {
-    if (event.target && event.target.id.indexOf("selectButton") === 0) {
-        event.preventDefault();
+    const selectButton = event.target.closest('.selectButton');
+    if (!selectButton) return;
 
-        const selectButton = event.target;
-        const imageId = selectButton.dataset.imageId;
-        const isSelected = selectButton.dataset.selected === 'true';
-        const action = isSelected ? 'deselect' : 'select';
+    event.preventDefault();
 
-        toggleSelection(imageId, action, selectButton);
-    }
+    const imageId = selectButton.dataset.imageId;
+    const isSelected = selectButton.dataset.selected === 'true';
+    const action = isSelected ? 'deselect' : 'select';
+
+    toggleSelection(imageId, action, selectButton);
 });

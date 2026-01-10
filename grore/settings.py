@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "images.apps.ImagesConfig",
     'modeltranslation',
     "django_htmx",
+    "django_icons",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
