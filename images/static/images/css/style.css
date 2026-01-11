@@ -46,9 +46,10 @@ body{
 }
 .modal-body{
   text-align: center;
+  padding-bottom: 0;
 }
 .modal-body p{
-  margin-top: 1rem;
+  margin-top: 2rem;
   margin-bottom: 0;
 }
 .modal-content{

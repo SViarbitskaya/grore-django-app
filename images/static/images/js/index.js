@@ -223,3 +223,22 @@ document.addEventListener('click', function(event) {
 
     toggleSelection(imageId, action, selectButton);
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+    // All zoom buttons
+    const zoomButtons = document.querySelectorAll(".zoomButton");
+    const zoomModalImage = document.getElementById("zoomImage");
+
+    zoomButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const zoomUrl = btn.dataset.zoomUrl;
+            zoomModalImage.src = zoomUrl;
+        });
+    });
+
+    // Optional: clear zoom modal image when closed
+    const zoomModal = document.getElementById("zoomModal");
+    zoomModal.addEventListener("hidden.bs.modal", () => {
+        zoomModalImage.src = "";
+    });
+});
