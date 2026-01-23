@@ -6,6 +6,7 @@ django-debug-toolbar==6.0.0
 django-htmx==1.25.0
 django-modeltranslation==0.19.17
 django-pandas==0.6.7
+django-icons
 gunicorn==23.0.0
 numpy==2.3.3
 packaging==25.0
