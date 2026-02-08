@@ -199,7 +199,6 @@ function showModal(imageId, imageUrl, imageNote) {
     const pNote = document.getElementById('imageNote_' + imageId);
 
     modalImage.src = imageUrl;
-    downloadButton.href = imageUrl;
     downloadButton.style.display = 'inline-block';
     pNote.textContent = imageNote;
 

@@ -2,7 +2,9 @@
 <div id="{{ page_obj.number }}" class="subcontainer">
 {% for image in images %}
     <div class="text-item" data-id="{{ image.id }}" 
-         onclick='showModal({{ image.id }}, "{{ image.thumbnail.url }}", "{{ image.note|escapejs }}")'>
+        onclick='showModal({{ image.id }},
+            "{% if image.thumbnail %} {{ image.thumbnail.url }} {% else %} {% endif %}",
+            "{{ image.note|escapejs }}")'>
         {{ image.note }}
     </div>
 
@@ -14,7 +16,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label={% translate "Close" %}></button>
                 </div>
                 <div class="modal-body">
-                    <img src="{{ image.thumbnail.url }}" 
+                    <img src="{% if image.thumbnail %} {{ image.thumbnail.url }} {% else %} {% endif %}"
                          id="modalImage_{{ image.id }}" 
                          alt="{{ image.note }}" 
                          class="img-fluid">
@@ -62,9 +64,7 @@
                         <!-- Download button -->
                         <a id="downloadButton_{{ image.id }}" 
                            class="btn btn-light" 
-                           href="{{ image.file.url }}" 
-                           download 
-                           style="display: none;" 
+                           href="{% url 'download_zip' image.id %}" 
                            title="{% translate 'Download' %}">
                             <i class="bi bi-download"></i>
                         </a>
