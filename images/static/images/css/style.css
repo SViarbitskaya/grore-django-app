@@ -62,6 +62,16 @@ body{
 .modal-footer{
   height: 50px;
 }
+.zoom-modal-body{
+  overflow: auto;
+  padding: 0;
+}
+.zoom-image{
+  display: block;
+  max-width: none;
+  max-height: none;
+  margin: 0 auto;
+}
 .imageNote{
     color: black;
     margin-top: 2rem;

@@ -10,6 +10,9 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 - Untracked `scripts/data/low_res_dir/` (2,265 low-res image files) from git and added it to `.gitignore`; files remain on disk and in git history, just no longer tracked going forward.
 ### Added
 - Rich text editing for `Page.content` in the Django admin via `django-ckeditor-5` (widget swapped in on the existing `TextField`, kept translation-compatible with `django-modeltranslation`); page template now renders content as HTML.
+### Fixed
+- Homepage zoom modal now opens fullscreen and renders the high-res image at its natural size (scrollable if larger than the viewport), instead of being squashed down to the modal's width.
+- Zoom images appearing black/blank: the click handler for the zoom button was only wired up for images present at initial page load, so images loaded later via infinite scroll opened an empty zoom modal; also fixed stacked modal backdrops (thumbnail modal not closing before the zoom modal opened) compounding the effect. Switched to a single delegated click handler and explicit modal hand-off.
 
 ## 2026-02-08
 ### Added

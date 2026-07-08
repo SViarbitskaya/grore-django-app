@@ -35,8 +35,6 @@
                         <button type="button"
                                 class="btn btn-light zoomButton"
                                 data-zoom-url="{{ image.zoom.url }}"
-                                data-bs-toggle="modal"
-                                data-bs-target="#zoomModal"
                                 title="{% translate 'High-res image (click to zoom)' %}">
                             <i class="bi bi-zoom-in"></i>
                         </button>
@@ -77,14 +75,14 @@
 
 <!-- Single Zoom Modal -->
 <div class="modal fade" id="zoomModal" tabindex="-1" aria-labelledby="zoomModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="zoomModalLabel">{% translate "Zoom Image" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label={% translate "Close" %}></button>
             </div>
-            <div class="modal-body text-center">
-                <img id="zoomImage" src="" class="img-fluid" alt="">
+            <div class="modal-body zoom-modal-body">
+                <img id="zoomImage" src="" class="zoom-image" alt="">
             </div>
         </div>
     </div>

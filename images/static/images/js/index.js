@@ -223,21 +223,29 @@ document.addEventListener('click', function(event) {
     toggleSelection(imageId, action, selectButton);
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-    // All zoom buttons
-    const zoomButtons = document.querySelectorAll(".zoomButton");
+document.addEventListener("click", function(event) {
+    const zoomButton = event.target.closest(".zoomButton");
+    if (!zoomButton) return;
+
+    const zoomUrl = zoomButton.dataset.zoomUrl;
     const zoomModalImage = document.getElementById("zoomImage");
+    zoomModalImage.src = zoomUrl;
 
-    zoomButtons.forEach(btn => {
-        btn.addEventListener("click", () => {
-            const zoomUrl = btn.dataset.zoomUrl;
-            zoomModalImage.src = zoomUrl;
-        });
-    });
+    // Close whichever modal the zoom button was clicked from (e.g. the
+    // thumbnail modal) so its backdrop doesn't stack under the zoom modal.
+    const openModalEl = zoomButton.closest(".modal.show");
+    if (openModalEl) {
+        const openModal = bootstrap.Modal.getInstance(openModalEl);
+        if (openModal) openModal.hide();
+    }
 
-    // Optional: clear zoom modal image when closed
-    const zoomModal = document.getElementById("zoomModal");
-    zoomModal.addEventListener("hidden.bs.modal", () => {
-        zoomModalImage.src = "";
-    });
+    const zoomModal = bootstrap.Modal.getOrCreateInstance(document.getElementById("zoomModal"));
+    zoomModal.show();
+});
+
+// Clear zoom modal image when closed
+document.addEventListener("hidden.bs.modal", (event) => {
+    if (event.target.id === "zoomModal") {
+        document.getElementById("zoomImage").src = "";
+    }
 });
