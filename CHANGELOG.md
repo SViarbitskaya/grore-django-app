@@ -7,6 +7,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 ### Changed
 - Removed the 255-character cap on `Page.content` (was only a form-validation limit, not a DB constraint); added corresponding migration.
 - Added `django-icons` dependency.
+- Untracked `scripts/data/low_res_dir/` (2,265 low-res image files) from git and added it to `.gitignore`; files remain on disk and in git history, just no longer tracked going forward.
 
 ## 2026-02-08
 ### Added
