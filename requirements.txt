@@ -4,6 +4,7 @@ django-appconf==1.1.0
 django-compressor==4.4
 django-debug-toolbar==6.0.0
 django-htmx==1.25.0
+django-icons==25.3
 django-modeltranslation==0.19.17
 django-pandas==0.6.7
 gunicorn==23.0.0
