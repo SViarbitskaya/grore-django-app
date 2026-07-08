@@ -8,6 +8,8 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 - Removed the 255-character cap on `Page.content` (was only a form-validation limit, not a DB constraint); added corresponding migration.
 - Added `django-icons` dependency.
 - Untracked `scripts/data/low_res_dir/` (2,265 low-res image files) from git and added it to `.gitignore`; files remain on disk and in git history, just no longer tracked going forward.
+### Added
+- Rich text editing for `Page.content` in the Django admin via `django-ckeditor-5` (widget swapped in on the existing `TextField`, kept translation-compatible with `django-modeltranslation`); page template now renders content as HTML.
 
 ## 2026-02-08
 ### Added
