@@ -72,6 +72,7 @@ class HomeView(SelectionMixin, generic.ListView):
         context['calculated_height'] = 100 * int(page_number)
         return context
 
+
 class SelectionView(SelectionMixin, View):
     template_name = "images/selection.html"
 
@@ -97,6 +98,12 @@ class SelectionView(SelectionMixin, View):
 
         return HttpResponse(status=400)
 
+
+class ToggleSelectionView(SelectionMixin, View):
+    def post(self, request, *args, **kwargs):
+        return JsonResponse(self.update_session_selection(request))
+
+
 def download_images(request):
     # Get the list of image IDs from the session
     selected_image_ids = request.session.get('selected_images', [])
@@ -114,13 +121,47 @@ def download_images(request):
     with zipfile.ZipFile(response, 'w') as zip_file:
         for image in images:
             # Ensure the image file exists
-            logger.info(image.file.path)
-            if os.path.exists(image.file.path):
+
+            if image.file and os.path.exists(image.file.path):
                 # Add the image to the zip file
-                zip_file.write(image.file.path, arcname=os.path.basename(image.file.path))
+                zip_file.write(
+                    image.file.path, 
+                    arcname=os.path.basename(image.file.path)
+                )
+
+            # Add low-res thumbnail if it exists
+            if image.thumbnail and os.path.exists(image.thumbnail.path):
+                zip_file.write(
+                    image.thumbnail.path,
+                    arcname=os.path.basename(image.thumbnail.path)
+                )
 
     return response
 
-class ToggleSelectionView(SelectionMixin, View):
-    def post(self, request, *args, **kwargs):
-        return JsonResponse(self.update_session_selection(request))
+def download_zip(request, image_id):
+    # Fetch the image
+    image = get_object_or_404(Image, pk=image_id)
+
+    # Name of the zip file
+    zip_filename = f"{image.identifier}.zip"
+    # Create the response
+    response = HttpResponse(content_type='application/zip')
+    response['Content-Disposition'] = f'attachment; filename="{zip_filename}"'
+
+    logger = logging.getLogger(__name__)
+
+    with zipfile.ZipFile(response, 'w') as zip_file:
+        # Add high-res file if it exists
+        if image.file and os.path.exists(image.file.path):
+            zip_file.write(
+                image.file.path,
+                arcname=os.path.basename(image.file.path)
+            )
+        # Add low-res thumbnail if it exists
+        if image.thumbnail and os.path.exists(image.thumbnail.path):
+            zip_file.write(
+                image.thumbnail.path,
+                arcname=os.path.basename(image.thumbnail.path)
+            )
+
+    return response

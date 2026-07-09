@@ -30,7 +30,7 @@
                 {% for image in images %}
                 <tr id="{{ image.id }}" class="image-item">
                     <td class="align-middle">
-                        <img class="img-thumbnail" src="{{ image.file.url }}" alt="{{ image.note }}">
+                        <img class="img-thumbnail" src="{{ image.thumbnail.url }}" alt="{{ image.note }}">
                     </td>
                     <td class="align-middle">
                         {{image.note}}

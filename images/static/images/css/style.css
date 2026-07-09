@@ -46,9 +46,10 @@ body{
 }
 .modal-body{
   text-align: center;
+  padding-bottom: 0;
 }
 .modal-body p{
-  margin-top: 1rem;
+  margin-top: 2rem;
   margin-bottom: 0;
 }
 .modal-content{
@@ -60,6 +61,16 @@ body{
 }
 .modal-footer{
   height: 50px;
+}
+.zoom-modal-body{
+  overflow: auto;
+  padding: 0;
+}
+.zoom-image{
+  display: block;
+  max-width: none;
+  max-height: none;
+  margin: 0 auto;
 }
 .imageNote{
     color: black;
