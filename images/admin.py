@@ -18,6 +18,10 @@ class ImageAdmin(TranslationAdmin):
     extra = 0
 
     def img_preview(self, obj):
+        # obj.file is often the original high-res .tiff, which browsers can't
+        # render inline, so prefer the browser-safe thumbnail for the preview.
+        if obj.thumbnail:
+            return format_html('<img src="{}" width="300"/>', obj.thumbnail.url)
         if obj.file:
             return format_html('<img src="{}" width="300"/>', obj.file.url)
         return "No image"

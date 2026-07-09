@@ -22,4 +22,4 @@ cache/
 .venv/
 result
 result/
-scripts/data/low_res_dir/
+scripts/data/

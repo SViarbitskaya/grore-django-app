@@ -7,12 +7,14 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 ### Changed
 - Removed the 255-character cap on `Page.content` (was only a form-validation limit, not a DB constraint); added corresponding migration.
 - Added `django-icons` dependency.
-- Untracked `scripts/data/low_res_dir/` (2,265 low-res image files) from git and added it to `.gitignore`; files remain on disk and in git history, just no longer tracked going forward.
+- Untracked `scripts/data/low_res_dir/` (2,265 low-res image files) from git and added it to `.gitignore`; files remain on disk and in git history, just no longer tracked going forward. Broadened this to ignore all of `scripts/data/`.
+- Populated `media_fixture.json` with real notes: parsed the `scripts/data/notules/Notules_*.doc` archive documents (2,139 unique image descriptions in French) and applied them to `note_fr` for 2,089 matching entries, with `note_en` generated via machine translation. The remaining 837 entries without a matching notule now read "Pas de description" / "No description" instead of the old `test_fr`/`test_en` placeholders. 50 notule identifiers had typos in the source docs and didn't match any fixture entry; 8 identifiers had conflicting duplicate descriptions in the source and kept only the first occurrence — see conversation history for the flagged lists.
 ### Added
 - Rich text editing for `Page.content` in the Django admin via `django-ckeditor-5` (widget swapped in on the existing `TextField`, kept translation-compatible with `django-modeltranslation`); page template now renders content as HTML.
 ### Fixed
 - Homepage zoom modal now opens fullscreen and renders the high-res image at its natural size (scrollable if larger than the viewport), instead of being squashed down to the modal's width.
 - Zoom images appearing black/blank: the click handler for the zoom button was only wired up for images present at initial page load, so images loaded later via infinite scroll opened an empty zoom modal; also fixed stacked modal backdrops (thumbnail modal not closing before the zoom modal opened) compounding the effect. Switched to a single delegated click handler and explicit modal hand-off.
+- Admin image preview showing broken for high-res images: `img_preview` rendered `obj.file` directly, which for `high_res=True` entries is the original `.tiff` (not renderable inline by browsers). Now prefers `obj.thumbnail` (a browser-safe JPG).
 
 ## 2026-02-08
 ### Added
