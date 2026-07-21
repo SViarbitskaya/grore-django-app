@@ -295,17 +295,13 @@ document.addEventListener('click', function(event) {
     toggleSelection(imageId, action, selectButton);
 });
 
-document.addEventListener("click", function(event) {
-    const zoomButton = event.target.closest(".zoomButton");
-    if (!zoomButton) return;
-
-    const zoomUrl = zoomButton.dataset.zoomUrl;
+function openZoomModal(zoomUrl, sourceEl) {
     const zoomModalImage = document.getElementById("zoomImage");
     zoomModalImage.src = zoomUrl;
 
-    // Close whichever modal the zoom button was clicked from (e.g. the
-    // thumbnail modal) so its backdrop doesn't stack under the zoom modal.
-    const openModalEl = zoomButton.closest(".modal.show");
+    // Close whichever modal the trigger was inside (e.g. the thumbnail
+    // modal) so its backdrop doesn't stack under the zoom modal.
+    const openModalEl = sourceEl.closest(".modal.show");
     if (openModalEl) {
         const openModal = bootstrap.Modal.getInstance(openModalEl);
         if (openModal) openModal.hide();
@@ -313,6 +309,22 @@ document.addEventListener("click", function(event) {
 
     const zoomModal = bootstrap.Modal.getOrCreateInstance(document.getElementById("zoomModal"));
     zoomModal.show();
+}
+
+document.addEventListener("click", function(event) {
+    const zoomButton = event.target.closest(".zoomButton");
+    if (!zoomButton) return;
+
+    openZoomModal(zoomButton.dataset.zoomUrl, zoomButton);
+});
+
+document.addEventListener("dblclick", function(event) {
+    // Only images rendered with a zoom-url (i.e. that actually have a
+    // high-res version) carry the .zoomable class - see htmx_partial.html.
+    const zoomableImage = event.target.closest(".zoomable");
+    if (!zoomableImage) return;
+
+    openZoomModal(zoomableImage.dataset.zoomUrl, zoomableImage);
 });
 
 // Clear zoom modal image when closed

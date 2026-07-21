@@ -64,13 +64,14 @@ body{
   height: 50px;
 }
 .zoom-modal-body{
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 0;
 }
 .zoom-image{
   display: block;
-  max-width: none;
-  max-height: none;
+  width: 100%;
+  height: auto;
   margin: 0 auto;
 }
 .imageNote{
@@ -91,6 +92,9 @@ body{
     position: relative;
     display: inline-block;
     cursor: pointer;
+}
+.zoomable {
+    cursor: zoom-in; /* only applied when a zoom version exists, see htmx_partial.html */
 }
 .image-wrapper .overlay {
     position: absolute;
