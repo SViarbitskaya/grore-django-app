@@ -24,6 +24,7 @@ body{
   z-index: 1000;
   opacity: 0;
   transition: opacity 0.5s ease-in;
+  will-change: transform; /* movement is driven by transform, not left/top */
 }
 .text-item:hover {
   color: #007bff; /* Optional: Change text color on hover */
