@@ -91,7 +91,9 @@ body{
 .image-wrapper {
     position: relative;
     display: inline-block;
-    cursor: pointer;
+    /* No blanket cursor here: only actual controls (buttons, the
+       zoomable image below) should look clickable. Buttons already get
+       their own pointer cursor from Bootstrap's .btn. */
 }
 .zoomable {
     cursor: zoom-in; /* only applied when a zoom version exists, see htmx_partial.html */
