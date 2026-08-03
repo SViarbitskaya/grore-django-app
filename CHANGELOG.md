@@ -14,6 +14,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 - Zoom modal was stretching every high-res image to 100% of the screen width regardless of its actual resolution, making lower-res images look blurry when enlarged. The image now renders at its native size (capped by `max-width: 100%`), so it only fills the screen when its resolution is at least screen-width, and otherwise displays at its own max resolution instead of being upscaled.
 - Stripped a stray leading `: ` parser artifact from 7 notule descriptions (`X1151X`, `X1350X`, `X1354X`, `X2285X`, `X2311`, `X4722X`, `X6292`).
 - The floating scroll up/down buttons sat above the zoom modal (higher `z-index`) and stayed visible/clickable over the fullscreen zoomed image; they're now hidden while the zoom modal is open and reappear when it closes.
+- Corrected 31 French/English spelling errors across 26 notule descriptions, found by running the full corpus through a spellchecker and manually reviewing every flagged word in context (missing/wrong accents, letter transpositions, a missing space, and "Renaud 5" → "Renault 5").
 
 ## 2026-07-08 – 2026-07-21
 ### Changed
