@@ -69,8 +69,15 @@ body{
   padding: 0;
 }
 .zoom-image{
+  /* No explicit width: let the browser use the image's intrinsic size,
+     capped by max-width so it never upscales past its own resolution.
+     A high-res image (>= the screen width) fills the width, capped at
+     100%; a lower-res image renders at its native size instead of
+     being stretched blurry to fill the screen. Height is intentionally
+     uncapped: tall images still scroll vertically (see 54db92c). */
   display: block;
-  width: 100%;
+  max-width: 100%;
+  width: auto;
   height: auto;
   margin: 0 auto;
 }

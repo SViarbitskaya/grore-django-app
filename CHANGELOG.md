@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); dates are `YYYY-MM-DD`.
 
 ## [Unreleased]
+### Fixed
+- Zoom modal was stretching every high-res image to 100% of the screen width regardless of its actual resolution, making lower-res images look blurry when enlarged. The image now renders at its native size (capped by `max-width: 100%`), so it only fills the screen when its resolution is at least screen-width, and otherwise displays at its own max resolution instead of being upscaled.
+
+## 2026-07-08 – 2026-07-21
 ### Changed
 - Removed the 255-character cap on `Page.content` (was only a form-validation limit, not a DB constraint); added corresponding migration.
 - Added `django-icons` dependency.
