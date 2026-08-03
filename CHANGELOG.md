@@ -4,6 +4,11 @@ All notable changes to this project are documented in this file.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); dates are `YYYY-MM-DD`.
 
 ## [Unreleased]
+### Added
+- `Image.ai_gen` boolean field (default `False`) marking whether an image's description was AI-generated, for future filtering/reporting.
+### Changed
+- Generated `note_fr`/`note_en` captions for all 813 images that previously had the "Pas de description" / "No description" placeholder, matching the style and established damage vocabulary (`Fragment déchiré.`, `Image avec déchirure, reconstituée.`, `Image très abîmée.`, etc.) of the existing human-written entries. Each generated caption is marked with a trailing ᴬᴵ superscript and `ai_gen=True` to distinguish it from human-written descriptions.
+- Fixed `make load-fixtures` pointing at `scripts/data/classeur.json`, a file that hasn't existed since commit `64d50b6`; it now loads `media_fixture.json`, the fixture that's actually been maintained (notule descriptions, zoom/high_res fields).
 ### Fixed
 - Zoom modal was stretching every high-res image to 100% of the screen width regardless of its actual resolution, making lower-res images look blurry when enlarged. The image now renders at its native size (capped by `max-width: 100%`), so it only fills the screen when its resolution is at least screen-width, and otherwise displays at its own max resolution instead of being upscaled.
 
