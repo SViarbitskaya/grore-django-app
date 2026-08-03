@@ -296,18 +296,26 @@ document.addEventListener('click', function(event) {
 });
 
 function openZoomModal(zoomUrl, sourceEl) {
+    const zoomModalEl = document.getElementById("zoomModal");
     const zoomModalImage = document.getElementById("zoomImage");
     zoomModalImage.src = zoomUrl;
 
     // Close whichever modal the trigger was inside (e.g. the thumbnail
-    // modal) so its backdrop doesn't stack under the zoom modal.
+    // modal) so its backdrop doesn't stack under the zoom modal. Remember
+    // it so the back button can hand off to it again on the way out.
     const openModalEl = sourceEl.closest(".modal.show");
+    const backButton = zoomModalEl.querySelector(".zoomBackButton");
     if (openModalEl) {
+        zoomModalEl.dataset.sourceModalId = openModalEl.id;
+        if (backButton) backButton.style.display = "";
         const openModal = bootstrap.Modal.getInstance(openModalEl);
         if (openModal) openModal.hide();
+    } else {
+        delete zoomModalEl.dataset.sourceModalId;
+        if (backButton) backButton.style.display = "none";
     }
 
-    const zoomModal = bootstrap.Modal.getOrCreateInstance(document.getElementById("zoomModal"));
+    const zoomModal = bootstrap.Modal.getOrCreateInstance(zoomModalEl);
     zoomModal.show();
 }
 
@@ -327,9 +335,43 @@ document.addEventListener("dblclick", function(event) {
     openZoomModal(zoomableImage.dataset.zoomUrl, zoomableImage);
 });
 
-// Clear zoom modal image when closed
+// The scroll up/down buttons are position:fixed with a z-index above the
+// modal's, so they'd otherwise float on top of the fullscreen zoom image.
+document.addEventListener("show.bs.modal", (event) => {
+    if (event.target.id === "zoomModal") {
+        document.getElementById("scrollUpBtn")?.classList.add("d-none");
+        document.getElementById("scrollDownBtn")?.classList.add("d-none");
+    }
+});
+
+// Back button hands off to the thumbnail modal the zoom was opened from,
+// instead of just closing (see hidden.bs.modal handler below).
+document.addEventListener("click", function(event) {
+    const backButton = event.target.closest(".zoomBackButton");
+    if (!backButton) return;
+
+    const zoomModalEl = document.getElementById("zoomModal");
+    zoomModalEl.dataset.returnToSource = "true";
+    const zoomModal = bootstrap.Modal.getInstance(zoomModalEl);
+    if (zoomModal) zoomModal.hide();
+});
+
+// Clear zoom modal image when closed, and hand back off to the thumbnail
+// modal if it was closed via the back button rather than a plain dismiss.
 document.addEventListener("hidden.bs.modal", (event) => {
     if (event.target.id === "zoomModal") {
         document.getElementById("zoomImage").src = "";
+        document.getElementById("scrollUpBtn")?.classList.remove("d-none");
+        document.getElementById("scrollDownBtn")?.classList.remove("d-none");
+
+        const shouldReturn = event.target.dataset.returnToSource === "true";
+        delete event.target.dataset.returnToSource;
+
+        if (shouldReturn && event.target.dataset.sourceModalId) {
+            const sourceModalEl = document.getElementById(event.target.dataset.sourceModalId);
+            if (sourceModalEl) {
+                bootstrap.Modal.getOrCreateInstance(sourceModalEl).show();
+            }
+        }
     }
 });
