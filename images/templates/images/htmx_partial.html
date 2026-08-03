@@ -79,7 +79,12 @@
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="zoomModalLabel">{% translate "Zoom Image" %}</h5>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-light zoomBackButton" title="{% translate 'Back to image' %}">
+                        <i class="bi bi-arrow-left"></i>
+                    </button>
+                    <h5 class="modal-title mb-0" id="zoomModalLabel">{% translate "Zoom Image" %}</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label={% translate "Close" %}></button>
             </div>
             <div class="modal-body zoom-modal-body">
