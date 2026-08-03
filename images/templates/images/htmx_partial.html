@@ -17,9 +17,10 @@
                 </div>
                 <div class="modal-body">
                     <img src="{% if image.thumbnail %} {{ image.thumbnail.url }} {% else %} {% endif %}"
-                         id="modalImage_{{ image.id }}" 
-                         alt="{{ image.note }}" 
-                         class="img-fluid">
+                         id="modalImage_{{ image.id }}"
+                         alt="{{ image.note }}"
+                         class="img-fluid{% if image.high_res and image.zoom %} zoomable{% endif %}"
+                         {% if image.high_res and image.zoom %}data-zoom-url="{{ image.zoom.url }}" title="{% translate 'High-res image (double-click to zoom)' %}"{% endif %}>
 
                     {% if image.note %}
                     <p id="imageNote_{{ image.id}}">

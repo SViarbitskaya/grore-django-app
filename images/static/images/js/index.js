@@ -1,10 +1,32 @@
 import { toggleSelection } from './toggle-selection.js';
 
+// Cached layout data, refreshed only on init and on resize (never per
+// animation frame) so the animate() loop below is pure arithmetic + a
+// single transform write with no DOM reads, avoiding forced-reflow
+// layout thrashing and the stale-bounds flicker bug it used to cause.
+const containerDimensions = new WeakMap(); // container -> { width, height }
+const itemDimensions = new WeakMap();      // item -> { width, height }
+const itemState = new WeakMap();           // item -> { x, y, directionX, directionY, speed }
+
 document.addEventListener("DOMContentLoaded", () => {
     // Initialize existing .subcontainer elements on page load
     const existingSubcontainers = document.querySelectorAll('.subcontainer');
     existingSubcontainers.forEach(subcontainer => {
         positionTextItems(subcontainer);
+    });
+
+    // Re-measure containers/items on resize (rAF-throttled to one pass per
+    // frame) and snap any item whose position is now out of bounds back
+    // inside, instead of leaving the animation loop to bounce it between
+    // stale limits forever.
+    let resizePending = false;
+    window.addEventListener('resize', () => {
+        if (resizePending) return;
+        resizePending = true;
+        requestAnimationFrame(() => {
+            resizePending = false;
+            refreshDimensionsAfterResize();
+        });
     });
 
     // Scroll buttons
@@ -60,13 +82,14 @@ function positionTextItems(container) {
     const textItems = container.querySelectorAll('.text-item');
     const containerHeight = container.scrollHeight;
     const containerWidth = container.clientWidth;
+    containerDimensions.set(container, { width: containerWidth, height: containerHeight });
 
     // Create an IntersectionObserver for the subcontainer itself (not individual items)2
     const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (entry.isIntersecting && !document.hidden) {
                 // Start movement for all items in the container when the container is partly visible
-                startLinearMovementForContainer(container, containerWidth, containerHeight);
+                startLinearMovementForContainer(container);
             } else {
                 // Stop movement for all items in the container when the container is not visible
                 stopLinearMovementForContainer(container);
@@ -88,64 +111,75 @@ function positionTextItems(container) {
         // Ensure the text item is rendered to get accurate dimensions
         const itemWidth = item.offsetWidth;
         const itemHeight = item.offsetHeight;
+        itemDimensions.set(item, { width: itemWidth, height: itemHeight });
 
         // Calculate random positions ensuring no overflow on the right or bottom
-        const randomX = Math.floor(Math.random() * (containerWidth - itemWidth));
-        const randomY = Math.floor(Math.random() * (containerHeight - itemHeight - 10)); // 10px padding at bottom
+        const randomX = Math.floor(Math.random() * Math.max(0, containerWidth - itemWidth));
+        const randomY = Math.floor(Math.random() * Math.max(0, containerHeight - itemHeight - 10)); // 10px padding at bottom
 
-        // Position the text item absolutely within the container
+        // Position the text item absolutely within the container, moved via
+        // transform (compositor-only) rather than left/top so that per-frame
+        // updates never invalidate layout.
         item.style.position = 'absolute';
-        item.style.left = `${randomX}px`;
-        item.style.top = `${randomY}px`;
+        item.style.left = '0';
+        item.style.top = '0';
+        item.style.transform = `translate3d(${randomX}px, ${randomY}px, 0)`;
 
         item.style.opacity = '1'; // Ensure items are visible
+
+        itemState.set(item, { x: randomX, y: randomY, directionX: 0, directionY: 0, speed: 0 });
     });
 }
 
-function startLinearMovementForContainer(container, containerWidth, containerHeight) {
+function startLinearMovementForContainer(container) {
     const textItems = container.querySelectorAll('.text-item');
 
     textItems.forEach(item => {
         if (item.dataset.isMoving === "true") return;
 
-        const speed = Math.random() * 0.6 + 0.2; // between 1 and 4
+        const state = itemState.get(item) || { x: 0, y: 0, directionX: 0, directionY: 0, speed: 0 };
+        state.speed = Math.random() * 0.6 + 0.2; // between 1 and 4
+        state.directionX = Math.random() * 2 - 1;
+        state.directionY = Math.random() * 2 - 1;
+        itemState.set(item, state);
 
-        let directionX = Math.random() * 2 - 1;
-        let directionY = Math.random() * 2 - 1;
-
-        // Define the animation logic
+        // Define the animation logic. Dimensions are looked up from the
+        // caches (updated on init/resize only) instead of read from the DOM
+        // every frame, so this loop does no layout-forcing reads at all.
         const animate = () => {
             if (item.dataset.isMoving !== "true") return;
 
-            const itemWidth = item.offsetWidth;
-            const itemHeight = item.offsetHeight;
+            const dims = itemDimensions.get(item);
+            const bounds = containerDimensions.get(container);
 
-            let currentX = parseFloat(item.style.left) || 0;
-            let currentY = parseFloat(item.style.top) || 0;
+            const maxX = Math.max(0, bounds.width - dims.width);
+            const maxY = Math.max(0, bounds.height - dims.height);
 
-            let nextX = currentX + directionX * speed;
-            let nextY = currentY + directionY * speed;
+            let nextX = state.x + state.directionX * state.speed;
+            let nextY = state.y + state.directionY * state.speed;
 
             // Boundary collision detection to stay within subcontainer
             if (nextX <= 0) {
-                directionX = 1;
+                state.directionX = 1;
                 nextX = 0;
-            } else if (nextX >= containerWidth - itemWidth) {
-                directionX = -1;
-                nextX = containerWidth - itemWidth;
+            } else if (nextX >= maxX) {
+                state.directionX = -1;
+                nextX = maxX;
             }
 
             if (nextY <= 0) {
-                directionY = 1;
+                state.directionY = 1;
                 nextY = 0;
-            } else if (nextY >= containerHeight - itemHeight) {
-                directionY = -1;
-                nextY = containerHeight - itemHeight;
+            } else if (nextY >= maxY) {
+                state.directionY = -1;
+                nextY = maxY;
             }
 
-            // Update the item's position
-            item.style.left = `${nextX}px`;
-            item.style.top = `${nextY}px`;
+            state.x = nextX;
+            state.y = nextY;
+
+            // Update the item's position (compositor-only write)
+            item.style.transform = `translate3d(${nextX}px, ${nextY}px, 0)`;
 
             // Continue animation
             requestAnimationFrame(animate);
@@ -163,6 +197,44 @@ function stopLinearMovementForContainer(container) {
         if (item.dataset.isMoving === "true") {
             item.dataset.isMoving = "false"; // Stop animation
         }
+    });
+}
+
+function refreshDimensionsAfterResize() {
+    const subcontainers = document.querySelectorAll('.subcontainer');
+
+    // Batch every DOM read first...
+    const updates = [];
+    subcontainers.forEach(container => {
+        const width = container.clientWidth;
+        const height = container.scrollHeight;
+        const items = Array.from(container.querySelectorAll('.text-item')).map(item => ({
+            item,
+            width: item.offsetWidth,
+            height: item.offsetHeight,
+        }));
+        updates.push({ container, width, height, items });
+    });
+
+    // ...then batch every write, so reads never interleave with writes.
+    updates.forEach(({ container, width, height, items }) => {
+        containerDimensions.set(container, { width, height });
+
+        items.forEach(({ item, width: itemWidth, height: itemHeight }) => {
+            itemDimensions.set(item, { width: itemWidth, height: itemHeight });
+
+            const state = itemState.get(item);
+            if (!state) return;
+
+            // Re-clamp so an item whose bounds just collapsed (or whose
+            // wrapped size just changed) snaps back inside immediately
+            // instead of oscillating between stale limits every frame.
+            const maxX = Math.max(0, width - itemWidth);
+            const maxY = Math.max(0, height - itemHeight);
+            state.x = Math.min(Math.max(state.x, 0), maxX);
+            state.y = Math.min(Math.max(state.y, 0), maxY);
+            item.style.transform = `translate3d(${state.x}px, ${state.y}px, 0)`;
+        });
     });
 }
 
@@ -223,17 +295,13 @@ document.addEventListener('click', function(event) {
     toggleSelection(imageId, action, selectButton);
 });
 
-document.addEventListener("click", function(event) {
-    const zoomButton = event.target.closest(".zoomButton");
-    if (!zoomButton) return;
-
-    const zoomUrl = zoomButton.dataset.zoomUrl;
+function openZoomModal(zoomUrl, sourceEl) {
     const zoomModalImage = document.getElementById("zoomImage");
     zoomModalImage.src = zoomUrl;
 
-    // Close whichever modal the zoom button was clicked from (e.g. the
-    // thumbnail modal) so its backdrop doesn't stack under the zoom modal.
-    const openModalEl = zoomButton.closest(".modal.show");
+    // Close whichever modal the trigger was inside (e.g. the thumbnail
+    // modal) so its backdrop doesn't stack under the zoom modal.
+    const openModalEl = sourceEl.closest(".modal.show");
     if (openModalEl) {
         const openModal = bootstrap.Modal.getInstance(openModalEl);
         if (openModal) openModal.hide();
@@ -241,6 +309,22 @@ document.addEventListener("click", function(event) {
 
     const zoomModal = bootstrap.Modal.getOrCreateInstance(document.getElementById("zoomModal"));
     zoomModal.show();
+}
+
+document.addEventListener("click", function(event) {
+    const zoomButton = event.target.closest(".zoomButton");
+    if (!zoomButton) return;
+
+    openZoomModal(zoomButton.dataset.zoomUrl, zoomButton);
+});
+
+document.addEventListener("dblclick", function(event) {
+    // Only images rendered with a zoom-url (i.e. that actually have a
+    // high-res version) carry the .zoomable class - see htmx_partial.html.
+    const zoomableImage = event.target.closest(".zoomable");
+    if (!zoomableImage) return;
+
+    openZoomModal(zoomableImage.dataset.zoomUrl, zoomableImage);
 });
 
 // Clear zoom modal image when closed

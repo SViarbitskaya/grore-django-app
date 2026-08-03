@@ -13,6 +13,7 @@ class Image(models.Model):
     thumbnail = models.ImageField(upload_to="thumbs/", blank=True, null=True)
     zoom = models.ImageField(upload_to="zoom/", blank=True, null=True)
     high_res = models.BooleanField(default=False)
+    ai_gen = models.BooleanField(default=False)
 
     def filename(self):
         return os.path.basename(self.file.name)

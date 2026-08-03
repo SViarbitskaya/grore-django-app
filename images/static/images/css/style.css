@@ -24,6 +24,7 @@ body{
   z-index: 1000;
   opacity: 0;
   transition: opacity 0.5s ease-in;
+  will-change: transform; /* movement is driven by transform, not left/top */
 }
 .text-item:hover {
   color: #007bff; /* Optional: Change text color on hover */
@@ -63,13 +64,21 @@ body{
   height: 50px;
 }
 .zoom-modal-body{
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 0;
 }
 .zoom-image{
+  /* No explicit width: let the browser use the image's intrinsic size,
+     capped by max-width so it never upscales past its own resolution.
+     A high-res image (>= the screen width) fills the width, capped at
+     100%; a lower-res image renders at its native size instead of
+     being stretched blurry to fill the screen. Height is intentionally
+     uncapped: tall images still scroll vertically (see 54db92c). */
   display: block;
-  max-width: none;
-  max-height: none;
+  max-width: 100%;
+  width: auto;
+  height: auto;
   margin: 0 auto;
 }
 .imageNote{
@@ -89,7 +98,12 @@ body{
 .image-wrapper {
     position: relative;
     display: inline-block;
-    cursor: pointer;
+    /* No blanket cursor here: only actual controls (buttons, the
+       zoomable image below) should look clickable. Buttons already get
+       their own pointer cursor from Bootstrap's .btn. */
+}
+.zoomable {
+    cursor: zoom-in; /* only applied when a zoom version exists, see htmx_partial.html */
 }
 .image-wrapper .overlay {
     position: absolute;
