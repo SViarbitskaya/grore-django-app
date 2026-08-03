@@ -9,10 +9,10 @@ Il y a des exemples de fichier de configuration dans les dossier  ̀scripts/*.en
 **Ne pas mettre aucune valeur entre guillements (") ni simple quotes (')**   
 Le Makefile utilise ce fichier .env et a une habitude de les reprendre de manière littérale.
 
+## Paramètres
+
 Voici les variables de configuration :
 
-| Paramètre | Explication / Exemple|
-| --- | --- | 
 | APP_DJANGO_ROOT |  Le dossier depuis dans lequel on trouve `manage.py`  **démarre avec "/" et termine sans "/"**. ${PWD} est habituellement le dossier courant. |
 |  |  ${PWD}  |
 | APP_CACHE_ROOT |  Le dossier pour des fichiers volatiles  **démarre avec "/" et termine sans "/"**. ${PWD} est habituellement le dossier courant. |
@@ -52,7 +52,7 @@ Voici les variables de configuration :
 | DJANGO_HOST |  La partie après "://" et avant "/" où le serveur Django ou Gunicorn écoute principalement  |
 |  |  localhost ou  ou ${APP_WEB_HOST}  |
 | DJANGO_LANGUAGE_CODE | La langue (par défaut ?) du site  |
-|  |  en ou fr  |
+| |  en ou fr  |
 | DJANGO_MEDIA_ROOT |  Ce dossier est créé avec `make init-nix`. **démarre avec "/" et termine sans "/"** |
 |  |  /var/www/html/grore/media  |
 | DJANGO_MEDIA_URL | **ni "/" avant ni "/" après**  |
