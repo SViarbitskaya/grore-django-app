@@ -102,11 +102,15 @@ function positionTextItems(container) {
 
     // Set up the initial positions and random styles for text items
     textItems.forEach(item => {
-        // Set a random font size between 14px and 36px
-        const minSize = 1.2;
-        const maxSize = 2;
-        const randomFontSize = Math.floor(Math.random() * (maxSize - minSize + 0.5)) + minSize;
-        item.style.fontSize = `${randomFontSize}rem`;
+        // Font size is derived deterministically from the image id (instead
+        // of Math.random()) so a given notule always renders at the same
+        // size across reloads/rescrolls, while still varying between items.
+        const minSize = 1;
+        const maxSize = 2.8;
+        const id = Number(item.dataset.id) || 0;
+        const pseudoRandom = Math.abs(Math.sin(id * 12.9898)) % 1;
+        const fontSize = minSize + pseudoRandom * (maxSize - minSize);
+        item.style.fontSize = `${fontSize}rem`;
 
         // Ensure the text item is rendered to get accurate dimensions
         const itemWidth = item.offsetWidth;

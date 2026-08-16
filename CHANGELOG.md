@@ -3,6 +3,18 @@
 All notable changes to this project are documented in this file.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); dates are `YYYY-MM-DD`.
 
+## 2026-08-16
+### Added
+- Semantic (embedding-based) notule search alongside the existing exact-word search. `Image` gained `note_en_embedding`/`note_fr_embedding` (`pgvector` `VectorField`, 384 dims, `paraphrase-multilingual-MiniLM-L12-v2` via `sentence-transformers`), backed by an `HnswIndex` (`vector_cosine_ops`) on each column. `manage.py generate_embeddings` (`--force`, `--batch-size`) backfills them for existing rows. Homepage search now ranks exact whole-word matches first, then fills in the rest with nearest-neighbor semantic matches (cosine distance < `0.5`) for images that don't literally contain the search words.
+- `pgvector/pgvector:pg15` Postgres image (was `postgres:15`) and `pgvector`/`sentence-transformers` dependencies, to support the above.
+- Bilingual (EN/FR) stopword lists (`images/stopwords.py`), selected by `request.LANGUAGE_CODE`.
+### Changed
+- Multi-word exact search now requires all (non-stopword) terms to match (AND), not just one (OR) — a query like "church and garden" no longer matches any row containing just "and". A query that's entirely stopwords (e.g. "a", "and the") falls back to the normal shuffled browse view instead of matching everything.
+- Homepage floating-caption font size is now derived deterministically from the image id instead of `Math.random()`, so a given notule renders at the same size across reloads/rescrolls instead of visibly changing size each time; also widened the size range from `1.2–2rem` to `1–2.8rem`. (The old random version also had a range bug that collapsed it to two fixed sizes instead of a continuous range.)
+- `HomeView.get_queryset` now defers the two embedding columns on the base queryset — fetching and deserializing ~768 floats per row for ~2,926 rows on every plain homepage load (never used for browsing) was adding noticeable latency.
+- Both search result branches (`exact_matches`, `semantic_matches`) are now explicitly ordered by primary key, since `Image` has no default ordering; previously, HTMX's separate per-page infinite-scroll requests could each re-run the unordered query and get rows back in a different order, causing the same image to land in more than one page and appear as a duplicate/triplicate while scrolling.
+- `paginate_by` reduced from 15 to 10.
+
 ## 2026-08-03
 ### Added
 - `Image.ai_gen` boolean field (default `False`) marking whether an image's description was AI-generated, for future filtering/reporting.
