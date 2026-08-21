@@ -150,6 +150,16 @@ class SelectionView(SelectionMixin, View):
         return HttpResponse(status=400)
 
 
+class ClearSelectionView(SelectionMixin, View):
+    def delete(self, request, *args, **kwargs):
+        # Empty the whole selection in one go rather than removing images
+        # one at a time -- the session holds the selection, not a DB table,
+        # so this is just resetting that list.
+        request.session['selected_images'] = []
+        no_images_message = render_to_string("images/no_images.html")
+        return HttpResponse(no_images_message, content_type="text/html", status=200)
+
+
 class ToggleSelectionView(SelectionMixin, View):
     def post(self, request, *args, **kwargs):
         return JsonResponse(self.update_session_selection(request))

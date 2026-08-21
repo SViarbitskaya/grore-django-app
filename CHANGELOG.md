@@ -4,6 +4,8 @@ All notable changes to this project are documented in this file.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); dates are `YYYY-MM-DD`.
 
 ## 2026-08-21
+### Added
+- "Delete all" button on the selection page, clearing the whole session-based selection in one action instead of removing images one at a time.
 ### Fixed
 - Infinite-scroll "load more" trigger fired twice for the same next page: `hx-trigger="revealed"` on the trigger div made htmx set up its own native intersection observer, alongside a separate custom `IntersectionObserver` in `index.js` that also manually fired the same `revealed` event (to get a 200px preload margin htmx's native trigger doesn't support). Both fired independently, so every "next page" was requested and appended twice, showing each of its images twice — most noticeable when scrolling through search results (e.g. searching "nude"). The trigger now listens for a dedicated `load-more` event that only the custom observer dispatches, so htmx no longer double-observes it; the observer is also now re-attached to each new page's trigger (previously only the first page's), guarded by a `WeakSet` so an already-fired trigger is never re-observed.
 
