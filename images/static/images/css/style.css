@@ -11,6 +11,41 @@ body{
 .page-content{
   margin-top:10vh;
 }
+.usage-hint{
+  margin-top: 10vh;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem 1rem;
+  padding: 0.5rem 2.5rem 0.5rem 1rem;
+  background: #f5f5f5;
+  font-size: 0.85rem;
+  text-align: center;
+  position: relative;
+}
+.usage-hint-rotate{
+  /* Only relevant advice on a narrow/portrait phone screen -- see the
+     media query below, which is the only place this becomes visible. */
+  display: none;
+}
+.usage-hint-dismiss{
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: none;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.25rem;
+}
+@media (max-width: 767.98px) and (orientation: portrait) {
+  .usage-hint-rotate{
+    display: inline;
+  }
+}
 .subcontainer {
   position: relative; /* Container should be relative */
   height: 100vh;

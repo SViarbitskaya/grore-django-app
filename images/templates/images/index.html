@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load static %}
 
 
@@ -30,6 +31,28 @@
 {% endblock %}
 
 {% block content %}
+    <div id="usage-hint" class="usage-hint" style="display:none;">
+        <span>{% translate "Tap or click on any text to see its image." %}</span>
+        <span class="usage-hint-rotate">{% translate "For a better view on mobile, turn your phone sideways." %}</span>
+        <button type="button" class="usage-hint-dismiss" aria-label="{% translate 'Dismiss' %}">&times;</button>
+    </div>
+    <script>
+        // Inline (not deferred/module) so it runs immediately, before the
+        // rest of the page renders below it -- avoids a flash of the
+        // banner for returning visitors who already dismissed it, since
+        // the element starts hidden via the inline style above and this
+        // is what decides whether to reveal it.
+        (function () {
+            var hint = document.getElementById('usage-hint');
+            if (localStorage.getItem('groreUsageHintDismissed') !== '1') {
+                hint.style.display = '';
+            }
+            hint.querySelector('.usage-hint-dismiss').addEventListener('click', function () {
+                localStorage.setItem('groreUsageHintDismissed', '1');
+                hint.style.display = 'none';
+            });
+        })();
+    </script>
     {% include 'images/list.html' with images=images %}
 {% endblock %}
 
