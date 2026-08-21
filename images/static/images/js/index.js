@@ -66,17 +66,38 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener('scroll', toggleButtons);
     window.addEventListener('resize', toggleButtons);
 
-    const trigger = document.querySelector(".load-more-trigger");
+    observeLoadMoreTrigger(document.querySelector(".load-more-trigger"));
+});
+
+// Fires the next "load more" request slightly before its trigger div
+// actually reaches the viewport (htmx's built-in "revealed" trigger has
+// no rootMargin option). Dispatches a dedicated "load-more" event rather
+// than "revealed" so this doesn't double up with htmx's own native
+// intersection handling of that keyword on the same element -- which
+// was firing a second, duplicate request for the next page every time,
+// showing every image on it twice.
+//
+// Guarded by observedTriggers because htmx:afterSwap's event.target is
+// the swap target (#text-items-container, which keeps every past page's
+// trigger since they're never removed), not just the newly appended
+// fragment -- so callers can't reliably pass just the new trigger and
+// must instead re-scan the whole document, which would reobserve old
+// (already fired) triggers without this guard.
+const observedTriggers = new WeakSet();
+
+function observeLoadMoreTrigger(trigger) {
+    if (!trigger || observedTriggers.has(trigger)) return;
+    observedTriggers.add(trigger);
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            // Load earlier: when element is within 200px of viewport
             if (entry.isIntersecting) {
-                htmx.trigger(trigger, "revealed");
+                observer.unobserve(trigger);
+                htmx.trigger(trigger, "load-more");
             }
         });
     }, { rootMargin: "200px" }); // 👈 preload distance
     observer.observe(trigger);
-});
+}
 
 function positionTextItems(container) {
     const textItems = container.querySelectorAll('.text-item');
@@ -253,6 +274,8 @@ document.addEventListener('htmx:afterSwap', (event) => {
     newSubcontainers.forEach(subcontainer => {
         positionTextItems(subcontainer);
     });
+
+    document.querySelectorAll('.load-more-trigger').forEach(observeLoadMoreTrigger);
 });
 
 document.addEventListener('htmx:beforeRequest', function(event) {

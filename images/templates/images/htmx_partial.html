@@ -96,7 +96,7 @@
 
 <!-- Load more trigger with HTMX -->
 <div class="load-more-trigger"
-    hx-trigger="revealed"
+    hx-trigger="load-more"
     hx-get="{% url 'home' %}?page={{ page_obj.number|add:1 }}{% if request.GET.search_query %}&search_query={{ request.GET.search_query }}{% endif %}"
     hx-target="#text-items-container"
     hx-swap="beforeend">
