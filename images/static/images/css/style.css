@@ -64,6 +64,24 @@ body{
 .text-item:hover {
   color: #007bff; /* Optional: Change text color on hover */
 }
+.load-more-trigger {
+  /* This element has no content, so with no positioning it collapses to
+     zero height and sits pinned at the top of its .subcontainer (everything
+     else in there is position: absolute, i.e. out of flow) instead of near
+     the bottom where a "load more" trigger needs to be. As pages stack up,
+     that top-of-section point becomes an ever-smaller target for a normal
+     scroll gesture to actually pass through, so the IntersectionObserver
+     watching it (see index.js) stops firing and infinite scroll silently
+     stalls. Pinning it to the bottom of the (position: relative) subcontainer
+     instead means it's reliably the last thing to enter the viewport as the
+     user approaches the end of the currently-loaded content.
+  */
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+}
 .navbar{
   width: 100vw;
   padding: 1rem;
