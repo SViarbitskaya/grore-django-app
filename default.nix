@@ -2,10 +2,14 @@ with (import <nixpkgs> {});
   mkShell {
     name = "Grore Shell";
 
+    permittedInsecurePackages = [
+      "python3.14-pypdf2-3.0.1"
+    ];
+
     buildInputs = [
       # Vim confiugred practically
       (
-        (vim_configurable.override {}).customize {
+        (vim-full.override {}).customize {
           name = "vim";
           vimrcConfig.customRC = ''
             " your custom vimrc
@@ -24,11 +28,11 @@ with (import <nixpkgs> {});
         }
       )
       # Python
-      (pkgs.python311.withPackages (pyPkgs: [
+      (pkgs.python314.withPackages (pyPkgs: [
         pyPkgs.pgvector
         pyPkgs.pillow
         pyPkgs.pylibjpeg-libjpeg
-        pyPkgs.pypdf2
+        # pyPkgs.pypdf2
         pyPkgs.python-ldap
         pyPkgs.pq
         pyPkgs.aiosasl
@@ -43,7 +47,7 @@ with (import <nixpkgs> {});
         pyPkgs.django-statici18n
         pyPkgs.django-webpack-loader
         pyPkgs.djangorestframework
-        pyPkgs.future
+        # pyPkgs.future
         pyPkgs.gunicorn
         pyPkgs.markdown
         pyPkgs.openpyxl
@@ -51,7 +55,7 @@ with (import <nixpkgs> {});
         pyPkgs.pip
         pyPkgs.pycryptodome
         pyPkgs.pyjwt
-        pyPkgs.pysaml2
+        # pyPkgs.pysaml2
         pyPkgs.python-dateutil
         pyPkgs.python-ldap
         pyPkgs.qrcode
@@ -63,7 +67,7 @@ with (import <nixpkgs> {});
         pyPkgs.pip
         pyPkgs.venvShellHook
         pyPkgs.pylibjpeg-libjpeg
-        pyPkgs.pypdf2
+        # pyPkgs.pypdf2
         # src = pkgs.fetchurl {
         #   url = "https://github.com/SViarbitskaya/grore-django-app/archive/refs/tags/0.1.1.tar.gz";
         #   sha256 = "sha256-v/HUnBljhWdfuu3EKRXLJTXGl1bueXVoXIA1TfUiRtE=";
