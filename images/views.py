@@ -18,7 +18,15 @@ from .stopwords import filter_stopwords, stopwords_for_language
 
 # Cosine distance ranges 0 (identical) to 2 (opposite); notules beyond this
 # are treated as irrelevant rather than returned as low-quality matches.
-SEMANTIC_SEARCH_MAX_DISTANCE = 0.5
+# 0.5 was measured to be too strict for this model on this corpus: even for
+# a query like "human" against hundreds of genuinely matching man/woman
+# portrait captions, the single closest match in the whole DB sat at 0.509 --
+# just above the old cutoff -- so almost nothing came back. 0.6 was checked
+# against several queries (roughly doubles the relevant results returned for
+# common nouns) without admitting noise for concepts absent from the corpus
+# (e.g. "submarine"/"volcano" still only surface sensible near-analogies:
+# boats, mountains -- not random captions).
+SEMANTIC_SEARCH_MAX_DISTANCE = 0.6
 
 class HomeView(SelectionMixin, generic.ListView):
     model = Image
