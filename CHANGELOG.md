@@ -3,6 +3,10 @@
 All notable changes to this project are documented in this file.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); dates are `YYYY-MM-DD`.
 
+## 2026-09-05
+### Added
+- Visible "Select"/"Remove from Selection" text label under the heart icon on the thumbnail overlay (previously only available as a hover tooltip). Reuses the existing translated strings, so French ("Sélectionner"/"Supprimer de la sélection") works without new translation work. Requested by the client, who found the heart-only icon unclear.
+
 ## 2026-08-21
 ### Added
 - "Delete all" button on the selection page, clearing the whole session-based selection in one action instead of removing images one at a time.

@@ -55,8 +55,10 @@
                         >
                             {% if image.id in selected_images_ids %}
                                 <i class="bi bi-heart-fill"></i>
+                                <span class="selectButtonLabel">{% translate 'Remove from Selection' %}</span>
                             {% else %}
                                 <i class="bi bi-heart"></i>
+                                <span class="selectButtonLabel">{% translate 'Select' %}</span>
                             {% endif %}
                         </a>
                         
