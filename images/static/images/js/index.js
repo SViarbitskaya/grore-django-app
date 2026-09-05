@@ -8,6 +8,62 @@ const containerDimensions = new WeakMap(); // container -> { width, height }
 const itemDimensions = new WeakMap();      // item -> { width, height }
 const itemState = new WeakMap();           // item -> { x, y, directionX, directionY, speed }
 
+// An item's width narrows as it nears either edge of its container (folding
+// long captions onto more lines) instead of staying wide right up to the
+// bounce, which used to leave almost no room to move before hitting an edge
+// again. Full container width away from both edges; the floor at the edge
+// itself is left to the .text-item `min-width: 50vw` CSS rule, which this
+// always stays at or above.
+const EDGE_ZONE_RATIO = 0.25;  // fraction of container width where narrowing begins
+const WIDTH_EASE = 0.08;       // fraction of the width gap closed per frame
+const WIDTH_UPDATE_PX = 6;     // only touch the DOM once the eased value has drifted this far
+
+// Target width is a function of the item's *current* width (it needs to know
+// its own right edge to measure distance to the right edge), which feeds
+// back into itself once applied -- narrower right edge reads as farther from
+// the edge, so it widens back out, which reads as closer again, etc. Calling
+// this every frame but only easing a fraction of the way to the target (see
+// applyDynamicWidth) damps that feedback into a smooth, stable transition
+// instead of the two states flickering back and forth every frame.
+function targetItemWidth(x, itemWidth, containerWidth) {
+    const maxWidth = containerWidth;
+    const minWidth = containerWidth * 0.5; // mirrors the CSS min-width: 50vw floor
+    const edgeZone = containerWidth * EDGE_ZONE_RATIO;
+
+    const leftDistance = x;
+    const rightDistance = containerWidth - (x + itemWidth);
+    const nearestEdge = Math.max(0, Math.min(leftDistance, rightDistance));
+
+    if (nearestEdge >= edgeZone) return maxWidth;
+
+    const t = nearestEdge / edgeZone; // 0 right at the edge, 1 at the zone boundary
+    return minWidth + t * (maxWidth - minWidth);
+}
+
+// Eases the item's logical width toward its position-appropriate target every
+// frame (cheap: no DOM access), but only writes to the DOM -- forcing a
+// reflow -- once the eased value has drifted far enough from what's actually
+// rendered to be worth it. Keeps the dimension cache and vertical clamp in
+// sync with whatever height a written width produces.
+function applyDynamicWidth(item, container, state) {
+    const bounds = containerDimensions.get(container);
+    const dims = itemDimensions.get(item);
+    if (!bounds || !dims || !state) return dims;
+
+    const target = targetItemWidth(state.x, state.logicalWidth, bounds.width);
+    state.logicalWidth += (target - state.logicalWidth) * WIDTH_EASE;
+
+    if (Math.abs(state.logicalWidth - dims.width) < WIDTH_UPDATE_PX) return dims;
+
+    item.style.width = `${state.logicalWidth}px`;
+    const newDims = { width: item.offsetWidth, height: item.offsetHeight };
+    itemDimensions.set(item, newDims);
+
+    const maxY = Math.max(0, bounds.height - newDims.height);
+    state.y = Math.min(Math.max(state.y, 0), maxY);
+    return newDims;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     // Initialize existing .subcontainer elements on page load
     const existingSubcontainers = document.querySelectorAll('.subcontainer');
@@ -66,17 +122,38 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener('scroll', toggleButtons);
     window.addEventListener('resize', toggleButtons);
 
-    const trigger = document.querySelector(".load-more-trigger");
+    observeLoadMoreTrigger(document.querySelector(".load-more-trigger"));
+});
+
+// Fires the next "load more" request slightly before its trigger div
+// actually reaches the viewport (htmx's built-in "revealed" trigger has
+// no rootMargin option). Dispatches a dedicated "load-more" event rather
+// than "revealed" so this doesn't double up with htmx's own native
+// intersection handling of that keyword on the same element -- which
+// was firing a second, duplicate request for the next page every time,
+// showing every image on it twice.
+//
+// Guarded by observedTriggers because htmx:afterSwap's event.target is
+// the swap target (#text-items-container, which keeps every past page's
+// trigger since they're never removed), not just the newly appended
+// fragment -- so callers can't reliably pass just the new trigger and
+// must instead re-scan the whole document, which would reobserve old
+// (already fired) triggers without this guard.
+const observedTriggers = new WeakSet();
+
+function observeLoadMoreTrigger(trigger) {
+    if (!trigger || observedTriggers.has(trigger)) return;
+    observedTriggers.add(trigger);
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            // Load earlier: when element is within 200px of viewport
             if (entry.isIntersecting) {
-                htmx.trigger(trigger, "revealed");
+                observer.unobserve(trigger);
+                htmx.trigger(trigger, "load-more");
             }
         });
     }, { rootMargin: "200px" }); // 👈 preload distance
     observer.observe(trigger);
-});
+}
 
 function positionTextItems(container) {
     const textItems = container.querySelectorAll('.text-item');
@@ -102,11 +179,15 @@ function positionTextItems(container) {
 
     // Set up the initial positions and random styles for text items
     textItems.forEach(item => {
-        // Set a random font size between 14px and 36px
-        const minSize = 1.2;
-        const maxSize = 2;
-        const randomFontSize = Math.floor(Math.random() * (maxSize - minSize + 0.5)) + minSize;
-        item.style.fontSize = `${randomFontSize}rem`;
+        // Font size is derived deterministically from the image id (instead
+        // of Math.random()) so a given notule always renders at the same
+        // size across reloads/rescrolls, while still varying between items.
+        const minSize = 1;
+        const maxSize = 2.8;
+        const id = Number(item.dataset.id) || 0;
+        const pseudoRandom = Math.abs(Math.sin(id * 12.9898)) % 1;
+        const fontSize = minSize + pseudoRandom * (maxSize - minSize);
+        item.style.fontSize = `${fontSize}rem`;
 
         // Ensure the text item is rendered to get accurate dimensions
         const itemWidth = item.offsetWidth;
@@ -123,11 +204,15 @@ function positionTextItems(container) {
         item.style.position = 'absolute';
         item.style.left = '0';
         item.style.top = '0';
+
+        const state = { x: randomX, y: randomY, directionX: 0, directionY: 0, speed: 0, logicalWidth: itemWidth };
+        itemState.set(item, state);
+
+        // Size the item for its starting position before the first paint,
+        // rather than waiting for the first animation frame to narrow it.
+        applyDynamicWidth(item, container, state);
         item.style.transform = `translate3d(${randomX}px, ${randomY}px, 0)`;
-
         item.style.opacity = '1'; // Ensure items are visible
-
-        itemState.set(item, { x: randomX, y: randomY, directionX: 0, directionY: 0, speed: 0 });
     });
 }
 
@@ -137,7 +222,7 @@ function startLinearMovementForContainer(container) {
     textItems.forEach(item => {
         if (item.dataset.isMoving === "true") return;
 
-        const state = itemState.get(item) || { x: 0, y: 0, directionX: 0, directionY: 0, speed: 0 };
+        const state = itemState.get(item) || { x: 0, y: 0, directionX: 0, directionY: 0, speed: 0, logicalWidth: itemDimensions.get(item)?.width ?? 0 };
         state.speed = Math.random() * 0.6 + 0.2; // between 1 and 4
         state.directionX = Math.random() * 2 - 1;
         state.directionY = Math.random() * 2 - 1;
@@ -149,7 +234,11 @@ function startLinearMovementForContainer(container) {
         const animate = () => {
             if (item.dataset.isMoving !== "true") return;
 
-            const dims = itemDimensions.get(item);
+            // Eases the item's width toward whatever its current position
+            // calls for; only actually touches the DOM (forcing a reflow)
+            // once that drifts far enough to matter (see WIDTH_UPDATE_PX),
+            // so most frames stay a compositor-only transform write.
+            const dims = applyDynamicWidth(item, container, state) || itemDimensions.get(item);
             const bounds = containerDimensions.get(container);
 
             const maxX = Math.max(0, bounds.width - dims.width);
@@ -226,12 +315,17 @@ function refreshDimensionsAfterResize() {
             const state = itemState.get(item);
             if (!state) return;
 
-            // Re-clamp so an item whose bounds just collapsed (or whose
-            // wrapped size just changed) snaps back inside immediately
-            // instead of oscillating between stale limits every frame.
+            // Re-clamp x first against the freshly-measured width, then let
+            // applyDynamicWidth re-derive the item's width for the new
+            // container size/position (a resize can move an item into or
+            // out of an edge zone), then re-clamp y against whatever height
+            // that produces -- instead of oscillating between stale limits.
             const maxX = Math.max(0, width - itemWidth);
-            const maxY = Math.max(0, height - itemHeight);
             state.x = Math.min(Math.max(state.x, 0), maxX);
+            state.logicalWidth = itemWidth; // resync to the just-measured actual width
+
+            const dims = applyDynamicWidth(item, container, state) || itemDimensions.get(item);
+            const maxY = Math.max(0, height - dims.height);
             state.y = Math.min(Math.max(state.y, 0), maxY);
             item.style.transform = `translate3d(${state.x}px, ${state.y}px, 0)`;
         });
@@ -249,6 +343,8 @@ document.addEventListener('htmx:afterSwap', (event) => {
     newSubcontainers.forEach(subcontainer => {
         positionTextItems(subcontainer);
     });
+
+    document.querySelectorAll('.load-more-trigger').forEach(observeLoadMoreTrigger);
 });
 
 document.addEventListener('htmx:beforeRequest', function(event) {

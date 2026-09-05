@@ -15,9 +15,17 @@
 <div class="container">
     <h1>{% translate "Your Image Selection" %}</h1>
 
-    <div class="page-content">
+    <div class="page-content" id="selection-content">
         {% if request.session.selected_images and request.session.selected_images|length > 0 %}
             <a href="{% url 'download_images' %}" class="btn btn-dark">{% translate "Download zip" %}</a>
+            <button
+                class="btn btn-outline-danger"
+                hx-delete="{% url 'delete_all_from_selection' %}"
+                hx-confirm="{% translate 'Delete all selected images?' %}"
+                hx-target="#selection-content"
+                hx-swap="innerHTML"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+            >{% translate "Delete all" %}</button>
             <table class="image-gallery table">
                 <thead>
                 </thead>

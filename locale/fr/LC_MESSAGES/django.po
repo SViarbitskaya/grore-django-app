@@ -71,3 +71,23 @@ msgstr "Supprimer?"
 
 msgid "Delete"
 msgstr "Supprimer"
+
+#: images/templates/images/selection.html:24
+msgid "Delete all"
+msgstr "Tout supprimer"
+
+#: images/templates/images/selection.html:25
+msgid "Delete all selected images?"
+msgstr "Supprimer toute la sélection ?"
+
+#: images/templates/images/index.html:35
+msgid "Tap or click on any text to see its image."
+msgstr "Touchez ou cliquez sur un texte pour voir son image."
+
+#: images/templates/images/index.html:36
+msgid "For a better view on mobile, turn your phone sideways."
+msgstr "Pour un meilleur affichage sur mobile, tournez votre téléphone à l'horizontale."
+
+#: images/templates/images/index.html:37
+msgid "Dismiss"
+msgstr "Fermer"

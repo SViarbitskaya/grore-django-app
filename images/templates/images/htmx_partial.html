@@ -55,8 +55,10 @@
                         >
                             {% if image.id in selected_images_ids %}
                                 <i class="bi bi-heart-fill"></i>
+                                <span class="selectButtonLabel">{% translate 'Remove from Selection' %}</span>
                             {% else %}
                                 <i class="bi bi-heart"></i>
+                                <span class="selectButtonLabel">{% translate 'Select' %}</span>
                             {% endif %}
                         </a>
                         
@@ -96,7 +98,7 @@
 
 <!-- Load more trigger with HTMX -->
 <div class="load-more-trigger"
-    hx-trigger="revealed"
+    hx-trigger="load-more"
     hx-get="{% url 'home' %}?page={{ page_obj.number|add:1 }}{% if request.GET.search_query %}&search_query={{ request.GET.search_query }}{% endif %}"
     hx-target="#text-items-container"
     hx-swap="beforeend">

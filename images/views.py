@@ -6,18 +6,33 @@ from django.views.decorators.http import require_POST
 from django.db.models import Q
 from django.utils import translation
 from django.template.loader import render_to_string
+from pgvector.django import CosineDistance
 import json, re, random, zipfile, os
 import logging
 
 from .models import Image
 from .forms import ImageSearchForm
 from .mixins import SelectionMixin
+from .embeddings import embed_text
+from .stopwords import filter_stopwords, stopwords_for_language
+
+# Cosine distance ranges 0 (identical) to 2 (opposite); notules beyond this
+# are treated as irrelevant rather than returned as low-quality matches.
+# 0.5 was measured to be too strict for this model on this corpus: even for
+# a query like "human" against hundreds of genuinely matching man/woman
+# portrait captions, the single closest match in the whole DB sat at 0.509 --
+# just above the old cutoff -- so almost nothing came back. 0.6 was checked
+# against several queries (roughly doubles the relevant results returned for
+# common nouns) without admitting noise for concepts absent from the corpus
+# (e.g. "submarine"/"volcano" still only surface sensible near-analogies:
+# boats, mountains -- not random captions).
+SEMANTIC_SEARCH_MAX_DISTANCE = 0.6
 
 class HomeView(SelectionMixin, generic.ListView):
     model = Image
     template_name = "images/index.html"
     context_object_name = "images"
-    paginate_by = 15
+    paginate_by = 10
 
     def get_template_names(self, *args, **kwargs):
         if self.request.htmx:
@@ -26,27 +41,71 @@ class HomeView(SelectionMixin, generic.ListView):
             return self.template_name
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        # Deferred: browsing/exact-match never reads the raw vectors, and
+        # fetching+deserializing two 384-dim floats per row for ~3k rows
+        # on every homepage load was adding real latency. The semantic
+        # query below still works deferred, since CosineDistance references
+        # the column at the SQL level, not through the Python attribute.
+        queryset = super().get_queryset().defer('note_en_embedding', 'note_fr_embedding')
         search_query = self.request.GET.get('search_query')
-        
+
         if search_query:
-            search_terms = search_query.split()
-            
-            # Create a regex pattern that matches whole words with optional punctuation
+            # Stopwords (bilingual EN/FR) are dropped before matching: common
+            # function words like "a"/"and"/"le"/"et" appear in nearly every
+            # notule, so leaving them in makes exact-match match everything
+            # and pollutes the semantic query embedding.
+            search_terms = filter_stopwords(
+                search_query.split(), stopwords_for_language(self.request.LANGUAGE_CODE)
+            )
+
+            if not search_terms:
+                # Query was only stopwords (e.g. "a", "and the") -- not a
+                # meaningful search term, so fall back to the browse view
+                # instead of matching either everything or nothing.
+                queryset = list(queryset)
+                random.shuffle(queryset)
+                return queryset
+
+            # Create a regex pattern that matches whole words with optional
+            # punctuation. All terms must match (AND), not just one (OR) --
+            # otherwise a multi-word query matches on any single word alone.
             def contains_full_word(note):
                 for term in search_terms:
                     pattern = fr'\b{re.escape(term)}\b[\s.,;:!?]*'
-                    if re.search(pattern, note, re.IGNORECASE):
-                        return True
-                return False
-            
-            # Filter the queryset based on the presence of full words
-            queryset = queryset.filter(note__in=[note.note for note in queryset if contains_full_word(note.note)])
+                    if not re.search(pattern, note, re.IGNORECASE):
+                        return False
+                return True
+
+            # Exact whole-word matches are ranked first. Ordered by pk so the
+            # result order is stable across the separate paginated requests
+            # HTMX infinite scroll makes for page 2, 3, ... (Image has no
+            # default ordering, so without this the same row can land on
+            # more than one page and show up as a duplicate).
+            exact_matches = [
+                image for image in queryset.order_by('pk') if contains_full_word(image.note)
+            ]
+            exact_match_ids = {image.id for image in exact_matches}
+
+            # Semantic matches fill in the rest, ranked by similarity. 'pk'
+            # is a tiebreaker for the same pagination-stability reason.
+            embedding_field = (
+                'note_en_embedding' if self.request.LANGUAGE_CODE == 'en' else 'note_fr_embedding'
+            )
+            query_vector = embed_text(' '.join(search_terms))
+            semantic_matches = list(
+                queryset.exclude(id__in=exact_match_ids)
+                .filter(**{f'{embedding_field}__isnull': False})
+                .annotate(distance=CosineDistance(embedding_field, query_vector))
+                .filter(distance__lt=SEMANTIC_SEARCH_MAX_DISTANCE)
+                .order_by('distance', 'pk')
+            )
+
+            queryset = exact_matches + semantic_matches
         else:
             # Shuffle the queryset if no search query is present
             queryset = list(queryset)
             random.shuffle(queryset)
-        
+
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -97,6 +156,16 @@ class SelectionView(SelectionMixin, View):
             return HttpResponse("", status=200)
 
         return HttpResponse(status=400)
+
+
+class ClearSelectionView(SelectionMixin, View):
+    def delete(self, request, *args, **kwargs):
+        # Empty the whole selection in one go rather than removing images
+        # one at a time -- the session holds the selection, not a DB table,
+        # so this is just resetting that list.
+        request.session['selected_images'] = []
+        no_images_message = render_to_string("images/no_images.html")
+        return HttpResponse(no_images_message, content_type="text/html", status=200)
 
 
 class ToggleSelectionView(SelectionMixin, View):
