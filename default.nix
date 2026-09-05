@@ -49,7 +49,7 @@ with (import <nixpkgs> {});
       docker-compose
       # sqlite
       postgresql_15
-      postgresql15Packages.pgvectorscale
+      # postgresql15Packages.pgvectorscale
     ];
     shellHook = ''
       export LC_ALL="C"
