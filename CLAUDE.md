@@ -15,15 +15,15 @@ The `grore/` directory is the Django project package (settings, root urls, wsgi/
 
 Environment config lives in `.env` (copy from `scripts/sample.env`; see `doc/configuration.md` for every variable). **Never quote values in `.env`** — the Makefile parses it literally.
 
-All `make` targets have a `-nix` suffix variant (e.g. `make up-nix`) that runs the same command inside the Nix shell defined by `default.nix` — use the `-nix` variant if Nix is the environment, otherwise the plain target.
-
 ```bash
 make up              # install deps, makemigrations, migrate, collectstatic
 make runserver        # run the dev server (make init only, no upgrade)
 make default-pages    # make up + load scripts/data/page_fixtures.json
-make load-fixtures    # flush DB, migrate, load classeur.json + page_fixtures.json, create admin user
+make load-fixtures    # flush DB, migrate, load media_fixture.json + page_fixtures.json, generate embeddings, create admin user
 make init-admin-user   # createsuperuser non-interactively from DJANGO_ADMIN_* env vars
 ```
+
+There are no `-nix` suffix target variants — the Makefile's `ENVIRONMENT=nix` branch is commented-out dead code, so `ENVIRONMENT=Nix` (the `scripts/sample.env` default) currently behaves identically to bare-metal (empty `EXEC_CMD`). To work under Nix, enter the shell from `default.nix` yourself, then run the plain targets from inside it; the only real nix-specific targets are the one-time machine-setup `sys-install-nix*`.
 
 Manual Django commands run through the venv at `${APP_CACHE_ROOT}/.venv` (created by `make init`), e.g.:
 
@@ -43,7 +43,7 @@ python manage.py test images.tests.ImageFileTestCase
 
 Note: `make test-uploaded-images` is currently broken (marked `"DOESN'T WORK"` in the Makefile).
 
-After `migrate` (which enables the pgvector extension and creates `note_en_embedding`/`note_fr_embedding`), semantic search won't return anything for rows that don't have embeddings yet. `Image.save()` computes embeddings automatically for normal add/update (admin, forms) — see Architecture notes below — but that doesn't cover bulk fixture loading (`loaddata`), so backfill after `make load-fixtures` etc. with:
+After `migrate` (which enables the pgvector extension and creates `note_en_embedding`/`note_fr_embedding`), semantic search won't return anything for rows that don't have embeddings yet. `Image.save()` computes embeddings automatically for normal add/update (admin, forms) — see Architecture notes below — but that doesn't cover bulk fixture loading (`loaddata`), so both `make load-fixtures` and the Docker Compose `entrypoint.sh` backfill automatically via `generate_embeddings` after loading data. Run it manually after any other bulk `loaddata`/`bulk_update` you do outside those paths:
 
 ```bash
 ${APP_CACHE_ROOT}/.venv/bin/python manage.py generate_embeddings          # only rows missing an embedding
@@ -52,7 +52,9 @@ ${APP_CACHE_ROOT}/.venv/bin/python manage.py generate_embeddings --force  # re-e
 
 Production/deploy targets (`make production-prepare`, `make production-install`, `make restart`) render nginx/systemd unit files from templates in `scripts/production/` and install them via sudo — see `doc/architecture.md`, `doc/integration.md`, and `doc/dev.md` for the full deploy flow (SSH to `grore-images.com`, `sudo su - django`, run `./up.sh` for prod or `./integration.sh` for the integration environment).
 
-Docker Compose is available (`docker-compose.yaml`, `make docker-compose-up`) as an alternative to the bare-metal/Nix setup; set `ENVIRONMENT=docker` in `.env` to have `make` targets shell out through `docker-compose exec`.
+The repo has four long-lived branches: `main` (default PR target on GitHub), `develop`, `integration`, and `production` — `production` is what `doc/continuous.md`'s deploy command actually pulls, so it's not just a naming convention. Don't assume standard single-default-branch GitHub flow; check which of these a change is meant to land on before opening a PR.
+
+Docker Compose is available (`docker-compose.yaml`, `make docker-compose-up`) as an alternative to the bare-metal/Nix setup; set `ENVIRONMENT=docker` in `.env` to have `make` targets shell out through `docker-compose exec`. The `django` service's `entrypoint.sh` runs on every container start/restart — it only runs `migrate` and backfills embeddings, it does **not** seed data, so a container restart is safe and won't touch existing rows. A brand-new/empty `postgres_data` volume still needs an explicit one-time `make load-fixtures` (via `docker exec`) to get any data in at all.
 
 ## Architecture notes
 
