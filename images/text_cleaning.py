@@ -67,3 +67,86 @@ def strip_ethnic_type_descriptors(text):
         new_text = new_text[0].upper() + new_text[1:]
 
     return new_text
+
+
+# strip_ethnic_descriptors() is the broader follow-up Philippe asked for
+# (2026-09-20, after strip_ethnic_type_descriptors() above had already
+# removed the "de type X"/"X type" wording): "everything that puts people in
+# a specific ethnic category" - i.e. a plain adjective too ("Femme
+# africaine", "Asian woman"), not just the classification phrasing. Scoped
+# to descriptions of PEOPLE only: a Chinese *restaurant*, Arabic *script* on
+# an urn, or African *vegetation* are not a person's ethnicity and are left
+# alone - only an ethnicity word immediately adjacent to a person-noun (or,
+# in French, its "d'origine X" variant) is removed.
+_FR_PERSON = r"(?:femmes?|hommes?|filles?|garçons?|enfants?|individus?|personnes?|couples?|dames?|gens)"
+_EN_PERSON = r"(?:m[ae]n|wom[ae]n|girls?|boys?|child(?:ren)?|guys?|persons?|people|couples?|lad(?:y|ies)|gentlem[ae]n)"
+
+_FR_ORIGIN_CLAUSE = re.compile(
+    r"d['’]origine\s+(?:africaine?|maghr[ée]bine?|asiatiques?|chinoise?)\b", re.IGNORECASE
+)
+_FR_ADJ_NEAR_PERSON = re.compile(
+    rf"\b({_FR_PERSON})\s+(?:africaine?s?|maghr[ée]bine?s?|asiatiques?|chinoise?s?)\b", re.IGNORECASE
+)
+# Standalone plural ethnicity noun as the sentence's own subject (e.g.
+# "Asiatiques debout dans..."): deleting it outright would leave the
+# sentence with no subject, so it's replaced with a neutral noun instead -
+# but only when what follows reads as a verb ("debout", a present participle
+# in "-ant(s)"), not another noun ("Asiatiques du quartier" is not this
+# case, and neither is any pattern _FR_ADJ_NEAR_PERSON already handles).
+_FR_SUBJECT_FALLBACK = re.compile(
+    r"^(?:Africains?|Asiatiques?)\s+(?=\w+ants?\b|debout\b)", re.IGNORECASE
+)
+
+_EN_ORIGIN_CLAUSE = re.compile(r"\bof\s+North African origin\b", re.IGNORECASE)
+_EN_ADJ_NEAR_PERSON = re.compile(
+    rf"\b(?:North African|African|Asian|Chinese)(-looking)?\s+({_EN_PERSON})\b", re.IGNORECASE
+)
+# Same reasoning as _FR_SUBJECT_FALLBACK: only fires when followed by a
+# present participle ("standing", "drawing", ...), which is the shape of
+# every case actually found in this corpus ("Asians standing...", "Africans
+# drawing..."). An unusual order like "Asian bust woman" (ethnicity, then a
+# non-person noun, then the person noun) matches neither this nor the
+# adjacency check above and is deliberately left untouched rather than
+# risk producing a broken sentence - flagged for manual review instead.
+_EN_SUBJECT_FALLBACK = re.compile(r"^(?:Africans?|Asians?)\s+(?=\w+ing\b)", re.IGNORECASE)
+
+
+def strip_ethnic_descriptors(text, lang):
+    """Remove a plain-adjective ethnicity description of a person (lang is
+    "fr" or "en"), leaving descriptions of places/objects/languages (a
+    Chinese restaurant, Arabic script, African vegetation) untouched.
+    Returns the text unchanged if no person-adjacent ethnicity word is
+    found."""
+    if not text:
+        return text
+
+    original = text
+    if lang == "fr":
+        before = text
+        text = _FR_ORIGIN_CLAUSE.sub("", text)
+        text = _FR_ADJ_NEAR_PERSON.sub(r"\1", text)
+        if text == before:
+            text = _FR_SUBJECT_FALLBACK.sub("Personnes ", text)
+    else:
+        before = text
+        text = _EN_ORIGIN_CLAUSE.sub("", text)
+        text = _EN_ADJ_NEAR_PERSON.sub(r"\2", text)
+        if text == before:
+            text = _EN_SUBJECT_FALLBACK.sub("People ", text)
+
+    if text == original:
+        return original
+
+    new_text = re.sub(r"  +", " ", text)
+    new_text = re.sub(r",\s*\.", ".", new_text)
+    new_text = re.sub(r"\s+([.,])", r"\1", new_text)
+    new_text = new_text.strip()
+
+    # "an African-looking man" -> "an man" -> "a man"; case-preserving so a
+    # sentence-initial "An X..." -> "A X..." is fixed too.
+    new_text = re.sub(r"\b([Aa])n(\s+)(?=[^aeiouAEIOU\s])", r"\1\2", new_text)
+
+    if original[:1].isupper() and new_text[:1].islower():
+        new_text = new_text[0].upper() + new_text[1:]
+
+    return new_text

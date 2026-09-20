@@ -23,7 +23,7 @@ from pages.models import Page
 from .forms import ImageSearchForm
 from .mixins import SelectionMixin
 from .models import Image, NOTULE_EMBEDDING_DIMENSIONS
-from .text_cleaning import strip_ethnic_type_descriptors
+from .text_cleaning import strip_ethnic_descriptors, strip_ethnic_type_descriptors
 
 # Image.save() computes a real embedding via sentence-transformers on every
 # save whenever note text changes, and HomeView.get_queryset() computes one
@@ -233,6 +233,104 @@ class StripEthnicTypeDescriptorsTests(TestCase):
     def test_leaves_none_and_empty_string_untouched(self):
         self.assertIsNone(strip_ethnic_type_descriptors(None))
         self.assertEqual(strip_ethnic_type_descriptors(""), "")
+
+
+class StripEthnicDescriptorsTests(TestCase):
+    """strip_ethnic_descriptors(): the broader follow-up Philippe asked for
+    on 2026-09-20 ('everything that puts people in a specific ethnic
+    category'), after strip_ethnic_type_descriptors() above had already
+    removed the narrower 'de type X'/'X type' classification wording."""
+
+    def test_strips_fr_adjective_after_person_noun(self):
+        self.assertEqual(
+            strip_ethnic_descriptors("Femme africaine en boubou.", "fr"),
+            "Femme en boubou.")
+
+    def test_strips_en_adjective_before_person_noun(self):
+        self.assertEqual(
+            strip_ethnic_descriptors("African woman in batik boubou.", "en"),
+            "Woman in batik boubou.")
+
+    def test_strips_fr_origin_clause(self):
+        self.assertEqual(
+            strip_ethnic_descriptors("Homme d’origine maghrébine de face.", "fr"),
+            "Homme de face.")
+
+    def test_strips_en_origin_clause(self):
+        self.assertEqual(
+            strip_ethnic_descriptors("Man of North African origin facing forward.", "en"),
+            "Man facing forward.")
+
+    def test_leaves_chinese_restaurant_untouched(self):
+        # "chinois" here describes the restaurant, not a person - only the
+        # "Femme chinoise" occurrence should go.
+        self.assertEqual(
+            strip_ethnic_descriptors("Femme chinoise debout dans un restaurant chinois.", "fr"),
+            "Femme debout dans un restaurant chinois.")
+        self.assertEqual(
+            strip_ethnic_descriptors("Chinese woman standing in a Chinese restaurant.", "en"),
+            "Woman standing in a Chinese restaurant.")
+
+    def test_leaves_non_person_descriptions_untouched(self):
+        # Language/script, vegetation, clothing style - not a person.
+        for note in (
+            "Urne avec inscriptions en arabe.",
+            "Falaises et végétations africaines.",
+            "Jambes de femme en robe batik africaine avec un enfant.",
+        ):
+            self.assertEqual(strip_ethnic_descriptors(note, "fr"), note)
+
+    def test_replaces_standalone_subject_noun_fr(self):
+        # Deleting "Asiatiques" outright would leave the sentence with no
+        # subject at all.
+        self.assertEqual(
+            strip_ethnic_descriptors("Asiatiques debout dans un escalier.", "fr"),
+            "Personnes debout dans un escalier.")
+
+    def test_replaces_standalone_subject_noun_en(self):
+        self.assertEqual(
+            strip_ethnic_descriptors("Asians standing on a staircase.", "en"),
+            "People standing on a staircase.")
+
+    def test_does_not_misfire_subject_fallback_on_adjective_use(self):
+        # Regression test: "African child..." was wrongly matched by an
+        # earlier version of the standalone-subject fallback (which didn't
+        # require what follows to look like a verb), producing the broken
+        # "People child...". child(?:ren)? in _EN_PERSON should catch this
+        # via the ordinary adjacency rule before the fallback ever runs.
+        self.assertEqual(
+            strip_ethnic_descriptors("African child resting on a cushion.", "en"),
+            "Child resting on a cushion.")
+        self.assertEqual(
+            strip_ethnic_descriptors("Little Asian child with a cap.", "en"),
+            "Little child with a cap.")
+
+    def test_leaves_unusual_word_order_untouched_rather_than_risk_breaking_it(self):
+        # "Asian" here precedes a non-person noun ("bust") before the person
+        # noun ("woman") - neither the adjacency rule nor the subject
+        # fallback (which requires a following "-ing" word) matches, so
+        # this is deliberately left alone rather than produce "People bust
+        # woman."
+        note = "Asian bust woman. Image with stripes."
+        self.assertEqual(strip_ethnic_descriptors(note, "en"), note)
+
+    def test_fixes_capitalized_article_left_stranded_by_removal(self):
+        # Regression test: "An Asian woman..." -> "An woman..." was broken
+        # (the article-fix regex only handled lowercase "an" mid-sentence).
+        self.assertEqual(
+            strip_ethnic_descriptors("An Asian woman and her daughter.", "en"),
+            "A woman and her daughter.")
+        self.assertEqual(
+            strip_ethnic_descriptors("An Asian man and woman sitting.", "en"),
+            "A man and woman sitting.")
+
+    def test_leaves_unrelated_text_untouched(self):
+        note = "Un chat noir sur le toit."
+        self.assertEqual(strip_ethnic_descriptors(note, "fr"), note)
+
+    def test_leaves_none_and_empty_string_untouched(self):
+        self.assertIsNone(strip_ethnic_descriptors(None, "fr"))
+        self.assertEqual(strip_ethnic_descriptors("", "en"), "")
 
 
 class HomeViewTests(MediaTestCase):
@@ -709,3 +807,36 @@ class StripEthnicTypeDescriptorsCommandTests(MediaTestCase):
         flagged.refresh_from_db()
         self.assertEqual(flagged.note_fr, "Homme de type africain assis.")
         self.assertEqual(flagged.note_en, "African type man sitting.")
+
+
+class StripEthnicDescriptorsCommandTests(MediaTestCase):
+    def make_note(self, identifier, note_fr, note_en):
+        img = create_image(identifier=identifier)
+        img.note_fr = note_fr
+        img.note_en = note_en
+        img.save()
+        return img
+
+    def test_command_updates_matching_notes_and_leaves_others(self):
+        flagged = self.make_note("flagged", "Femme africaine en boubou.",
+                                  "African woman in boubou.")
+        untouched = self.make_note("clean", "Un chat noir.", "A black cat.")
+
+        call_command("strip_ethnic_descriptors")
+
+        flagged.refresh_from_db()
+        untouched.refresh_from_db()
+        self.assertEqual(flagged.note_fr, "Femme en boubou.")
+        self.assertEqual(flagged.note_en, "Woman in boubou.")
+        self.assertEqual(untouched.note_fr, "Un chat noir.")
+        self.assertEqual(untouched.note_en, "A black cat.")
+
+    def test_dry_run_does_not_save_changes(self):
+        flagged = self.make_note("flagged", "Femme africaine en boubou.",
+                                  "African woman in boubou.")
+
+        call_command("strip_ethnic_descriptors", "--dry-run")
+
+        flagged.refresh_from_db()
+        self.assertEqual(flagged.note_fr, "Femme africaine en boubou.")
+        self.assertEqual(flagged.note_en, "African woman in boubou.")
