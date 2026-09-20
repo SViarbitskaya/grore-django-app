@@ -27,7 +27,8 @@ load-fixtures:
 	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py flush --no-input
 	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py migrate
 	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py loaddata media_fixture.json
-	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py loaddata scripts/data/page_fixtures.json 
+	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py loaddata scripts/data/page_fixtures.json
+	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py generate_embeddings
 	make init-admin-user
 
 up:

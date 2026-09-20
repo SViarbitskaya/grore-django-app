@@ -11,6 +11,41 @@ body{
 .page-content{
   margin-top:10vh;
 }
+.usage-hint{
+  margin-top: 10vh;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem 1rem;
+  padding: 0.5rem 2.5rem 0.5rem 1rem;
+  background: #f5f5f5;
+  font-size: 0.85rem;
+  text-align: center;
+  position: relative;
+}
+.usage-hint-rotate{
+  /* Only relevant advice on a narrow/portrait phone screen -- see the
+     media query below, which is the only place this becomes visible. */
+  display: none;
+}
+.usage-hint-dismiss{
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: none;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.25rem;
+}
+@media (max-width: 767.98px) and (orientation: portrait) {
+  .usage-hint-rotate{
+    display: inline;
+  }
+}
 .subcontainer {
   position: relative; /* Container should be relative */
   height: 100vh;
@@ -20,7 +55,7 @@ body{
   position: absolute; /* Position items absolutely */
   cursor: pointer;
   margin: 10px;
-  min-width: 50vw;
+  min-width: 50vw; /* floor enforced even if JS hasn't run yet or sets something narrower */
   z-index: 1000;
   opacity: 0;
   transition: opacity 0.5s ease-in;
@@ -28,6 +63,24 @@ body{
 }
 .text-item:hover {
   color: #007bff; /* Optional: Change text color on hover */
+}
+.load-more-trigger {
+  /* This element has no content, so with no positioning it collapses to
+     zero height and sits pinned at the top of its .subcontainer (everything
+     else in there is position: absolute, i.e. out of flow) instead of near
+     the bottom where a "load more" trigger needs to be. As pages stack up,
+     that top-of-section point becomes an ever-smaller target for a normal
+     scroll gesture to actually pass through, so the IntersectionObserver
+     watching it (see index.js) stops firing and infinite scroll silently
+     stalls. Pinning it to the bottom of the (position: relative) subcontainer
+     instead means it's reliably the last thing to enter the viewport as the
+     user approaches the end of the currently-loaded content.
+  */
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
 }
 .navbar{
   width: 100vw;
@@ -120,6 +173,19 @@ body{
 .image-wrapper:hover .overlay {
     opacity: 1;                      /* show on hover */
     pointer-events: auto;            /* make overlay clickable if needed */
+}
+.selectButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    line-height: 1.1;
+}
+.selectButtonLabel {
+    font-size: 0.6rem;
+    max-width: 4.5rem;
+    text-align: center;
+    white-space: normal;
 }
 @media (max-width: 991.98px) {
   html {

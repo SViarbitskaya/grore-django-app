@@ -1,3 +1,11 @@
+# CPU-only torch wheels: the deploy targets (integration/production) are
+# plain VPSes with no GPU, and the default PyPI torch wheel bundles the full
+# CUDA toolkit (~3GB+ of nvidia-* packages) for nothing. The +cpu build is a
+# few hundred MB instead - the difference between fitting and not fitting on
+# a nearly-full disk.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.9.1+cpu
+
 asgiref==3.9.1
 Django==5.2.6
 django-appconf==1.1.0
@@ -23,3 +31,5 @@ six==1.17.0
 sqlparse==0.5.3
 typing_extensions==4.15.0
 tzdata==2025.2
+pgvector==0.5.0
+sentence-transformers==3.0.1
