@@ -36,10 +36,22 @@ ${APP_CACHE_ROOT}/.venv/bin/python manage.py migrate
 Tests use Django's standard test runner (`django.test.TestCase`), per-app:
 
 ```bash
+python manage.py test               # whole suite (images + pages + grore)
 python manage.py test images
-python manage.py test pages
-python manage.py test images.tests.ImageFileTestCase
+python manage.py test images.tests.HomeViewTests
 ```
+
+**Prefer running tests (and any `manage.py` task) inside Docker** — the compose stack
+(`docker-compose.yaml`) is the closest match to production (same pinned image, same
+Postgres + pgvector as the deploy target) and needs no local Python/Nix setup:
+
+```bash
+docker compose up -d                              # start django + db containers
+docker compose exec django python manage.py test  # run the whole suite
+docker compose exec django python manage.py test images.tests.SomeTestCase
+```
+
+Only fall back to a local venv/conda env when Docker is unavailable.
 
 Note: `make test-uploaded-images` is currently broken (marked `"DOESN'T WORK"` in the Makefile).
 

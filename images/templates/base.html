@@ -25,6 +25,11 @@
     <div class="container">
     <nav class="navbar navbar-expand-lg fixed-top bg-white">
         <a class="navbar-brand" href="/">GRORE images</a>
+        {# Phone-only: always visible, not hidden behind the hamburger toggle #}
+        {# like the desktop search bar below is (Philippe, 2026-09-07). #}
+        <div class="d-lg-none">
+            {% block mobile_searchbar %}{% endblock %}
+        </div>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -36,7 +41,12 @@
                     </li>
                 {% endfor %}
             </ul>
-            {% block searchbar %}{% endblock %}
+            {# Desktop position unchanged; hidden on phones so it doesn't #}
+            {# duplicate the always-visible mobile_searchbar above when the #}
+            {# hamburger menu is opened. #}
+            <div class="d-none d-lg-block">
+                {% block searchbar %}{% endblock %}
+            </div>
             <form class="language-switch" action="{% url 'set_language' %}" method="post">{% csrf_token %}
                 <input name="next" type="hidden" value="{{ redirect_to }}">
                 <select class="form-select" name="language" onchange="this.form.submit()">

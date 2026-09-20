@@ -31,17 +31,20 @@ class HomeView(SelectionMixin, generic.ListView):
         
         if search_query:
             search_terms = search_query.split()
-            
-            # Create a regex pattern that matches whole words with optional punctuation
-            def contains_full_word(note):
+
+            # Every search term must appear as a whole word. Matching on ANY
+            # term (OR) meant a common connector word in a multi-word query
+            # (e.g. "de" in "maillot de bains") flooded the results with
+            # unrelated images, making the query look broken.
+            def contains_all_words(note):
                 for term in search_terms:
                     pattern = fr'\b{re.escape(term)}\b[\s.,;:!?]*'
-                    if re.search(pattern, note, re.IGNORECASE):
-                        return True
-                return False
-            
+                    if not re.search(pattern, note, re.IGNORECASE):
+                        return False
+                return True
+
             # Filter the queryset based on the presence of full words
-            queryset = queryset.filter(note__in=[note.note for note in queryset if contains_full_word(note.note)])
+            queryset = queryset.filter(note__in=[note.note for note in queryset if contains_all_words(note.note)])
         else:
             # Shuffle the queryset if no search query is present
             queryset = list(queryset)
@@ -52,6 +55,10 @@ class HomeView(SelectionMixin, generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['search_form'] = ImageSearchForm(self.request.GET)
+        # Same form, rendered a second time for the always-visible mobile
+        # search bar (see base.html) - a distinct auto_id keeps the two
+        # renders from producing duplicate "id_search_query" elements.
+        context['mobile_search_form'] = ImageSearchForm(self.request.GET, auto_id="mobile_id_%s")
         context['language'] = self.request.LANGUAGE_CODE
         context['redirect_to'] = self.request.path
         # Convert stored IDs in the session to integers
@@ -97,6 +104,13 @@ class SelectionView(SelectionMixin, View):
             return HttpResponse("", status=200)
 
         return HttpResponse(status=400)
+
+
+class ClearSelectionView(SelectionMixin, View):
+    def delete(self, request, *args, **kwargs):
+        self.clear_selection(request)
+        no_images_message = render_to_string("images/no_images.html")
+        return HttpResponse(no_images_message, content_type="text/html", status=200)
 
 
 class ToggleSelectionView(SelectionMixin, View):

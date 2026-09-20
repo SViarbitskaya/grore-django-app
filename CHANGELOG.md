@@ -3,6 +3,15 @@
 All notable changes to this project are documented in this file.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); dates are `YYYY-MM-DD`.
 
+## 2026-09-20
+### Added
+- "Clear selection" button on the selection cart page, clearing the whole session selection in one action instead of deleting images one at a time (Philippe, 2026-08-19: "add a button 'delete all'").
+- `strip_ethnic_type_descriptors` management command (and the underlying `images.text_cleaning` helper, unit-tested) to remove the "de type africain/nord-africain/maghrébin/asiatique" / "African/North African/Maghrebian/Asian type" classification phrasing from captions, per Philippe's 2026-09-18 request to suppress this discriminating phrasing. Applied it to `media_fixture.json`: 146 `note_fr`/`note_en` fields changed across 107 images (145 fields on the first pass; a second pass caught one hyphenated "African-type" variant the original regex missed).
+- `scripts/data/ethnic_descriptor_review_for_client.txt`: every remaining caption (130 images) that names a person's ethnicity as a plain adjective (e.g. "Femme africaine") without the "type" classification wording above - not touched, listed for Philippe to review with the client.
+### Changed
+- Search now requires every word in a multi-word query to match (was: any word), so a common connector word no longer floods the results. Regression: "maillot de bains" used to match almost everything because of "de" alone; "maillot" by itself still works as before (Philippe, 2026-08-19).
+- Added a second, always-visible search bar for phones, next to the logo, so it no longer needs the hamburger menu opened first (Philippe, 2026-09-07: "on my phone... research should stay visible besides GroreImages"). The desktop search bar keeps its original position and markup unchanged.
+
 ## 2026-08-03
 ### Added
 - `Image.ai_gen` boolean field (default `False`) marking whether an image's description was AI-generated, for future filtering/reporting.
@@ -14,6 +23,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 - Zoom modal was stretching every high-res image to 100% of the screen width regardless of its actual resolution, making lower-res images look blurry when enlarged. The image now renders at its native size (capped by `max-width: 100%`), so it only fills the screen when its resolution is at least screen-width, and otherwise displays at its own max resolution instead of being upscaled.
 - Stripped a stray leading `: ` parser artifact from 7 notule descriptions (`X1151X`, `X1350X`, `X1354X`, `X2285X`, `X2311`, `X4722X`, `X6292`).
 - The floating scroll up/down buttons sat above the zoom modal (higher `z-index`) and stayed visible/clickable over the fullscreen zoomed image; they're now hidden while the zoom modal is open and reappear when it closes.
+- Corrected 31 French/English spelling errors across 26 notule descriptions, found by running the full corpus through a spellchecker and manually reviewing every flagged word in context (missing/wrong accents, letter transpositions, a missing space, and "Renaud 5" → "Renault 5").
 
 ## 2026-07-08 – 2026-07-21
 ### Changed
