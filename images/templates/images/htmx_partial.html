@@ -96,6 +96,7 @@
     </div>
 </div>
 
+{% if page_obj.has_next %}
 <!-- Load more trigger with HTMX -->
 <div class="load-more-trigger"
     hx-trigger="load-more"
@@ -103,4 +104,5 @@
     hx-target="#text-items-container"
     hx-swap="beforeend">
 </div>
+{% endif %}
 </div>

@@ -323,6 +323,19 @@ class HomeViewTests(MediaTestCase):
         self.assertTrue(resp.context["is_paginated"])
         self.assertTrue(resp.context["page_obj"].has_next())
 
+    def test_load_more_trigger_absent_on_last_page(self):
+        # Regression test: the infinite-scroll trigger used to render
+        # unconditionally, always requesting page_obj.number + 1 - so on the
+        # last page it asked for a page past the end and 404'd once it
+        # scrolled into view.
+        for i in range(15):
+            create_image(identifier=f"last{i}")
+        last_page_resp = self.client.get(self.url, {"page": 2}, headers={"hx-request": "true"})
+        self.assertNotContains(last_page_resp, "load-more-trigger")
+
+        first_page_resp = self.client.get(self.url, headers={"hx-request": "true"})
+        self.assertContains(first_page_resp, "load-more-trigger")
+
     def test_selected_ids_parsed_from_session_and_bad_values_skipped(self):
         session = self.client.session
         session["selected_images"] = ["1", "not-a-number", None, 3]
