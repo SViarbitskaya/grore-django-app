@@ -9,6 +9,7 @@ import tempfile
 import zipfile
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
 from django.db import IntegrityError, transaction
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
@@ -21,6 +22,7 @@ from pages.models import Page
 from .forms import ImageSearchForm
 from .mixins import SelectionMixin
 from .models import Image
+from .text_cleaning import strip_ethnic_type_descriptors
 
 
 def make_image_file(name="test.png", color=(200, 30, 30)):
@@ -123,6 +125,82 @@ class ImageSearchFormTests(TestCase):
         self.assertIn("search_query", form.errors)
 
 
+class StripEthnicTypeDescriptorsTests(TestCase):
+    """strip_ethnic_type_descriptors(): the caption-cleanup Philippe Mairesse
+    requested on 2026-09-18 ('suppress the existing discriminating terms')."""
+
+    def test_strips_fr_de_type_africain(self):
+        self.assertEqual(
+            strip_ethnic_type_descriptors("Visage d’homme de type africain. Image abîmée."),
+            "Visage d’homme. Image abîmée.")
+
+    def test_strips_fr_de_type_maghrebin_plural(self):
+        self.assertEqual(
+            strip_ethnic_type_descriptors("Jeunes hommes de type maghrébin dans la rue la nuit."),
+            "Jeunes hommes dans la rue la nuit.")
+
+    def test_strips_fr_de_type_asiatique_and_is_case_insensitive(self):
+        self.assertEqual(
+            strip_ethnic_type_descriptors("Visage DE TYPE Asiatique. Noir et blanc."),
+            "Visage. Noir et blanc.")
+
+    def test_strips_fr_leftover_comma_before_period(self):
+        # The classification clause sat right before the sentence-ending
+        # period, behind a comma introducing it: both must go together.
+        self.assertEqual(
+            strip_ethnic_type_descriptors(
+                "Visage d’un couple, homme et femme, de type maghrébin. Image abîmée."),
+            "Visage d’un couple, homme et femme. Image abîmée.")
+
+    def test_strips_en_bare_ethnicity_type(self):
+        self.assertEqual(
+            strip_ethnic_type_descriptors("African type man with glasses and bow tie."),
+            "Man with glasses and bow tie.")
+
+    def test_strips_en_north_african_type(self):
+        self.assertEqual(
+            strip_ethnic_type_descriptors("North African type man sitting with a cigarette."),
+            "Man sitting with a cigarette.")
+
+    def test_strips_en_hyphenated_ethnicity_type(self):
+        # Regression test: the original regex only matched a space between
+        # the ethnicity word and "type" and missed this hyphenated form
+        # (found in X2249X's note_en after the first cleanup pass).
+        self.assertEqual(
+            strip_ethnic_type_descriptors("Two African-type children sitting on a bed."),
+            "Two children sitting on a bed.")
+
+    def test_fixes_article_left_stranded_by_removal(self):
+        # "an African type man" -> "an man" would be broken; must read "a man".
+        self.assertEqual(
+            strip_ethnic_type_descriptors("Face of an African type man. Damaged image."),
+            "Face of a man. Damaged image.")
+
+    def test_keeps_of_before_a_bare_type_phrase(self):
+        # "of" belongs to "Face of ...", not to the discriminating clause.
+        self.assertEqual(
+            strip_ethnic_type_descriptors("Face of African type man with suit and white tie."),
+            "Face of man with suit and white tie.")
+
+    def test_removes_of_type_when_it_is_itself_the_predicate(self):
+        self.assertEqual(
+            strip_ethnic_type_descriptors("Two young men of North African type are walking in the street."),
+            "Two young men are walking in the street.")
+
+    def test_recapitalizes_when_removal_was_at_sentence_start(self):
+        self.assertEqual(
+            strip_ethnic_type_descriptors("African type face and striped polo shirt."),
+            "Face and striped polo shirt.")
+
+    def test_leaves_unrelated_text_untouched(self):
+        note = "Un chat noir sur le toit."
+        self.assertEqual(strip_ethnic_type_descriptors(note), note)
+
+    def test_leaves_none_and_empty_string_untouched(self):
+        self.assertIsNone(strip_ethnic_type_descriptors(None))
+        self.assertEqual(strip_ethnic_type_descriptors(""), "")
+
+
 class HomeViewTests(MediaTestCase):
     def setUp(self):
         super().setUp()
@@ -159,12 +237,22 @@ class HomeViewTests(MediaTestCase):
             notes = {img.note for img in resp.context["images"]}
             self.assertEqual(notes, {hit.note}, f"query={query!r}")
 
-    def test_search_matches_any_of_several_terms(self):
-        a = create_image(note="Un chat noir", identifier="a")
-        b = create_image(note="Le chien aboie", identifier="b")
-        create_image(note="Une fleur rouge", identifier="c")
+    def test_search_requires_all_terms_to_match(self):
+        both = create_image(note="Un chat et un chien", identifier="a")
+        create_image(note="Un chat seul", identifier="b")
+        create_image(note="Un chien seul", identifier="c")
         resp = self.client.get(self.url, {"search_query": "chat chien"})
-        self.assertEqual({i.note for i in resp.context["images"]}, {a.note, b.note})
+        self.assertEqual({i.note for i in resp.context["images"]}, {both.note})
+
+    def test_common_connector_word_does_not_flood_multiword_search(self):
+        # Regression test: "maillot de bains" (Philippe Mairesse, 2026-08-19)
+        # used to match nearly everything because "de" alone satisfied the
+        # OR-based term match, while "maillot" alone worked fine.
+        hit = create_image(note="Femme en maillot de bains sur la plage", identifier="a")
+        create_image(note="Un chat noir de type gouttiere", identifier="b")  # contains "de", not "maillot"
+        create_image(note="Un maillot de sport rouge", identifier="c")  # "maillot" and "de", not "bains"
+        resp = self.client.get(self.url, {"search_query": "maillot de bains"})
+        self.assertEqual({i.note for i in resp.context["images"]}, {hit.note})
 
     def test_search_with_no_match_is_empty(self):
         create_image(note="Un chat noir")
@@ -224,6 +312,38 @@ class HomeViewTests(MediaTestCase):
         resp = self.client.get(self.url, headers={"hx-request": "true"})
         self.assertContains(resp, "data-zoom-url")
 
+    def test_mobile_search_bar_is_outside_the_collapse_menu_and_phone_only(self):
+        # Regression test: Philippe reported (2026-09-07) that on phones the
+        # search box was only reachable behind the hamburger toggle. A
+        # dedicated mobile copy (distinct auto_id "mobile_id_search_query")
+        # must render before (outside) the collapsible #navbarSupportedContent
+        # div, inside a d-lg-none wrapper so it's phone-only.
+        create_image()
+        resp = self.client.get(self.url)
+        content = resp.content.decode()
+        self.assertIn("mobile_id_search_query", content)
+        collapse_at = content.index('id="navbarSupportedContent"')
+        self.assertLess(content.index("mobile_id_search_query"), collapse_at)
+        self.assertLess(content.index('class="d-lg-none"'), collapse_at)
+
+    def test_desktop_search_bar_keeps_its_original_position_and_is_desktop_only(self):
+        # The desktop search bar (default auto_id "id_search_query") must
+        # stay exactly where it always was: inside the collapse, between the
+        # nav links and the language switcher, wrapped so phones don't show
+        # it a second time when the hamburger menu is opened.
+        create_image()
+        resp = self.client.get(self.url)
+        content = resp.content.decode()
+        collapse_at = content.index('id="navbarSupportedContent"')
+        nav_links_at = content.index('navbarSupportedContent">') + len('navbarSupportedContent">')
+        desktop_wrapper_at = content.index('class="d-none d-lg-block"')
+        # The exact quoted id (not a substring of "mobile_id_search_query").
+        desktop_search_at = content.index('id="id_search_query"')
+        language_switch_at = content.index('class="language-switch"')
+        self.assertGreater(desktop_wrapper_at, collapse_at)
+        self.assertGreater(desktop_search_at, nav_links_at)
+        self.assertLess(desktop_search_at, language_switch_at)
+
 
 class SelectionMixinUnitTests(TestCase):
     """The branches that the wired-up views can't reach (non-ajax / wrong verb)."""
@@ -263,6 +383,12 @@ class SelectionMixinUnitTests(TestCase):
             req = self.rf.get("/x")
             req.session = {"selected_images": [keep.id]}
             self.assertQuerySetEqual(self.mixin.get_selected_images(req), [keep])
+
+    def test_clear_selection_empties_the_session_list(self):
+        req = self.rf.delete("/x")
+        req.session = {"selected_images": ["1", "2", "3"]}
+        self.mixin.clear_selection(req)
+        self.assertEqual(req.session["selected_images"], [])
 
 
 class ToggleSelectionViewTests(TestCase):
@@ -377,6 +503,36 @@ class SelectionViewTests(MediaTestCase):
         self.assertEqual(resp.status_code, 400)
 
 
+class ClearSelectionViewTests(MediaTestCase):
+    def select_in_session(self, *images):
+        session = self.client.session
+        session["selected_images"] = [str(img.id) for img in images]
+        session.save()
+
+    def test_clear_empties_session_and_returns_no_images_message(self):
+        a = create_image(identifier="a", with_thumbnail=True)
+        b = create_image(identifier="b", with_thumbnail=True)
+        self.select_in_session(a, b)
+
+        resp = self.client.delete(reverse("clear_selection"))
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "no-images-message")
+        self.assertEqual(self.client.session["selected_images"], [])
+
+    def test_clear_when_already_empty_is_a_no_op_success(self):
+        resp = self.client.delete(reverse("clear_selection"))
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(self.client.session["selected_images"], [])
+
+    def test_get_is_not_allowed(self):
+        a = create_image(identifier="a", with_thumbnail=True)
+        self.select_in_session(a)
+        resp = self.client.get(reverse("clear_selection"))
+        self.assertEqual(resp.status_code, 405)
+        self.assertEqual(self.client.session["selected_images"], [str(a.id)])
+
+
 class DownloadTests(MediaTestCase):
     def zip_names(self, response):
         return zipfile.ZipFile(io.BytesIO(response.content)).namelist()
@@ -462,3 +618,36 @@ class ImageAdminPreviewTests(MediaTestCase):
         img = create_image()
         html = self.admin.img_preview(img)
         self.assertIn(img.file.url, html)
+
+
+class StripEthnicTypeDescriptorsCommandTests(MediaTestCase):
+    def make_note(self, identifier, note_fr, note_en):
+        img = create_image(identifier=identifier)
+        img.note_fr = note_fr
+        img.note_en = note_en
+        img.save()
+        return img
+
+    def test_command_updates_matching_notes_and_leaves_others(self):
+        flagged = self.make_note("flagged", "Homme de type africain assis.",
+                                  "African type man sitting.")
+        untouched = self.make_note("clean", "Un chat noir.", "A black cat.")
+
+        call_command("strip_ethnic_type_descriptors")
+
+        flagged.refresh_from_db()
+        untouched.refresh_from_db()
+        self.assertEqual(flagged.note_fr, "Homme assis.")
+        self.assertEqual(flagged.note_en, "Man sitting.")
+        self.assertEqual(untouched.note_fr, "Un chat noir.")
+        self.assertEqual(untouched.note_en, "A black cat.")
+
+    def test_dry_run_does_not_save_changes(self):
+        flagged = self.make_note("flagged", "Homme de type africain assis.",
+                                  "African type man sitting.")
+
+        call_command("strip_ethnic_type_descriptors", "--dry-run")
+
+        flagged.refresh_from_db()
+        self.assertEqual(flagged.note_fr, "Homme de type africain assis.")
+        self.assertEqual(flagged.note_en, "African type man sitting.")

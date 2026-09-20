@@ -29,6 +29,18 @@
 </div>
 {% endblock %}
 
+{% block mobile_searchbar %}
+<div>
+    <form class="form-inline my-2 my-lg-0 search-form" method="get" action="{% url 'home' %}" >
+        {% csrf_token %}
+        {{ mobile_search_form }}
+        {% if mobile_search_form.is_bound and mobile_search_form.search_query.errors %}
+            <p class="error">{{ mobile_search_form.search_query.errors }}</p>
+        {% endif %}
+      </form>
+</div>
+{% endblock %}
+
 {% block content %}
     {% include 'images/list.html' with images=images %}
 {% endblock %}

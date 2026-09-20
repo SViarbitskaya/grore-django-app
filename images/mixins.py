@@ -57,6 +57,12 @@ class SelectionMixin:
             return {'status': 'Invalid request: not ajax!'}
 
 
+    def clear_selection(self, request):
+        """
+        Empties the selection entirely.
+        """
+        request.session['selected_images'] = []
+
     def get_selected_images(self, request):
         """
         Retrieves the list of selected images based on the session data.
