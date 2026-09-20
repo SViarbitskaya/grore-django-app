@@ -26,3 +26,4 @@ result
 result/
 scripts/data/
 SERVER_SESSION_REPORT.md
+.hf_cache/
