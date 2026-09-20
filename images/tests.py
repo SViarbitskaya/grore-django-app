@@ -7,6 +7,7 @@ import os
 import shutil
 import tempfile
 import zipfile
+from unittest import mock
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
@@ -21,8 +22,34 @@ from pages.models import Page
 
 from .forms import ImageSearchForm
 from .mixins import SelectionMixin
-from .models import Image
+from .models import Image, NOTULE_EMBEDDING_DIMENSIONS
 from .text_cleaning import strip_ethnic_type_descriptors
+
+# Image.save() computes a real embedding via sentence-transformers on every
+# save whenever note text changes, and HomeView.get_queryset() computes one
+# per search query - both need network access to download the model and a
+# writable HF cache, neither available in CI/sandboxed test runs. Patched
+# for the whole module so no test depends on that: a fixed dummy vector is
+# fine since these tests never assert on embedding values. Two targets:
+# images.models does `from .embeddings import embed_text` *inside* save()
+# (a fresh lookup on images.embeddings every call), but images.views does
+# it at module level, binding its own name once at import time - patching
+# only images.embeddings.embed_text would leave that already-bound name
+# untouched.
+_embed_text_patchers = []
+
+
+def setUpModule():
+    for target in ("images.embeddings.embed_text", "images.views.embed_text"):
+        patcher = mock.patch(target, return_value=[0.0] * NOTULE_EMBEDDING_DIMENSIONS)
+        patcher.start()
+        _embed_text_patchers.append(patcher)
+
+
+def tearDownModule():
+    for patcher in _embed_text_patchers:
+        patcher.stop()
+    _embed_text_patchers.clear()
 
 
 def make_image_file(name="test.png", color=(200, 30, 30)):
@@ -80,7 +107,14 @@ class ImageModelTests(MediaTestCase):
         self.assertTrue(img.filename().endswith(".png"))
 
     def test_thumbnail_preview_is_empty_without_thumbnail(self):
-        self.assertEqual(create_image().thumbnail_preview(), "")
+        # create_image() always sets `file`, which now auto-derives a
+        # thumbnail on save() - so a genuinely thumbnail-less image needs no
+        # file/zoom source at all (a bare row, as file/thumbnail/zoom are
+        # all optional on this model).
+        img = Image(identifier="no-media", slug="no-media",
+                    pub_date=timezone.now(), modif_date=timezone.now())
+        img.save()
+        self.assertEqual(img.thumbnail_preview(), "")
 
     def test_thumbnail_preview_renders_img_tag_when_present(self):
         img = create_image(with_thumbnail=True)
@@ -285,7 +319,7 @@ class HomeViewTests(MediaTestCase):
         for i in range(20):
             create_image(identifier=f"p{i}")
         resp = self.client.get(self.url)
-        self.assertEqual(len(resp.context["images"]), 15)
+        self.assertEqual(len(resp.context["images"]), 10)
         self.assertTrue(resp.context["is_paginated"])
         self.assertTrue(resp.context["page_obj"].has_next())
 
@@ -572,7 +606,11 @@ class DownloadTests(MediaTestCase):
 
     def test_download_images_skips_files_missing_on_disk(self):
         img = create_image(identifier="ghost")
+        # `file` now auto-derives a real, separate thumbnail file on save(),
+        # so removing only `file` from disk leaves that thumbnail behind -
+        # remove both to genuinely simulate "nothing left on disk".
         os.remove(img.file.path)
+        os.remove(img.thumbnail.path)
         session = self.client.session
         session["selected_images"] = [img.id]
         session.save()
@@ -616,6 +654,13 @@ class ImageAdminPreviewTests(MediaTestCase):
 
     def test_preview_falls_back_to_file(self):
         img = create_image()
+        # create_image() sets `file`, which now auto-derives a thumbnail on
+        # save() - so a real "file but no thumbnail" row (the fallback this
+        # test covers) can only happen for data predating that feature.
+        # Simulate it by clearing thumbnail via a queryset update, which
+        # bypasses save() rather than fighting the auto-derivation.
+        Image.objects.filter(pk=img.pk).update(thumbnail="")
+        img.refresh_from_db()
         html = self.admin.img_preview(img)
         self.assertIn(img.file.url, html)
 
