@@ -10,7 +10,8 @@
 # Actions tab. Treat that click as the real "go live" moment.
 #
 # Runs the server's existing up.sh:
-#   cd /home/django/grore-django-app && nix-shell default.nix --command "make git-up"
+#   cd /home/django/grore-django-app && git fetch && git reset --hard @{u}
+#   nix develop --extra-experimental-features "nix-command flakes" -f default.nix -c make up
 #   sudo systemctl restart grore
 # ---------------------------------------------------------------------------
 

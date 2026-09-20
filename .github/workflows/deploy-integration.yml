@@ -4,7 +4,9 @@
 # Runs automatically after the CI workflow finishes successfully on the
 # `integration` branch. It SSHes into the server and runs the same
 # `integration.sh` script that's already there for manual deploys:
-#   cd /home/django/integration && nix-shell default.nix --command "make git-up"
+#   cd /home/django/integration && git fetch && git reset --hard @{u}
+#   nix develop --extra-experimental-features "nix-command flakes" -f default.nix -c make up
+#   (recomputes LD_LIBRARY_PATH from that shell and writes it into .env)
 #   sudo systemctl restart grore-images.demarchic.com.service
 #
 # No approval gate here on purpose — this is the staging environment Philippe

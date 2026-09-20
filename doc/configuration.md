@@ -53,7 +53,7 @@ Voici les variables de configuration :
 |  |  localhost ou  ou ${APP_WEB_HOST}  |
 | DJANGO_LANGUAGE_CODE | La langue (par défaut ?) du site  |
 | |  en ou fr  |
-| DJANGO_MEDIA_ROOT |  Ce dossier est créé avec `make init-nix`. **démarre avec "/" et termine sans "/"** |
+| DJANGO_MEDIA_ROOT |  Ce dossier est créé avec `make init`. **démarre avec "/" et termine sans "/"** |
 |  |  /var/www/html/grore/media  |
 | DJANGO_MEDIA_URL | **ni "/" avant ni "/" après**  |
 |  |  media  |
@@ -63,7 +63,7 @@ Voici les variables de configuration :
 |  |  http  |
 | DJANGO_SETTINGS_MODULE | N'est guère utilisé actuellement en interne mais pris automatiquement par DJANGO |
 |  |  grore.settings  |
-| DJANGO_STATIC_ROOT | Ce dossier est créé avec `make init-nix`. **démarre avec "/" et termine sans "/"**. |
+| DJANGO_STATIC_ROOT | Ce dossier est créé avec `make init`. **démarre avec "/" et termine sans "/"**. |
 |  | ${APP_DJANGO_ROOT}/cache/www/staticfiles ou /var/www/html/grore/staticfiles  |
 | DJANGO_STATIC_URL |  **ni "/" avant ni "/" après**  |
 |  |  static  |
