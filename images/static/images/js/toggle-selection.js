@@ -31,16 +31,16 @@ export function toggleSelection(imageId, action, selectButton) {
 export function updateSelectButton(button, isSelected) {
     button.dataset.selected = isSelected ? "true" : "false";
 
-    // Change icon
-    button.innerHTML = isSelected
+    // Change icon and visible label
+    const icon = isSelected
         ? '<i class="bi bi-heart-fill"></i>'
         : '<i class="bi bi-heart"></i>';
-
-    // Change native tooltip
-    const title = isSelected
+    const label = isSelected
         ? gettext("Remove from Selection")
         : gettext("Select");
+    button.innerHTML = `${icon}<span class="selectButtonLabel">${label}</span>`;
 
-    button.setAttribute("title", title);
+    // Change native tooltip
+    button.setAttribute("title", label);
 }
 

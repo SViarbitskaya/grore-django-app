@@ -2,6 +2,8 @@
 *.log
 *.pot
 *.pyc
+.coverage
+htmlcov/
 __pycache__
 db.sqlite3
 media
@@ -23,3 +25,5 @@ cache/
 result
 result/
 scripts/data/
+SERVER_SESSION_REPORT.md
+.hf_cache/

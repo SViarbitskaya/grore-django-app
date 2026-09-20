@@ -27,7 +27,8 @@ load-fixtures:
 	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py flush --no-input
 	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py migrate
 	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py loaddata media_fixture.json
-	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py loaddata scripts/data/page_fixtures.json 
+	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py loaddata scripts/data/page_fixtures.json
+	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py generate_embeddings
 	make init-admin-user
 
 up:
@@ -37,8 +38,14 @@ up:
 	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py migrate --noinput
 	$(EXEC_CMD) ${APP_CACHE_ROOT}/.venv/bin/python manage.py collectstatic --noinput
 
+# Deploy-only (not part of local dev, see CLAUDE.md): hard-mirrors whatever
+# the checked-out branch's upstream points to, rather than `git pull`. A
+# deploy target should never carry its own commits; `git pull` here would
+# create a merge commit on every run and hang/fail non-interactively the
+# first time that merge actually conflicts.
 git-up:
-	$(EXEC_CMD) git pull
+	$(EXEC_CMD) git fetch
+	$(EXEC_CMD) git reset --hard @{u}
 	make up
 
 restart: 
