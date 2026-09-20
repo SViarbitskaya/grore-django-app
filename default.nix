@@ -1,10 +1,21 @@
-with (import <nixpkgs> {});
+# Pinned to a specific nixos-26.05 commit via fetchTarball instead of
+# resolving <nixpkgs> from whatever channel happens to be configured on the
+# local machine. That was resolving inconsistently (root's and django's
+# channels on the deploy server had different names/content) and, worse, a
+# stale unstable-channel snapshot had its pre-built binaries evicted from
+# cache.nixos.org, forcing full from-scratch builds - including
+# bootstrapping a compiler toolchain - on every nix-shell invocation
+# instead of a normal download. A pinned stable release stays cached far
+# longer and is identical on every machine regardless of local config.
+let
+  nixpkgs = fetchTarball {
+    url = "https://github.com/NixOS/nixpkgs/archive/refs/heads/nixos-26.05.tar.gz";
+    sha256 = "16fa6vir35h0pajdrs1ws7d3ly28ifks2g9y67y3j7zw1hqyqm3h";
+  };
+in
+with (import nixpkgs {});
   mkShell {
     name = "Grore Shell";
-
-    permittedInsecurePackages = [
-      "python3.14-pypdf2-3.0.1"
-    ];
 
     buildInputs = [
       # Vim confiugred practically
@@ -28,7 +39,11 @@ with (import <nixpkgs> {});
         }
       )
       # Necessities
-      python314
+      # Matches the Dockerfile's python:3.12-bookworm - not the bleeding-
+      # edge python314, which has no prebuilt wheels yet for several
+      # scientific packages (pandas, numpy) this project needs, forcing
+      # slow/fragile from-source builds that were failing on this server.
+      python312
       git
       zlib
       lzlib
