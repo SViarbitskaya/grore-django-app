@@ -47,6 +47,8 @@ with (import nixpkgs {});
       git
       zlib
       lzlib
+      bzip2
+      xz
       gettext
       # Utilities
       openssl
@@ -68,5 +70,17 @@ with (import nixpkgs {});
     ];
     shellHook = ''
       export LC_ALL="C"
+      # pip-installed binary wheels (numpy, pandas, torch, ...) are built
+      # against the system's standard library locations and don't know
+      # about the Nix store - without this, importing their compiled C
+      # extensions fails with "libstdc++.so.6: cannot open shared object
+      # file", since Nix's shell doesn't expose it by default.
+      export LD_LIBRARY_PATH="${lib.makeLibraryPath [
+        stdenv.cc.cc  # libstdc++, libgcc_s
+        zlib          # libz
+        bzip2         # libbz2
+        xz            # liblzma
+        openssl       # libssl, libcrypto
+      ]}:$LD_LIBRARY_PATH"
     '';
   }
