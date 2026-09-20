@@ -8,31 +8,80 @@ body{
 .navbar-header{
   display: flex;
 }
-
 .page-content{
   margin-top:10vh;
 }
-
+.usage-hint{
+  margin-top: 10vh;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem 1rem;
+  padding: 0.5rem 2.5rem 0.5rem 1rem;
+  background: #f5f5f5;
+  font-size: 0.85rem;
+  text-align: center;
+  position: relative;
+}
+.usage-hint-rotate{
+  /* Only relevant advice on a narrow/portrait phone screen -- see the
+     media query below, which is the only place this becomes visible. */
+  display: none;
+}
+.usage-hint-dismiss{
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: none;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.25rem;
+}
+@media (max-width: 767.98px) and (orientation: portrait) {
+  .usage-hint-rotate{
+    display: inline;
+  }
+}
 .subcontainer {
   position: relative; /* Container should be relative */
   height: 100vh;
   overflow: hidden;
 }
-
 .text-item {
   position: absolute; /* Position items absolutely */
   cursor: pointer;
   margin: 10px;
-  min-width: 50vw;
+  min-width: 50vw; /* floor enforced even if JS hasn't run yet or sets something narrower */
   z-index: 1000;
   opacity: 0;
   transition: opacity 0.5s ease-in;
+  will-change: transform; /* movement is driven by transform, not left/top */
 }
-
 .text-item:hover {
   color: #007bff; /* Optional: Change text color on hover */
 }
-
+.load-more-trigger {
+  /* This element has no content, so with no positioning it collapses to
+     zero height and sits pinned at the top of its .subcontainer (everything
+     else in there is position: absolute, i.e. out of flow) instead of near
+     the bottom where a "load more" trigger needs to be. As pages stack up,
+     that top-of-section point becomes an ever-smaller target for a normal
+     scroll gesture to actually pass through, so the IntersectionObserver
+     watching it (see index.js) stops firing and infinite scroll silently
+     stalls. Pinning it to the bottom of the (position: relative) subcontainer
+     instead means it's reliably the last thing to enter the viewport as the
+     user approaches the end of the currently-loaded content.
+  */
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+}
 .navbar{
   width: 100vw;
   padding: 1rem;
@@ -42,44 +91,102 @@ body{
   font-family: 'Courier New', Courier, monospace;
   text-transform: lowercase;
 }
-
 .nav-link.active {
   text-decoration: underline;
   font-weight: bold;
 }
-
 .navbar-nav{
   margin-right: auto;
 }
-
 .modal-body{
   text-align: center;
+  padding-bottom: 0;
+}
+.modal-body p{
+  margin-top: 2rem;
+  margin-bottom: 0;
 }
 .modal-content{
   border-radius: 0;
 }
-
 .modal-header, .modal-body, .modal-footer{
   border: 0;
+  position: relative;
 }
-
-.imageNote{
-  color: black;
-  margin-top: 2rem;
+.modal-footer{
+  height: 50px;
 }
-
-.img-thumbnail{
-  width: 10rem;
+.zoom-modal-body{
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+}
+.zoom-image{
+  /* No explicit width: let the browser use the image's intrinsic size,
+     capped by max-width so it never upscales past its own resolution.
+     A high-res image (>= the screen width) fills the width, capped at
+     100%; a lower-res image renders at its native size instead of
+     being stretched blurry to fill the screen. Height is intentionally
+     uncapped: tall images still scroll vertically (see 54db92c). */
+  display: block;
+  max-width: 100%;
+  width: auto;
   height: auto;
-  display: block;  /* Makes the image a block element for centering */
-  margin: 0 auto; /* Center the image */
+  margin: 0 auto;
 }
-
+.imageNote{
+    color: black;
+    margin-top: 2rem;
+}
+.img-thumbnail{
+    width: 10rem;
+    height: auto;
+    display: block;  /* Makes the image a block element for centering */
+    margin: 0 auto; /* Center the image */
+}
 .modal{
-  width: 100vw;
-  height: 100vh;
+    width: 100vw;
+    height: 100vh;
 }
-
+.image-wrapper {
+    position: relative;
+    display: inline-block;
+    /* No blanket cursor here: only actual controls (buttons, the
+       zoomable image below) should look clickable. Buttons already get
+       their own pointer cursor from Bootstrap's .btn. */
+}
+.zoomable {
+    cursor: zoom-in; /* only applied when a zoom version exists, see htmx_partial.html */
+}
+.image-wrapper .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgb(255, 255, 255); /* semi-transparent grey */
+    opacity: 0;                      /* hidden by default */
+    transition: opacity 0.3s ease;
+    pointer-events: none;            /* clicks pass through to image if needed */
+    margin: 0;
+}
+.image-wrapper:hover .overlay {
+    opacity: 1;                      /* show on hover */
+    pointer-events: auto;            /* make overlay clickable if needed */
+}
+.selectButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    line-height: 1.1;
+}
+.selectButtonLabel {
+    font-size: 0.6rem;
+    max-width: 4.5rem;
+    text-align: center;
+    white-space: normal;
+}
 @media (max-width: 991.98px) {
   html {
     font-size: 14px;
@@ -88,39 +195,49 @@ body{
     width: 100%;
     height: auto;
   }
+  .image-wrapper .overlay {
+    opacity: 1;
+    pointer-events: auto;                       /* show on hover */        /* make overlay clickable if needed */
+  }
+  button[id^="zoomButton_"] {
+    display: none !important;
+  }
 }
-
 @media (max-width: 767.98px) {
-  html {
-    font-size: 12px;
-  }
-  .img-thumbnail{
-    width: 100%;
-    height: auto;
-  }
-}
-
-#scrollDownBtn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      padding: 10px 15px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-      transition: background 0.3s;
-      z-index: 2000;
+    html {
+        font-size: 12px;
     }
-
-
-
-#scrollDownBtn.hidden {
-  opacity: 0;
-  pointer-events: none;
+    .img-thumbnail{
+        width: 100%;
+        height: auto;
+    }
 }
-
-
+#scrollDownBtn {
+    position: fixed;
+    bottom: 20px;
+    border-radius: 50%;
+    right: 20px;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    transition: background 0.3s;
+    z-index: 2000;
+}
+#scrollUpBtn {
+    position: fixed;
+    bottom: 75px;
+    right: 20px;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    transition: background 0.3s;
+    z-index: 2000;
+}
 
 

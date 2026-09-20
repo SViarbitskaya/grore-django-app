@@ -15,9 +15,18 @@
 <div class="container">
     <h1>{% translate "Your Image Selection" %}</h1>
 
-    <div class="page-content">
+    <div class="page-content" id="selection-content">
         {% if request.session.selected_images and request.session.selected_images|length > 0 %}
             <a href="{% url 'download_images' %}" class="btn btn-dark">{% translate "Download zip" %}</a>
+            <button
+                type="button"
+                class="btn btn-outline-danger"
+                hx-delete="{% url 'clear_selection' %}"
+                hx-target="#selection-content"
+                hx-swap="innerHTML"
+                hx-confirm="{% translate "Clear the whole selection?" %}"
+                data-hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+            >{% translate "Clear selection" %}</button>
             <table class="image-gallery table">
                 <thead>
                 </thead>
@@ -30,15 +39,15 @@
                 {% for image in images %}
                 <tr id="{{ image.id }}" class="image-item">
                     <td class="align-middle">
-                        <img class="img-thumbnail" src="{{ image.file.url }}" alt="{{ image.note }}">
+                        <img class="img-thumbnail" src="{{ image.thumbnail.url }}" alt="{{ image.note }}">
                     </td>
                     <td class="align-middle">
                         {{image.note}}
                     </td>
                     <td class="align-middle">
-                        <button class="btn btn-light" hx-delete="{% url "delete_image_from_selection" image.id %}">
-                            {% translate "Delete" %}
-                        </button>
+                        <button class="btn btn-light" hx-delete="{% url "delete_image_from_selection" image.id %}" title="{% translate "Delete" %}">
+                            <i class="bi bi-trash3"></i>
+                        </a>
                     </td>
                 {% endfor %}
                 </tbody>

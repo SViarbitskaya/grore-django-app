@@ -1,5 +1,69 @@
 import { toggleSelection } from './toggle-selection.js';
 
+// Cached layout data, refreshed only on init and on resize (never per
+// animation frame) so the animate() loop below is pure arithmetic + a
+// single transform write with no DOM reads, avoiding forced-reflow
+// layout thrashing and the stale-bounds flicker bug it used to cause.
+const containerDimensions = new WeakMap(); // container -> { width, height }
+const itemDimensions = new WeakMap();      // item -> { width, height }
+const itemState = new WeakMap();           // item -> { x, y, directionX, directionY, speed }
+
+// An item's width narrows as it nears either edge of its container (folding
+// long captions onto more lines) instead of staying wide right up to the
+// bounce, which used to leave almost no room to move before hitting an edge
+// again. Full container width away from both edges; the floor at the edge
+// itself is left to the .text-item `min-width: 50vw` CSS rule, which this
+// always stays at or above.
+const EDGE_ZONE_RATIO = 0.25;  // fraction of container width where narrowing begins
+const WIDTH_EASE = 0.08;       // fraction of the width gap closed per frame
+const WIDTH_UPDATE_PX = 6;     // only touch the DOM once the eased value has drifted this far
+
+// Target width is a function of the item's *current* width (it needs to know
+// its own right edge to measure distance to the right edge), which feeds
+// back into itself once applied -- narrower right edge reads as farther from
+// the edge, so it widens back out, which reads as closer again, etc. Calling
+// this every frame but only easing a fraction of the way to the target (see
+// applyDynamicWidth) damps that feedback into a smooth, stable transition
+// instead of the two states flickering back and forth every frame.
+function targetItemWidth(x, itemWidth, containerWidth) {
+    const maxWidth = containerWidth;
+    const minWidth = containerWidth * 0.5; // mirrors the CSS min-width: 50vw floor
+    const edgeZone = containerWidth * EDGE_ZONE_RATIO;
+
+    const leftDistance = x;
+    const rightDistance = containerWidth - (x + itemWidth);
+    const nearestEdge = Math.max(0, Math.min(leftDistance, rightDistance));
+
+    if (nearestEdge >= edgeZone) return maxWidth;
+
+    const t = nearestEdge / edgeZone; // 0 right at the edge, 1 at the zone boundary
+    return minWidth + t * (maxWidth - minWidth);
+}
+
+// Eases the item's logical width toward its position-appropriate target every
+// frame (cheap: no DOM access), but only writes to the DOM -- forcing a
+// reflow -- once the eased value has drifted far enough from what's actually
+// rendered to be worth it. Keeps the dimension cache and vertical clamp in
+// sync with whatever height a written width produces.
+function applyDynamicWidth(item, container, state) {
+    const bounds = containerDimensions.get(container);
+    const dims = itemDimensions.get(item);
+    if (!bounds || !dims || !state) return dims;
+
+    const target = targetItemWidth(state.x, state.logicalWidth, bounds.width);
+    state.logicalWidth += (target - state.logicalWidth) * WIDTH_EASE;
+
+    if (Math.abs(state.logicalWidth - dims.width) < WIDTH_UPDATE_PX) return dims;
+
+    item.style.width = `${state.logicalWidth}px`;
+    const newDims = { width: item.offsetWidth, height: item.offsetHeight };
+    itemDimensions.set(item, newDims);
+
+    const maxY = Math.max(0, bounds.height - newDims.height);
+    state.y = Math.min(Math.max(state.y, 0), maxY);
+    return newDims;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     // Initialize existing .subcontainer elements on page load
     const existingSubcontainers = document.querySelectorAll('.subcontainer');
@@ -7,46 +71,102 @@ document.addEventListener("DOMContentLoaded", () => {
         positionTextItems(subcontainer);
     });
 
-    // Scrolldown button
-    const btn = document.getElementById('scrollDownBtn');
+    // Re-measure containers/items on resize (rAF-throttled to one pass per
+    // frame) and snap any item whose position is now out of bounds back
+    // inside, instead of leaving the animation loop to bounce it between
+    // stale limits forever.
+    let resizePending = false;
+    window.addEventListener('resize', () => {
+        if (resizePending) return;
+        resizePending = true;
+        requestAnimationFrame(() => {
+            resizePending = false;
+            refreshDimensionsAfterResize();
+        });
+    });
 
-    btn.addEventListener('click', () => {
+    // Scroll buttons
+    const btnDown = document.getElementById('scrollDownBtn');
+    const btnUp = document.getElementById('scrollUpBtn');
+
+    btnDown.disabled = false;
+
+    btnDown.addEventListener('click', () => {
       window.scrollBy({
         top: window.innerHeight / 2, // half screen height
         behavior: 'smooth'
       });
     });
 
-    function toggleButtonVisibility() {
-      const scrollY = window.scrollY;
-      const viewportHeight = window.innerHeight;
-      const fullHeight = document.documentElement.scrollHeight;
+    btnUp.addEventListener('click', () => {
+      window.scrollBy({
+        top: -  window.innerHeight / 2, // half screen height
+        behavior: 'smooth'
+      });
+    });
 
-      // If we are close to bottom (within 10px), hide the button
-      if (scrollY + viewportHeight >= fullHeight - 10) {
-        btn.classList.add('hidden');
-      } else {
-        btn.classList.remove('hidden');
-      }
+    // Toggle button states
+    function toggleButtons() {
+      const scrollY = window.scrollY;
+      const fullHeight = document.documentElement.scrollHeight;
+      const viewportHeight = window.innerHeight;
+
+      // Enable "up" when not at the top
+      btnUp.disabled = scrollY < 50;
+
+      // Enable "down" when not at the bottom
+      btnDown.disabled = (scrollY + viewportHeight >= fullHeight - 50)
     }
 
     // Run on scroll and on page load
-    window.addEventListener('scroll', toggleButtonVisibility);
-    window.addEventListener('resize', toggleButtonVisibility);
-    document.addEventListener('DOMContentLoaded', toggleButtonVisibility);
+    window.addEventListener('scroll', toggleButtons);
+    window.addEventListener('resize', toggleButtons);
+
+    observeLoadMoreTrigger(document.querySelector(".load-more-trigger"));
 });
+
+// Fires the next "load more" request slightly before its trigger div
+// actually reaches the viewport (htmx's built-in "revealed" trigger has
+// no rootMargin option). Dispatches a dedicated "load-more" event rather
+// than "revealed" so this doesn't double up with htmx's own native
+// intersection handling of that keyword on the same element -- which
+// was firing a second, duplicate request for the next page every time,
+// showing every image on it twice.
+//
+// Guarded by observedTriggers because htmx:afterSwap's event.target is
+// the swap target (#text-items-container, which keeps every past page's
+// trigger since they're never removed), not just the newly appended
+// fragment -- so callers can't reliably pass just the new trigger and
+// must instead re-scan the whole document, which would reobserve old
+// (already fired) triggers without this guard.
+const observedTriggers = new WeakSet();
+
+function observeLoadMoreTrigger(trigger) {
+    if (!trigger || observedTriggers.has(trigger)) return;
+    observedTriggers.add(trigger);
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                observer.unobserve(trigger);
+                htmx.trigger(trigger, "load-more");
+            }
+        });
+    }, { rootMargin: "200px" }); // 👈 preload distance
+    observer.observe(trigger);
+}
 
 function positionTextItems(container) {
     const textItems = container.querySelectorAll('.text-item');
     const containerHeight = container.scrollHeight;
     const containerWidth = container.clientWidth;
+    containerDimensions.set(container, { width: containerWidth, height: containerHeight });
 
     // Create an IntersectionObserver for the subcontainer itself (not individual items)2
     const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (entry.isIntersecting && !document.hidden) {
                 // Start movement for all items in the container when the container is partly visible
-                startLinearMovementForContainer(container, containerWidth, containerHeight);
+                startLinearMovementForContainer(container);
             } else {
                 // Stop movement for all items in the container when the container is not visible
                 stopLinearMovementForContainer(container);
@@ -59,73 +179,96 @@ function positionTextItems(container) {
 
     // Set up the initial positions and random styles for text items
     textItems.forEach(item => {
-        // Set a random font size between 14px and 36px
-        const minSize = 1.2;
-        const maxSize = 2;
-        const randomFontSize = Math.floor(Math.random() * (maxSize - minSize + 0.5)) + minSize;
-        item.style.fontSize = `${randomFontSize}rem`;
+        // Font size is derived deterministically from the image id (instead
+        // of Math.random()) so a given notule always renders at the same
+        // size across reloads/rescrolls, while still varying between items.
+        const minSize = 1;
+        const maxSize = 2.8;
+        const id = Number(item.dataset.id) || 0;
+        const pseudoRandom = Math.abs(Math.sin(id * 12.9898)) % 1;
+        const fontSize = minSize + pseudoRandom * (maxSize - minSize);
+        item.style.fontSize = `${fontSize}rem`;
 
         // Ensure the text item is rendered to get accurate dimensions
         const itemWidth = item.offsetWidth;
         const itemHeight = item.offsetHeight;
+        itemDimensions.set(item, { width: itemWidth, height: itemHeight });
 
         // Calculate random positions ensuring no overflow on the right or bottom
-        const randomX = Math.floor(Math.random() * (containerWidth - itemWidth));
-        const randomY = Math.floor(Math.random() * (containerHeight - itemHeight - 10)); // 10px padding at bottom
+        const randomX = Math.floor(Math.random() * Math.max(0, containerWidth - itemWidth));
+        const randomY = Math.floor(Math.random() * Math.max(0, containerHeight - itemHeight - 10)); // 10px padding at bottom
 
-        // Position the text item absolutely within the container
+        // Position the text item absolutely within the container, moved via
+        // transform (compositor-only) rather than left/top so that per-frame
+        // updates never invalidate layout.
         item.style.position = 'absolute';
-        item.style.left = `${randomX}px`;
-        item.style.top = `${randomY}px`;
+        item.style.left = '0';
+        item.style.top = '0';
 
+        const state = { x: randomX, y: randomY, directionX: 0, directionY: 0, speed: 0, logicalWidth: itemWidth };
+        itemState.set(item, state);
+
+        // Size the item for its starting position before the first paint,
+        // rather than waiting for the first animation frame to narrow it.
+        applyDynamicWidth(item, container, state);
+        item.style.transform = `translate3d(${randomX}px, ${randomY}px, 0)`;
         item.style.opacity = '1'; // Ensure items are visible
     });
 }
 
-function startLinearMovementForContainer(container, containerWidth, containerHeight) {
+function startLinearMovementForContainer(container) {
     const textItems = container.querySelectorAll('.text-item');
 
     textItems.forEach(item => {
         if (item.dataset.isMoving === "true") return;
 
-        const speed = Math.random() * 0.6 + 0.2; // between 1 and 4
+        const state = itemState.get(item) || { x: 0, y: 0, directionX: 0, directionY: 0, speed: 0, logicalWidth: itemDimensions.get(item)?.width ?? 0 };
+        state.speed = Math.random() * 0.6 + 0.2; // between 1 and 4
+        state.directionX = Math.random() * 2 - 1;
+        state.directionY = Math.random() * 2 - 1;
+        itemState.set(item, state);
 
-        let directionX = Math.random() * 2 - 1;
-        let directionY = Math.random() * 2 - 1;
-
-        // Define the animation logic
+        // Define the animation logic. Dimensions are looked up from the
+        // caches (updated on init/resize only) instead of read from the DOM
+        // every frame, so this loop does no layout-forcing reads at all.
         const animate = () => {
             if (item.dataset.isMoving !== "true") return;
 
-            const itemWidth = item.offsetWidth;
-            const itemHeight = item.offsetHeight;
+            // Eases the item's width toward whatever its current position
+            // calls for; only actually touches the DOM (forcing a reflow)
+            // once that drifts far enough to matter (see WIDTH_UPDATE_PX),
+            // so most frames stay a compositor-only transform write.
+            const dims = applyDynamicWidth(item, container, state) || itemDimensions.get(item);
+            const bounds = containerDimensions.get(container);
 
-            let currentX = parseFloat(item.style.left) || 0;
-            let currentY = parseFloat(item.style.top) || 0;
+            const maxX = Math.max(0, bounds.width - dims.width);
+            const maxY = Math.max(0, bounds.height - dims.height);
 
-            let nextX = currentX + directionX * speed;
-            let nextY = currentY + directionY * speed;
+            let nextX = state.x + state.directionX * state.speed;
+            let nextY = state.y + state.directionY * state.speed;
 
             // Boundary collision detection to stay within subcontainer
             if (nextX <= 0) {
-                directionX = 1;
+                state.directionX = 1;
                 nextX = 0;
-            } else if (nextX >= containerWidth - itemWidth) {
-                directionX = -1;
-                nextX = containerWidth - itemWidth;
+            } else if (nextX >= maxX) {
+                state.directionX = -1;
+                nextX = maxX;
             }
 
             if (nextY <= 0) {
-                directionY = 1;
+                state.directionY = 1;
                 nextY = 0;
-            } else if (nextY >= containerHeight - itemHeight) {
-                directionY = -1;
-                nextY = containerHeight - itemHeight;
+            } else if (nextY >= maxY) {
+                state.directionY = -1;
+                nextY = maxY;
             }
 
-            // Update the item's position
-            item.style.left = `${nextX}px`;
-            item.style.top = `${nextY}px`;
+            state.x = nextX;
+            state.y = nextY;
+
+            // Update the item's position (compositor-only write)
+            item.style.transform = `translate3d(${nextX}px, ${nextY}px, 0)`;
 
             // Continue animation
             requestAnimationFrame(animate);
@@ -146,19 +289,48 @@ function stopLinearMovementForContainer(container) {
     });
 }
 
+function refreshDimensionsAfterResize() {
+    const subcontainers = document.querySelectorAll('.subcontainer');
 
-// function setupVisibilityChangeHandler() {
-//     document.addEventListener('visibilitychange', () => {
-//         const textItems = document.querySelectorAll('.text-item');
+    // Batch every DOM read first...
+    const updates = [];
+    subcontainers.forEach(container => {
+        const width = container.clientWidth;
+        const height = container.scrollHeight;
+        const items = Array.from(container.querySelectorAll('.text-item')).map(item => ({
+            item,
+            width: item.offsetWidth,
+            height: item.offsetHeight,
+        }));
+        updates.push({ container, width, height, items });
+    });
 
-//         if (document.hidden) {
-//             // Pause all animations when the page is not active
-//             textItems.forEach(item => item.dataset.isMoving = "false");
-//         }else{
-//             textItems.forEach(item => item.dataset.isMoving = "true");
-//         }
-//     });
-// }
+    // ...then batch every write, so reads never interleave with writes.
+    updates.forEach(({ container, width, height, items }) => {
+        containerDimensions.set(container, { width, height });
+
+        items.forEach(({ item, width: itemWidth, height: itemHeight }) => {
+            itemDimensions.set(item, { width: itemWidth, height: itemHeight });
+
+            const state = itemState.get(item);
+            if (!state) return;
+
+            // Re-clamp x first against the freshly-measured width, then let
+            // applyDynamicWidth re-derive the item's width for the new
+            // container size/position (a resize can move an item into or
+            // out of an edge zone), then re-clamp y against whatever height
+            // that produces -- instead of oscillating between stale limits.
+            const maxX = Math.max(0, width - itemWidth);
+            state.x = Math.min(Math.max(state.x, 0), maxX);
+            state.logicalWidth = itemWidth; // resync to the just-measured actual width
+
+            const dims = applyDynamicWidth(item, container, state) || itemDimensions.get(item);
+            const maxY = Math.max(0, height - dims.height);
+            state.y = Math.min(Math.max(state.y, 0), maxY);
+            item.style.transform = `translate3d(${state.x}px, ${state.y}px, 0)`;
+        });
+    });
+}
 
 document.addEventListener('htmx:afterSwap', (event) => {
     // If the swapped content itself is a .subcontainer
@@ -171,6 +343,8 @@ document.addEventListener('htmx:afterSwap', (event) => {
     newSubcontainers.forEach(subcontainer => {
         positionTextItems(subcontainer);
     });
+
+    document.querySelectorAll('.load-more-trigger').forEach(observeLoadMoreTrigger);
 });
 
 document.addEventListener('htmx:beforeRequest', function(event) {
@@ -193,7 +367,6 @@ function showModal(imageId, imageUrl, imageNote) {
     const pNote = document.getElementById('imageNote_' + imageId);
 
     modalImage.src = imageUrl;
-    downloadButton.href = imageUrl;
     downloadButton.style.display = 'inline-block';
     pNote.textContent = imageNote;
 
@@ -206,14 +379,95 @@ function showModal(imageId, imageUrl, imageNote) {
 window.showModal = showModal;
 
 document.addEventListener('click', function(event) {
-    if (event.target && event.target.id.indexOf("selectButton") === 0) {
-        event.preventDefault();
+    const selectButton = event.target.closest('.selectButton');
+    if (!selectButton) return;
 
-        const selectButton = event.target;
-        const imageId = selectButton.dataset.imageId;
-        const isSelected = selectButton.dataset.selected === 'true';
-        const action = isSelected ? 'deselect' : 'select';
+    event.preventDefault();
 
-        toggleSelection(imageId, action, selectButton);
+    const imageId = selectButton.dataset.imageId;
+    const isSelected = selectButton.dataset.selected === 'true';
+    const action = isSelected ? 'deselect' : 'select';
+
+    toggleSelection(imageId, action, selectButton);
+});
+
+function openZoomModal(zoomUrl, sourceEl) {
+    const zoomModalEl = document.getElementById("zoomModal");
+    const zoomModalImage = document.getElementById("zoomImage");
+    zoomModalImage.src = zoomUrl;
+
+    // Close whichever modal the trigger was inside (e.g. the thumbnail
+    // modal) so its backdrop doesn't stack under the zoom modal. Remember
+    // it so the back button can hand off to it again on the way out.
+    const openModalEl = sourceEl.closest(".modal.show");
+    const backButton = zoomModalEl.querySelector(".zoomBackButton");
+    if (openModalEl) {
+        zoomModalEl.dataset.sourceModalId = openModalEl.id;
+        if (backButton) backButton.style.display = "";
+        const openModal = bootstrap.Modal.getInstance(openModalEl);
+        if (openModal) openModal.hide();
+    } else {
+        delete zoomModalEl.dataset.sourceModalId;
+        if (backButton) backButton.style.display = "none";
+    }
+
+    const zoomModal = bootstrap.Modal.getOrCreateInstance(zoomModalEl);
+    zoomModal.show();
+}
+
+document.addEventListener("click", function(event) {
+    const zoomButton = event.target.closest(".zoomButton");
+    if (!zoomButton) return;
+
+    openZoomModal(zoomButton.dataset.zoomUrl, zoomButton);
+});
+
+document.addEventListener("dblclick", function(event) {
+    // Only images rendered with a zoom-url (i.e. that actually have a
+    // high-res version) carry the .zoomable class - see htmx_partial.html.
+    const zoomableImage = event.target.closest(".zoomable");
+    if (!zoomableImage) return;
+
+    openZoomModal(zoomableImage.dataset.zoomUrl, zoomableImage);
+});
+
+// The scroll up/down buttons are position:fixed with a z-index above the
+// modal's, so they'd otherwise float on top of the fullscreen zoom image.
+document.addEventListener("show.bs.modal", (event) => {
+    if (event.target.id === "zoomModal") {
+        document.getElementById("scrollUpBtn")?.classList.add("d-none");
+        document.getElementById("scrollDownBtn")?.classList.add("d-none");
+    }
+});
+
+// Back button hands off to the thumbnail modal the zoom was opened from,
+// instead of just closing (see hidden.bs.modal handler below).
+document.addEventListener("click", function(event) {
+    const backButton = event.target.closest(".zoomBackButton");
+    if (!backButton) return;
+
+    const zoomModalEl = document.getElementById("zoomModal");
+    zoomModalEl.dataset.returnToSource = "true";
+    const zoomModal = bootstrap.Modal.getInstance(zoomModalEl);
+    if (zoomModal) zoomModal.hide();
+});
+
+// Clear zoom modal image when closed, and hand back off to the thumbnail
+// modal if it was closed via the back button rather than a plain dismiss.
+document.addEventListener("hidden.bs.modal", (event) => {
+    if (event.target.id === "zoomModal") {
+        document.getElementById("zoomImage").src = "";
+        document.getElementById("scrollUpBtn")?.classList.remove("d-none");
+        document.getElementById("scrollDownBtn")?.classList.remove("d-none");
+
+        const shouldReturn = event.target.dataset.returnToSource === "true";
+        delete event.target.dataset.returnToSource;
+
+        if (shouldReturn && event.target.dataset.sourceModalId) {
+            const sourceModalEl = document.getElementById(event.target.dataset.sourceModalId);
+            if (sourceModalEl) {
+                bootstrap.Modal.getOrCreateInstance(sourceModalEl).show();
+            }
+        }
     }
 });

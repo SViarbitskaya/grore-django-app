@@ -4,7 +4,7 @@ from django.urls import reverse
 class Page(models.Model):
     slug = models.CharField(max_length=20)
     title = models.CharField(max_length=255)
-    content = models.TextField(max_length=255)
+    content = models.TextField()
     pub_date = models.DateTimeField("date published")
 
     def get_absolute_url(self):

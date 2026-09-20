@@ -1,45 +1,108 @@
 {% load i18n %}
 <div id="{{ page_obj.number }}" class="subcontainer">
 {% for image in images %}
-    <div class="text-item" data-id="{{ image.id }}" onclick='showModal({{ image.id }}, "{{ image.file.url }}", "{{ image.note|escapejs }}")'>
+    <div class="text-item" data-id="{{ image.id }}" 
+        onclick='showModal({{ image.id }},
+            "{% if image.thumbnail %} {{ image.thumbnail.url }} {% else %} {% endif %}",
+            "{{ image.note|escapejs }}")'>
         {{ image.note }}
     </div>
-    <!-- Modal Structure -->
+
+    <!-- Main Modal (thumbnail) -->
     <div class="modal fade" id="imageModal_{{ image.id}}" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+            <div class="modal-content image-wrapper">
                 <div class="modal-header">
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label={% translate "Close" %}></button>
                 </div>
                 <div class="modal-body">
-                    <img src="{{ image.file.url }}" id="modalImage_{{ image.id}}" alt="{{ image.note }}" class="img-fluid">
+                    <img src="{% if image.thumbnail %} {{ image.thumbnail.url }} {% else %} {% endif %}"
+                         id="modalImage_{{ image.id }}"
+                         alt="{{ image.note }}"
+                         class="img-fluid{% if image.high_res and image.zoom %} zoomable{% endif %}"
+                         {% if image.high_res and image.zoom %}data-zoom-url="{{ image.zoom.url }}" title="{% translate 'High-res image (double-click to zoom)' %}"{% endif %}>
+
+                    {% if image.note %}
                     <p id="imageNote_{{ image.id}}">
-                        {{ image.note}}
+                        {{ image.note }}
                     </p>
+                    {% endif %}
                 </div>
                 <div class="modal-footer">
-                    <a id="goToSelection" class="btn btn-light" href="{% url 'selection' %}">{% translate "Selection" %}</a>
-                    <button type="button" class="btn btn-dark selectButton" id="selectButton_{{ image.id}}" 
-                        data-selected="{% if image.id in selected_images_ids %}true{% else %}false{% endif %}" 
-                        data-image-id="{{ image.id }}">
-                        {% if image.id in selected_images_ids %}{% translate "Remove from Selection" %}{% else %}{% translate "Select" %}{% endif %}
-                    </button>
-                
-                    <a id="downloadButton_{{ image.id}}" class="btn btn-light" href="{{ image.file.url }}" download style="display: none;">{% translate "Download" %}</a>
-
+                    <div class="overlay position-absolute top-0 start-0 d-flex align-items-center justify-content-center">
+                        
+                        {% if image.high_res and image.zoom %}
+                        <!-- Zoom button -->
+                        <button type="button"
+                                class="btn btn-light zoomButton"
+                                data-zoom-url="{{ image.zoom.url }}"
+                                title="{% translate 'High-res image (click to zoom)' %}">
+                            <i class="bi bi-zoom-in"></i>
+                        </button>
+                        {% endif %}
+                        
+                        <!-- Select button -->
+                        <a id="selectButton_{{ image.id }}"
+                           role="button"
+                           class="btn btn-light selectButton"
+                           data-selected="{% if image.id in selected_images_ids %}true{% else %}false{% endif %}"
+                           data-image-id="{{ image.id }}"
+                           {% if image.id in selected_images_ids %}
+                               title="{% translate 'Remove from Selection' %}"
+                           {% else %}
+                               title="{% translate 'Select' %}"
+                           {% endif %}
+                        >
+                            {% if image.id in selected_images_ids %}
+                                <i class="bi bi-heart-fill"></i>
+                                <span class="selectButtonLabel">{% translate 'Remove from Selection' %}</span>
+                            {% else %}
+                                <i class="bi bi-heart"></i>
+                                <span class="selectButtonLabel">{% translate 'Select' %}</span>
+                            {% endif %}
+                        </a>
+                        
+                        <!-- Download button -->
+                        <a id="downloadButton_{{ image.id }}" 
+                           class="btn btn-light" 
+                           href="{% url 'download_zip' image.id %}" 
+                           title="{% translate 'Download' %}">
+                            <i class="bi bi-download"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
 {% endfor %}
 
-    <!-- Load more trigger with HTMX -->
-    <div class="load-more-trigger"
-        hx-trigger="revealed"
-        hx-get="{% url 'home' %}?page={{ page_obj.number|add:1 }}{% if request.GET.search_query %}&search_query={{ request.GET.search_query }}{% endif %}"
-        hx-target="#text-items-container"
-        hx-swap="beforeend"
-        >
+<!-- Single Zoom Modal -->
+<div class="modal fade" id="zoomModal" tabindex="-1" aria-labelledby="zoomModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-light zoomBackButton" title="{% translate 'Back to image' %}">
+                        <i class="bi bi-arrow-left"></i>
+                    </button>
+                    <h5 class="modal-title mb-0" id="zoomModalLabel">{% translate "Zoom Image" %}</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label={% translate "Close" %}></button>
+            </div>
+            <div class="modal-body zoom-modal-body">
+                <img id="zoomImage" src="" class="zoom-image" alt="">
+            </div>
+        </div>
     </div>
+</div>
+
+{% if page_obj.has_next %}
+<!-- Load more trigger with HTMX -->
+<div class="load-more-trigger"
+    hx-trigger="load-more"
+    hx-get="{% url 'home' %}?page={{ page_obj.number|add:1 }}{% if request.GET.search_query %}&search_query={{ request.GET.search_query }}{% endif %}"
+    hx-target="#text-items-container"
+    hx-swap="beforeend">
+</div>
+{% endif %}
 </div>

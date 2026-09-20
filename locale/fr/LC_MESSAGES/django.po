@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 12:54+0000\n"
+"POT-Creation-Date: 2026-09-20 09:22+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: grore/settings.py:156
+#: grore/settings.py:158
 msgid "English"
 msgstr "anglais"
 
-#: grore/settings.py:157
+#: grore/settings.py:159
 msgid "French"
 msgstr "français"
 
@@ -34,40 +34,80 @@ msgstr "Rechercher"
 msgid "Home"
 msgstr "Accueil"
 
-#: images/navigation.py:11 images/templates/images/htmx_partial.html:21
+#: images/navigation.py:11
 msgid "Selection"
 msgstr "Sélection"
 
-#: images/templates/images/htmx_partial.html:12
+#: images/templates/images/htmx_partial.html:16
+#: images/templates/images/htmx_partial.html:88
 msgid "Close"
 msgstr "Fermer"
 
-#: images/templates/images/htmx_partial.html:25
+#: images/templates/images/htmx_partial.html:23
+msgid "High-res image (double-click to zoom)"
+msgstr ""
+
+#: images/templates/images/htmx_partial.html:39
+msgid "High-res image (click to zoom)"
+msgstr ""
+
+#: images/templates/images/htmx_partial.html:51
 msgid "Remove from Selection"
 msgstr "Supprimer de la sélection"
 
-#: images/templates/images/htmx_partial.html:25
+#: images/templates/images/htmx_partial.html:53
 msgid "Select"
 msgstr "Sélectionner"
 
-#: images/templates/images/htmx_partial.html:28
+#: images/templates/images/htmx_partial.html:67
 msgid "Download"
 msgstr "Télécharger"
 
+#: images/templates/images/htmx_partial.html:83
+msgid "Back to image"
+msgstr ""
+
+#: images/templates/images/htmx_partial.html:86
+msgid "Zoom Image"
+msgstr ""
+
 #: images/templates/images/no_images.html:2
-#: images/templates/images/selection.html:47
+#: images/templates/images/selection.html:56
 msgid "No images selected."
 msgstr "Votre sélection est vide."
 
+#: images/templates/images/selection.html:16
 msgid "Your Image Selection"
 msgstr "Votre sélection d'images"
 
+#: images/templates/images/selection.html:20
 msgid "Download zip"
 msgstr "Télécharger un zip"
 
-#: images/templates/images/selection.html:25
+#: images/templates/images/selection.html:27
+msgid "Clear the whole selection?"
+msgstr "Vider toute la sélection ?"
+
+#: images/templates/images/selection.html:29
+msgid "Clear selection"
+msgstr "Vider la sélection"
+
+#: images/templates/images/selection.html:34
 msgid "Delete?"
 msgstr "Supprimer?"
 
+#: images/templates/images/selection.html:48
 msgid "Delete"
 msgstr "Supprimer"
+
+#: images/templates/images/index.html:35
+msgid "Tap or click on any text to see its image."
+msgstr "Touchez ou cliquez sur un texte pour voir son image."
+
+#: images/templates/images/index.html:36
+msgid "For a better view on mobile, turn your phone sideways."
+msgstr "Pour un meilleur affichage sur mobile, tournez votre téléphone à l'horizontale."
+
+#: images/templates/images/index.html:37
+msgid "Dismiss"
+msgstr "Fermer"

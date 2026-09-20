@@ -21,11 +21,25 @@ services:
       DB_HOST: db
       DB_PORT: 5432
       ENVIRONEMENT: "docker"
-      DEBUG: True 
+      DEBUG: True
+      # The container's user is a bare numeric UID with no /etc/passwd
+      # entry, so $HOME defaults to "/" - not writable, which breaks
+      # anything relying on it (e.g. sentence-transformers' model cache,
+      # which otherwise tries to write to /.cache and gets a
+      # PermissionError). Pointed at the bind-mounted repo (already proven
+      # writable by this UID - media uploads land there) rather than a
+      # fresh named volume, which Docker creates root-owned and this
+      # locked-down non-root container has no way to chown. HF_HOME is
+      # also set explicitly so the cache location doesn't depend on $HOME
+      # resolution at all; the directory is git-ignored and persists
+      # across container restarts so the ~470MB model isn't re-downloaded
+      # every time.
+      HOME: ${APP_DJANGO_ROOT}/.hf_cache
+      HF_HOME: ${APP_DJANGO_ROOT}/.hf_cache/huggingface
     depends_on:
       - db
   db:
-    image: postgres:15
+    image: pgvector/pgvector:pg15
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:

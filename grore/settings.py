@@ -57,6 +57,8 @@ INSTALLED_APPS = [
     "images.apps.ImagesConfig",
     'modeltranslation',
     "django_htmx",
+    "django_icons",
+    "django_ckeditor_5",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -178,6 +180,20 @@ MEDIA_URL = os.environ.get("DJANGO_MEDIA_URL", 'media') + '/'
 MEDIA_ROOT = os.environ.get("DJANGO_MEDIA_ROOT", BASE_DIR / "media")
 
 STATICFILES_DIRS = []
+
+# django-ckeditor-5
+# https://django-ckeditor-5.readthedocs.io/
+CKEDITOR_5_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+CKEDITOR_5_CONFIGS = {
+    "default": {
+        "toolbar": [
+            "heading", "|",
+            "bold", "italic", "link", "|",
+            "bulletedList", "numberedList", "blockQuote", "|",
+            "undo", "redo",
+        ],
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
