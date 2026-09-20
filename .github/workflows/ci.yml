@@ -31,11 +31,13 @@ jobs:
 
     # --- A real Postgres for the tests to talk to -------------------------
     # GitHub starts this container alongside the job. It mirrors production
-    # (Postgres, not SQLite). `django manage.py test` creates its own
-    # `test_grore` database inside it and drops it afterwards.
+    # (pgvector/pgvector:pg15, not SQLite) - plain postgres:15 doesn't have
+    # the vector extension the images app's migrations require. `django
+    # manage.py test` creates its own `test_grore` database inside it and
+    # drops it afterwards.
     services:
       postgres:
-        image: postgres:15
+        image: pgvector/pgvector:pg15
         env:
           POSTGRES_DB: grore
           POSTGRES_USER: grore
