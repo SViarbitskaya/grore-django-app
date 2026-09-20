@@ -1,0 +1,43 @@
+# ---------------------------------------------------------------------------
+# Deploy to Production
+#
+# Runs after the CI workflow finishes successfully on the `production`
+# branch — but unlike the integration deploy, this job targets the
+# `production` GitHub Environment, which has a required-reviewer rule
+# configured (Settings > Environments > production). That means the job
+# starts but pauses right before running, and won't actually SSH into
+# grore-images.com until someone with write access clicks "Approve" in the
+# Actions tab. Treat that click as the real "go live" moment.
+#
+# Runs the server's existing up.sh:
+#   cd /home/django/grore-django-app && nix-shell default.nix --command "make git-up"
+#   sudo systemctl restart grore
+# ---------------------------------------------------------------------------
+
+name: Deploy to Production
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [production]
+
+jobs:
+  deploy:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Set up SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.GRORE_DEPLOY_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          # Pinned host key (fetched directly from grore-images.com), so we
+          # don't blindly trust whatever answers on first connect.
+          echo "grore-images.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKLvBe1Xc+UoGE/63mBmGTEklPc9uBu3En7CFdbTx5Uf" > ~/.ssh/known_hosts
+
+      - name: Deploy
+        run: ssh -i ~/.ssh/id_ed25519 django@grore-images.com 'cd /home/django && ./up.sh'

@@ -19,6 +19,12 @@ class SelectionMixin:
                 image_id = data.get('image_id')
                 action = data.get('action')
 
+                # Store ids as strings so the selection list stays a single
+                # type: SelectionView.delete matches on str(image_id) and the
+                # templates compare against ids read from data-* attributes.
+                if image_id is not None:
+                    image_id = str(image_id)
+
                 # Initialize or retrieve the list of selected images in the session
                 selected_images = request.session.get('selected_images', [])
 
@@ -50,6 +56,12 @@ class SelectionMixin:
         else:
             return {'status': 'Invalid request: not ajax!'}
 
+
+    def clear_selection(self, request):
+        """
+        Empties the selection entirely.
+        """
+        request.session['selected_images'] = []
 
     def get_selected_images(self, request):
         """

@@ -1,0 +1,41 @@
+# ---------------------------------------------------------------------------
+# Deploy to Demarchic (integration)
+#
+# Runs automatically after the CI workflow finishes successfully on the
+# `integration` branch. It SSHes into the server and runs the same
+# `integration.sh` script that's already there for manual deploys:
+#   cd /home/django/integration && nix-shell default.nix --command "make git-up"
+#   sudo systemctl restart grore-images.demarchic.com.service
+#
+# No approval gate here on purpose — this is the staging environment Philippe
+# tests against, it's meant to update as soon as `integration` gets new,
+# tested commits. Production has its own workflow with a manual approval
+# step (see deploy-production.yml).
+# ---------------------------------------------------------------------------
+
+name: Deploy to Demarchic
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [integration]
+
+jobs:
+  deploy:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.GRORE_DEPLOY_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          # Pinned host key (fetched directly from grore-images.com), so we
+          # don't blindly trust whatever answers on first connect.
+          echo "grore-images.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKLvBe1Xc+UoGE/63mBmGTEklPc9uBu3En7CFdbTx5Uf" > ~/.ssh/known_hosts
+
+      - name: Deploy
+        run: ssh -i ~/.ssh/id_ed25519 django@grore-images.com 'cd /home/django && ./integration.sh'
