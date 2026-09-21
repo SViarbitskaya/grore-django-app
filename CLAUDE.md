@@ -83,4 +83,4 @@ Docker Compose is available (`docker-compose.yaml`, `make docker-compose-up`) as
 
 ## Documentation
 
-Primary docs live in `doc/`: `configuration.md` (every `.env` variable, with format constraints), `dev.md`, `installation.md`, `integration.md`, `makefile.md`, `nixpkgs.md`. Secondary: `architecture.md` (production topology diagram), `continuous.md`, `docker.md`, `nixos4django.md`. Consult `doc/configuration.md` before changing anything `.env`-related — several variables have strict formatting rules (leading/trailing slashes, no quotes) that break the Makefile/nginx/systemd templates if violated.
+Primary docs live in `doc/`: `configuration.md` (every `.env` variable, with format constraints), `dev.md`, `installation.md`, `integration.md`, `makefile.md`. Secondary: `architecture.md` (production topology diagram), `continuous.md`, `docker.md`, `images.md`. Consult `doc/configuration.md` before changing anything `.env`-related — several variables have strict formatting rules (leading/trailing slashes, no quotes) that break the Makefile/nginx/systemd templates if violated.

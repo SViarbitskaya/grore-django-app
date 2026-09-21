@@ -42,13 +42,17 @@
                         <img class="img-thumbnail" src="{{ image.thumbnail.url }}" alt="{{ image.note }}">
                     </td>
                     <td class="align-middle">
-                        {{image.note}}
+                        {{ image.identifier }}
+                    </td>
+                    <td class="align-middle">
+                        {{ image.note }}
                     </td>
                     <td class="align-middle">
                         <button class="btn btn-light" hx-delete="{% url "delete_image_from_selection" image.id %}" title="{% translate "Delete" %}">
                             <i class="bi bi-trash3"></i>
-                        </a>
+                        </button>
                     </td>
+                </tr>
                 {% endfor %}
                 </tbody>
             </table>
