@@ -623,6 +623,14 @@ class SelectionViewTests(MediaTestCase):
         self.assertContains(resp, "Premiere")
         self.assertContains(resp, "Deuxieme")
 
+    def test_get_lists_selected_references(self):
+        a = create_image(note="Premiere", identifier="ref-a", with_thumbnail=True)
+        b = create_image(note="Deuxieme", identifier="ref-b", with_thumbnail=True)
+        self.select_in_session(a, b)
+        resp = self.client.get(reverse("selection"))
+        self.assertContains(resp, "ref-a")
+        self.assertContains(resp, "ref-b")
+
     def test_delete_one_keeps_the_rest(self):
         a = create_image(identifier="a", with_thumbnail=True)
         b = create_image(identifier="b", with_thumbnail=True)

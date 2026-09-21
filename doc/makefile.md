@@ -1,32 +1,39 @@
 # Commandes Makefile
 
-Toute commande `make` peut être post-fixé `-nix` pour exécuter la commande dans l'environnement nix spécifié par `scripts/default.nix`.
+Il n'y a pas de variante `-nix` des commandes `make` : la branche `ENVIRONMENT=nix` du Makefile est du code mort (commenté). Pour travailler sous Nix, entrez dans le shell défini par `default.nix` vous-même, puis lancez les commandes normales depuis cet environnement. Seul `ENVIRONMENT=docker` change réellement le comportement du Makefile (les commandes passent alors par `docker-compose exec`).
 
 Voici les commandes principales
 
 | command make | explication |
 | --- | --- |
-| `make up` / `make up-nix` | Met à jour et initialize l'environnement actuel  | 
-| `make default-pages` / `make default-pages-nix` | Ajout des pages par défault  | 
-| `make runserver` / `make runserver-nix` |  Tourne un serveur de développement (dev sans avoir mis à jour) | 
-| `make production-prepare` / `make production-prepare-nix` | Crée les fichiers de configuration dans ./scripts/production/output/ (nginx et service systemd)  | 
-| `make production-install` / `make production-install-nix` |  Fait toutes les opérations sur NGINX et SYSTEMD en tant que SUDO | 
-| `make restart` / `make restart-nix`  | Met à jour et redémarre le serveur en production  | 
+| `make up` | Installe les dépendances, `makemigrations`, `migrate`, `collectstatic` |
+| `make default-pages` | `make up` puis chargement de `scripts/data/page_fixtures.json` |
+| `make runserver` | Tourne un serveur de développement (dev sans avoir mis à jour) |
+| `make production-prepare` | Crée les fichiers de configuration dans `./scripts/production/output/` (nginx et service systemd) |
+| `make production-install` | Fait toutes les opérations sur NGINX et SYSTEMD en tant que SUDO |
+| `make restart` | Redémarre le service systemd `grore` |
 
 Voici les commandes intermédiaires
 
 | command make | explication |
 | --- | --- |
-| `make init` / `make init-nix` | Etablit l'environnement de base Python (ne fait pas `source ./venv/bin/activate`)  | 
-| `make nginxconf` / `make nginxconf-nix` |  Crée le fichier de config scripts/production/output/webser.nginx | 
-| `make service` / `make service-nix` |  Crée le fichier de config scripts/production/output/grore.service | 
+| `make init` | Etablit l'environnement de base Python (crée les dossiers, le venv, installe les dépendances) |
+| `make init-admin-user` | Crée le superuser Django depuis les variables `DJANGO_ADMIN_*` de `.env`, sans interaction |
+| `make load-fixtures` | Vide la base, migre, charge `media_fixture.json` + `scripts/data/page_fixtures.json`, génère les embeddings, crée le superuser |
+| `make git-up` | Réservé au déploiement (pas pour le dev local) : `git fetch` + `git reset --hard @{u}` puis `make up` |
+| `make nginxconf` | Crée le fichier de config `scripts/production/output/${APP_WEB_HOST}.conf` |
+| `make service` | Crée le fichier de config `scripts/production/output/${APP_WEB_HOST}.service` |
 | `make sys-install-nix` ou `make sys-install-nix-mac` | Installe Nix sur votre propre ordinateur linux (y compris wsl) ou mac |
 
-Voici les commandes en travaux
+Voici les commandes Docker Compose
 
 | command make | explication |
 | --- | --- |
-| `make docker-compose-up` / `make docker-compose-up-nix` |   | 
-| `make docker-nginx` / `make docker-nginx-nix` |   | 
-| `make docker-postgres` / `make docker-postgres-nix` |   | 
-| `make test-uploaded-images` / `make test-uploaded-images-nix` |   | 
+| `make docker-compose-up` | `docker-compose up -d` |
+| `make docker-rebuild-recompose-up` | Supprime le conteneur et l'image `django`, puis relance `docker compose up -d` |
+
+Commande cassée (voir le Makefile, marquée `"DOESN'T WORK"`) :
+
+| command make | explication |
+| --- | --- |
+| `make test-uploaded-images` | Actuellement non fonctionnelle |
