@@ -12,7 +12,7 @@ body{
   margin-top:10vh;
 }
 .usage-hint{
-  margin-top: 10vh;
+  margin-top: 13vh;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -84,7 +84,7 @@ body{
 }
 .navbar{
   width: 100vw;
-  padding: 1rem;
+  padding: 1.75rem 1rem;
   position: fixed;
   top:0;
   left:0;
@@ -97,6 +97,16 @@ body{
 }
 .navbar-nav{
   margin-right: auto;
+}
+@media (min-width: 992px) {
+  .navbar-nav .nav-item + .nav-item {
+    margin-left: 0.75rem;
+  }
+}
+.nav-link[href$="/legal-advice/"] {
+  /* "Legal advice" is a single nav item (see images/navigation.py); tighten
+     the gap between its two words without affecting other nav items. */
+  word-spacing: -0.2em;
 }
 .modal-body{
   text-align: center;
