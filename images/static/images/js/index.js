@@ -183,7 +183,7 @@ function positionTextItems(container) {
         // of Math.random()) so a given notule always renders at the same
         // size across reloads/rescrolls, while still varying between items.
         const minSize = 1;
-        const maxSize = 2.8;
+        const maxSize = 2;
         const id = Number(item.dataset.id) || 0;
         const pseudoRandom = Math.abs(Math.sin(id * 12.9898)) % 1;
         const fontSize = minSize + pseudoRandom * (maxSize - minSize);
