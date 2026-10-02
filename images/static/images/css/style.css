@@ -8,8 +8,10 @@ body{
 .navbar-header{
   display: flex;
 }
-.page-content{
-  margin-top:10vh;
+/* Fixed navbar is ~6rem tall at every breakpoint (html font-size scales
+   with it), so offset page content by that plus some breathing room. */
+.below-navbar{
+  padding-top: 7.5rem;
 }
 .usage-hint{
   margin-top: 13vh;
@@ -91,16 +93,34 @@ body{
   font-family: 'Courier New', Courier, monospace;
   text-transform: lowercase;
 }
+.navbar-nav .nav-link {
+  /* Light grey underline on every item makes each one read as a unit;
+     the active item overrides it with a solid black one below. */
+  text-decoration: underline;
+  text-decoration-color: #ccc;
+  text-underline-offset: 0.25em;
+}
 .nav-link.active {
   text-decoration: underline;
+  text-decoration-color: currentColor;
   font-weight: bold;
 }
 .navbar-nav{
   margin-right: auto;
 }
+.navbar-nav .nav-link {
+  /* A wrapped two-word item ("legal advice" at ~992-1100px) reads as two
+     separate items, so never break inside one. */
+  white-space: nowrap;
+}
 @media (min-width: 992px) {
   .navbar-nav .nav-item + .nav-item {
     margin-left: 0.75rem;
+  }
+}
+@media (min-width: 1200px) {
+  .navbar-nav .nav-item + .nav-item {
+    margin-left: 1.5rem;
   }
 }
 /* Search box sized to show the whole placeholder ("What are you looking
@@ -108,10 +128,21 @@ body{
 .search-form .form-control {
   width: calc(25ch + 2rem);
 }
+.language-switch {
+  /* Nav links don't wrap, so without this the language select is what
+     gets squeezed (down to "f") on narrow desktops. */
+  flex-shrink: 0;
+}
 @media (min-width: 992px) and (max-width: 1199.98px) {
-  /* Not enough room beside the nav links at full size. */
+  /* Not enough room for everything at full size on one row. */
   .search-form .form-control {
     font-size: 0.75rem;
+  }
+  .navbar-nav .nav-link {
+    font-size: 0.85rem;
+  }
+  .navbar-brand {
+    font-size: 1.1rem;
   }
 }
 @media (max-width: 991.98px) {
@@ -146,7 +177,7 @@ body{
 .nav-link[href$="/legal-advice/"] {
   /* "Legal advice" is a single nav item (see images/navigation.py); tighten
      the gap between its two words without affecting other nav items. */
-  word-spacing: -0.2em;
+  word-spacing: -0.3em;
 }
 .modal-body{
   text-align: center;
