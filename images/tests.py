@@ -158,6 +158,19 @@ class ImageSearchFormTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("search_query", form.errors)
 
+    def _placeholder(self):
+        return str(ImageSearchForm()["search_query"])
+
+    def test_placeholder_in_english(self):
+        with translation.override("en"):
+            self.assertIn('placeholder="What are you looking for?"', self._placeholder())
+
+    def test_placeholder_in_french(self):
+        # Also guards against the placeholder being translated once at import
+        # time (eager gettext) instead of per request.
+        with translation.override("fr"):
+            self.assertIn('placeholder="Que cherchez-vous ?"', self._placeholder())
+
 
 class StripEthnicTypeDescriptorsTests(TestCase):
     """strip_ethnic_type_descriptors(): the caption-cleanup Philippe Mairesse
