@@ -27,8 +27,8 @@ msgid "French"
 msgstr "français"
 
 #: images/forms.py:8
-msgid "Search"
-msgstr "Rechercher"
+msgid "What are you looking for?"
+msgstr "Que cherchez-vous ?"
 
 #: images/navigation.py:10
 msgid "Home"
