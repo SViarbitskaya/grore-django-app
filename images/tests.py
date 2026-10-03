@@ -4,6 +4,7 @@ the session-based selection cart, zip downloads and navigation."""
 import io
 import json
 import os
+import re
 import shutil
 import tempfile
 import zipfile
@@ -650,6 +651,48 @@ class HomeViewTests(MediaTestCase):
 
         first_page_resp = self.client.get(self.url, headers={"hx-request": "true"})
         self.assertContains(first_page_resp, "load-more-trigger")
+
+    def _next_page_url(self, resp):
+        match = re.search(r'hx-get="([^"]+)"', resp.content.decode())
+        return match.group(1).replace("&amp;", "&") if match else None
+
+    def test_infinite_scroll_never_repeats_an_image_while_browsing(self):
+        # Regression test: with no search, every page request reshuffled
+        # the whole collection and sliced it, so page 2 was an independent
+        # random sample - captions repeated on scroll and others were never
+        # reached. One shuffle seed now carries through the scroll.
+        ids = {create_image(identifier=f"s{i}").pk for i in range(25)}
+        seen = []
+        resp = self.client.get(self.url, headers={"hx-request": "true"})
+        while True:
+            seen += [image.pk for image in resp.context["images"]]
+            next_url = self._next_page_url(resp)
+            if not next_url:
+                break
+            resp = self.client.get(next_url, headers={"hx-request": "true"})
+        self.assertEqual(len(seen), len(set(seen)), "an image was shown twice")
+        self.assertEqual(set(seen), ids)
+
+    def test_same_seed_gives_same_order_and_new_visit_reshuffles(self):
+        for i in range(30):
+            create_image(identifier=f"o{i}")
+        first = [i.pk for i in self.client.get(self.url, {"seed": 42}).context["images"]]
+        again = [i.pk for i in self.client.get(self.url, {"seed": 42}).context["images"]]
+        self.assertEqual(first, again)
+        seeds = {self.client.get(self.url).context["shuffle_seed"] for _ in range(5)}
+        self.assertGreater(len(seeds), 1)
+
+    def test_invalid_seed_falls_back_to_a_fresh_one(self):
+        create_image()
+        resp = self.client.get(self.url, {"seed": "not-a-number"})
+        self.assertEqual(resp.status_code, 200)
+        self.assertIsInstance(resp.context["shuffle_seed"], int)
+
+    def test_next_page_link_url_encodes_the_search_query(self):
+        for i in range(15):
+            create_image(identifier=f"q{i}", note="chat chien")
+        resp = self.client.get(self.url, {"search_query": "chat chien"}, headers={"hx-request": "true"})
+        self.assertIn("search_query=chat%20chien", self._next_page_url(resp))
 
     def test_selected_ids_parsed_from_session_and_bad_values_skipped(self):
         session = self.client.session
