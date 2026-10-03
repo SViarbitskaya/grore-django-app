@@ -134,44 +134,34 @@ body{
   flex-shrink: 0;
 }
 @media (min-width: 992px) and (max-width: 1199.98px) {
-  /* Not enough room for everything at full size on one row. */
-  .search-form .form-control {
-    font-size: 0.75rem;
-  }
+  /* Not enough room for everything at full size on one row. The
+     placeholder deliberately matches the nav link size. */
+  .search-form .form-control,
   .navbar-nav .nav-link {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
   .navbar-brand {
     font-size: 1.1rem;
   }
 }
 @media (max-width: 991.98px) {
-  /* Phone search bar: fill the space between brand and hamburger. */
+  /* Phone/tablet search bar: its own full-width row right below the brand
+     and hamburger, so the whole placeholder fits at its normal font size.
+     The opened menu drops down below it rather than above it. */
   .navbar > .d-lg-none {
-    flex: 1 1 0;
-    min-width: 0;
-    margin: 0 0.25rem;
+    order: 2;
+    flex-basis: 100%;
+  }
+  .navbar-collapse {
+    order: 3;
   }
   .navbar > .d-lg-none .form-control {
     width: 100%;
   }
-}
-@media (max-width: 767.98px) {
-  .navbar > .d-lg-none .form-control {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-  }
-  .navbar > .d-lg-none .form-control::placeholder {
-    font-size: 0.85rem;
-  }
-}
-@media (max-width: 374.98px) {
-  /* Smallest phones (e.g. 320px): shrink brand and placeholder further. */
-  .navbar-brand {
-    font-size: 1.1rem;
-  }
-  .navbar > .d-lg-none .form-control::placeholder {
-    font-size: 0.75rem;
+  /* Navbar is ~9.5rem tall here with the search row, so the homepage
+     hint must clear that rather than the desktop 13vh. */
+  .usage-hint {
+    margin-top: 10rem;
   }
 }
 .nav-link[href$="/legal-advice/"] {
