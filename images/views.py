@@ -62,9 +62,7 @@ class HomeView(SelectionMixin, generic.ListView):
                 # Query was only stopwords (e.g. "a", "and the") -- not a
                 # meaningful search term, so fall back to the browse view
                 # instead of matching either everything or nothing.
-                queryset = list(queryset)
-                random.shuffle(queryset)
-                return queryset
+                return self.shuffled(queryset)
 
             # Create a regex pattern that matches whole words with optional
             # punctuation. All terms must match (AND), not just one (OR) --
@@ -102,11 +100,25 @@ class HomeView(SelectionMixin, generic.ListView):
 
             queryset = exact_matches + semantic_matches
         else:
-            # Shuffle the queryset if no search query is present
-            queryset = list(queryset)
-            random.shuffle(queryset)
+            queryset = self.shuffled(queryset)
 
         return queryset
+
+    def shuffled(self, queryset):
+        """Random browse order that stays the same across one visit's pages.
+
+        Each infinite-scroll page is a separate request; reshuffling on
+        every request made page 2 an independent random sample, so captions
+        repeated while scrolling and others were never reached. Page 1 picks
+        a seed, the load-more link carries it (?seed=), and every page
+        shuffles the same pk-ordered list with it."""
+        try:
+            self.shuffle_seed = int(self.request.GET['seed'])
+        except (KeyError, ValueError):
+            self.shuffle_seed = random.SystemRandom().randrange(2**31)
+        images = list(queryset.order_by('pk'))
+        random.Random(self.shuffle_seed).shuffle(images)
+        return images
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -115,6 +127,7 @@ class HomeView(SelectionMixin, generic.ListView):
         # search bar (see base.html) - a distinct auto_id keeps the two
         # renders from producing duplicate "id_search_query" elements.
         context['mobile_search_form'] = ImageSearchForm(self.request.GET, auto_id="mobile_id_%s")
+        context['shuffle_seed'] = getattr(self, 'shuffle_seed', None)
         context['language'] = self.request.LANGUAGE_CODE
         context['redirect_to'] = self.request.path
         # Convert stored IDs in the session to integers
