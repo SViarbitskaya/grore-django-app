@@ -23,7 +23,15 @@ from pages.models import Page
 from .forms import ImageSearchForm
 from .mixins import SelectionMixin
 from .models import Image, NOTULE_EMBEDDING_DIMENSIONS
-from .text_cleaning import strip_ethnic_descriptors, strip_ethnic_type_descriptors
+from .text_cleaning import (
+    CAPTION_CORRECTIONS,
+    clean_caption_pair,
+    fix_brown_hair_translation,
+    fix_film_leader_translation,
+    strip_ethnic_descriptors,
+    strip_ethnic_type_descriptors,
+    strip_skin_colour,
+)
 
 # Image.save() computes a real embedding via sentence-transformers on every
 # save whenever note text changes, and HomeView.get_queryset() computes one
@@ -344,6 +352,202 @@ class StripEthnicDescriptorsTests(TestCase):
     def test_leaves_none_and_empty_string_untouched(self):
         self.assertIsNone(strip_ethnic_descriptors(None, "fr"))
         self.assertEqual(strip_ethnic_descriptors("", "en"), "")
+
+
+class StripEthnicTypeDescriptorsCreoleTests(TestCase):
+    """2026-10 audit: "de type créole" was missed by the September list."""
+
+    def test_strips_fr_de_type_creole(self):
+        self.assertEqual(
+            strip_ethnic_type_descriptors("Visage de femme brune souriante de type créole. Noir et blanc."),
+            "Visage de femme brune souriante. Noir et blanc.",
+        )
+
+    def test_strips_en_creole_type(self):
+        self.assertEqual(
+            strip_ethnic_type_descriptors("Face of smiling brunette Creole type woman. Black and white."),
+            "Face of smiling brunette woman. Black and white.",
+        )
+
+
+class FixBrownHairTranslationTests(TestCase):
+    """2026-10 audit: "brun" (dark-haired) was translated "brown man", which
+    reads as skin colour in English."""
+
+    def test_brun_becomes_dark_haired(self):
+        self.assertEqual(
+            fix_brown_hair_translation("Petit garçon brun souriant.", "Little smiling brown boy."),
+            "Little smiling dark-haired boy.",
+        )
+
+    def test_keeps_capital_at_sentence_start(self):
+        self.assertEqual(
+            fix_brown_hair_translation("Homme brun de face.", "Brown man from the front."),
+            "Dark-haired man from the front.",
+        )
+
+    def test_handles_young_between_brown_and_person(self):
+        self.assertEqual(
+            fix_brown_hair_translation("Hommes blonds et bruns.", "Blond and brown men; brown young man."),
+            "Blond and dark-haired men; dark-haired young man.",
+        )
+
+    def test_chatain_becomes_brown_haired(self):
+        self.assertEqual(
+            fix_brown_hair_translation("Visage de jeune homme châtain à anorak.",
+                                       "Face of a young brown man in an anorak."),
+            "Face of a young brown-haired man in an anorak.",
+        )
+
+    def test_light_chatain_becomes_light_brown_haired(self):
+        self.assertEqual(
+            fix_brown_hair_translation("Visage de jeune homme châtain clair.",
+                                       "Face of a light brown young man."),
+            "Face of a light-brown-haired young man.",
+        )
+
+    def test_leaves_brown_objects_and_hair_untouched(self):
+        en = "Brown-haired man on a brown sofa with brown eyes."
+        self.assertEqual(fix_brown_hair_translation("Homme brun sur un canapé marron.", en), en)
+
+    def test_needs_brun_in_french(self):
+        # Without "brun"/"châtain" in the source, "brown" is left alone.
+        en = "Brown man."
+        self.assertEqual(fix_brown_hair_translation("Homme.", en), en)
+
+    def test_leaves_none_and_empty_untouched(self):
+        self.assertIsNone(fix_brown_hair_translation("Homme brun.", None))
+        self.assertEqual(fix_brown_hair_translation(None, "Brown man."), "Brown man.")
+
+
+class StripSkinColourTests(TestCase):
+    """2026-10 audit: skin-colour descriptions of people removed in both
+    languages, per Philippe Mairesse's approval."""
+
+    def test_strips_fr_peau_clause_and_en_dark_skinned(self):
+        self.assertEqual(
+            strip_skin_colour("Femme à la peau foncée assise sur une banquette.",
+                              "Dark-skinned woman sitting on a bench."),
+            ("Femme assise sur une banquette.", "Woman sitting on a bench."),
+        )
+
+    def test_strips_clause_without_article_and_before_comma(self):
+        self.assertEqual(
+            strip_skin_colour("à ses côtés une femme à peau foncée, un gobelet à la main.",
+                              "next to him a dark-skinned woman, a cup in her hand."),
+            ("à ses côtés une femme, un gobelet à la main.",
+             "next to him a woman, a cup in her hand."),
+        )
+
+    def test_strips_noire_blanche_after_person_and_black_white_before(self):
+        self.assertEqual(
+            strip_skin_colour(
+                "Femme blanche souriante serrant la main d’une femme noire corpulente.",
+                "Smiling white woman shaking hands with a heavyset black woman."),
+            ("Femme souriante serrant la main d’une femme corpulente.",
+             "Smiling woman shaking hands with a heavyset woman."),
+        )
+
+    def test_strips_little_black_girl(self):
+        self.assertEqual(
+            strip_skin_colour("Petite fille noire de profil.", "Little black girl in profile."),
+            ("Petite fille de profil.", "Little girl in profile."),
+        )
+
+    def test_leaves_clothing_and_black_and_white_untouched(self):
+        fr = "Homme en noir et femme en blanc. Noir et blanc."
+        en = "Man in black and woman in white. Black and white."
+        self.assertEqual(strip_skin_colour(fr, en), (fr, en))
+
+    def test_strips_fr_et_peau_clause(self):
+        self.assertEqual(
+            strip_skin_colour("Visage d’homme à moustache et peau foncée. Noir et blanc.",
+                              "Face of a man with mustache and dark skin. Black and white."),
+            ("Visage d’homme à moustache. Noir et blanc.", "Face of a man with mustache. Black and white."),
+        )
+
+    def test_strips_english_only_skin_phrases(self):
+        # The translation added skin colour the French doesn't mention.
+        for fr, en, expected in [
+            ("Visage souriant d’enfant.", "Smiling face of a child with dark skin.",
+             "Smiling face of a child."),
+            ("Couple enlacé, homme et femme.", "Embracing couple, man and woman, with black skin.",
+             "Embracing couple, man and woman."),
+            ("Visage d’homme brun à lunettes souriant.",
+             "Face of dark-haired man in glasses with dark skin smiling.",
+             "Face of dark-haired man in glasses smiling."),
+            ("Podium avec mannequin.", "Podium with black-skinned model.", "Podium with model."),
+        ]:
+            self.assertEqual(strip_skin_colour(fr, en), (fr, expected))
+
+    def test_leaves_animal_skins_untouched(self):
+        fr, en = "Femme près d'une peau de zèbre.", "Woman near a zebra skin."
+        self.assertEqual(strip_skin_colour(fr, en), (fr, en))
+
+    def test_english_needs_skin_mention_in_french(self):
+        # "white man" with no skin colour in the French source is left alone
+        # rather than guessed at.
+        fr, en = "Homme en chemise.", "White man in a shirt."
+        self.assertEqual(strip_skin_colour(fr, en), (fr, en))
+
+
+class FixFilmLeaderTranslationTests(TestCase):
+    def test_primer_becomes_film_leader(self):
+        self.assertEqual(
+            fix_film_leader_translation("Image avec amorce.", "Image with primer."),
+            "Image with film leader.",
+        )
+
+    def test_capitalised_primer(self):
+        self.assertEqual(
+            fix_film_leader_translation("Amorce rayée.", "Primer scratched."),
+            "Film leader scratched.",
+        )
+
+    def test_drops_uncertainty_mark_in_both_languages(self):
+        self.assertEqual(
+            clean_caption_pair("zzz", "Vue non identifiée. Amorce\u00a0???", "Unidentified view. Primer???"),
+            ("Vue non identifiée. Amorce.", "Unidentified view. Film leader."),
+        )
+        self.assertEqual(clean_caption_pair("zzz", "Amorce\u00a0?", "Film leader?"),
+                         ("Amorce.", "Film leader."))
+
+    def test_needs_amorce_in_french(self):
+        self.assertEqual(fix_film_leader_translation("Peinture.", "Primer."), "Primer.")
+
+
+class CleanCaptionPairTests(TestCase):
+    def test_runs_september_cleanups_then_audit_fixes(self):
+        fr, en = clean_caption_pair(
+            "zzz", "Femme africaine et garçon brun.", "African woman and brown boy.")
+        self.assertEqual((fr, en), ("Femme et garçon brun.", "Woman and dark-haired boy."))
+
+    def test_applies_per_image_correction(self):
+        self.assertEqual(
+            clean_caption_pair("A1111",
+                               "Champ de course avec trois cavaliers au passage de la ligne d'arrivée. Noir et blanc.",
+                               "Race field with three riders crossing the finish line. Black and white."),
+            ("Champ de course avec trois cavaliers au passage de la ligne d'arrivée. Noir et blanc.",
+             "Racecourse with three riders crossing the finish line. Black and white."),
+        )
+
+    def test_per_image_correction_skipped_if_text_was_edited(self):
+        # Hand-edited on the server since the audit: leave it alone.
+        self.assertEqual(clean_caption_pair("A1111", "Autre.", "Something else."),
+                         ("Autre.", "Something else."))
+
+    def test_is_idempotent(self):
+        once = clean_caption_pair("A1287", "Petit garçon brun souriant en polo orange. Image abîmée.",
+                                  "Little smiling brown boy in orange polo shirt. Damaged image.")
+        self.assertEqual(clean_caption_pair("A1287", *once), once)
+
+    def test_every_correction_targets_text_the_patterns_leave_behind(self):
+        # Guards against a correction whose "old" substring can never match
+        # because an earlier pattern step already rewrote it.
+        for identifier, langs in CAPTION_CORRECTIONS.items():
+            for lang, pairs in langs.items():
+                for old, new in pairs:
+                    self.assertNotEqual(old, new, identifier)
 
 
 class HomeViewTests(MediaTestCase):
@@ -861,3 +1065,85 @@ class StripEthnicDescriptorsCommandTests(MediaTestCase):
         flagged.refresh_from_db()
         self.assertEqual(flagged.note_fr, "Femme africaine en boubou.")
         self.assertEqual(flagged.note_en, "African woman in boubou.")
+
+
+class FixCaptionTranslationsCommandTests(MediaTestCase):
+    def make_note(self, identifier, note_fr, note_en):
+        img = create_image(identifier=identifier)
+        img.note_fr = note_fr
+        img.note_en = note_en
+        img.save()
+        return img
+
+    def test_command_updates_matching_notes_and_leaves_others(self):
+        flagged = self.make_note("flagged", "Petit garçon brun souriant.",
+                                  "Little smiling brown boy.")
+        untouched = self.make_note("clean", "Un chat noir.", "A black cat.")
+
+        call_command("fix_caption_translations")
+
+        flagged.refresh_from_db()
+        untouched.refresh_from_db()
+        self.assertEqual(flagged.note_fr, "Petit garçon brun souriant.")
+        self.assertEqual(flagged.note_en, "Little smiling dark-haired boy.")
+        self.assertEqual(untouched.note_en, "A black cat.")
+
+    def test_recomputes_embedding_only_for_the_changed_language(self):
+        flagged = self.make_note("flagged", "Petit garçon brun souriant.",
+                                  "Little smiling brown boy.")
+        with mock.patch("images.embeddings.embed_text",
+                        return_value=[1.0] * NOTULE_EMBEDDING_DIMENSIONS) as embed:
+            call_command("fix_caption_translations")
+
+        embed.assert_called_once_with("Little smiling dark-haired boy.")
+        flagged.refresh_from_db()
+        self.assertEqual(list(flagged.note_en_embedding), [1.0] * NOTULE_EMBEDDING_DIMENSIONS)
+        self.assertEqual(list(flagged.note_fr_embedding), [0.0] * NOTULE_EMBEDDING_DIMENSIONS)
+
+    def test_dry_run_does_not_save_changes(self):
+        flagged = self.make_note("flagged", "Petit garçon brun souriant.",
+                                  "Little smiling brown boy.")
+
+        call_command("fix_caption_translations", "--dry-run")
+
+        flagged.refresh_from_db()
+        self.assertEqual(flagged.note_en, "Little smiling brown boy.")
+
+
+class FixCaptionTranslationsMigrationTests(MediaTestCase):
+    """Data migration 0016 is what actually applies the audit on deploy."""
+
+    def run_migration(self):
+        import importlib
+        from django.apps import apps as global_apps
+        module = importlib.import_module("images.migrations.0016_fix_caption_translations")
+        module.fix_captions(global_apps, None)
+
+    def test_fixes_notes_syncs_base_note_and_reembeds_changed_language_only(self):
+        img = create_image(identifier="A1287")
+        Image.objects.filter(pk=img.pk).update(
+            note="Petit garçon brun souriant.", note_fr="Petit garçon brun souriant.",
+            note_en="Little smiling brown boy.",
+            note_en_embedding=[0.0] * NOTULE_EMBEDDING_DIMENSIONS,
+            note_fr_embedding=[0.0] * NOTULE_EMBEDDING_DIMENSIONS,
+        )
+        untouched = create_image(identifier="clean")
+        Image.objects.filter(pk=untouched.pk).update(note_fr="Un chat noir.", note_en="A black cat.")
+
+        with mock.patch("images.embeddings.embed_texts",
+                        side_effect=lambda texts: [[1.0] * NOTULE_EMBEDDING_DIMENSIONS for _ in texts]) as embed:
+            self.run_migration()
+
+        embed.assert_called_once_with(["Little smiling dark-haired boy."])
+        row = Image.objects.get(pk=img.pk)
+        self.assertEqual(row.note_en, "Little smiling dark-haired boy.")
+        self.assertEqual(row.note_fr, "Petit garçon brun souriant.")
+        self.assertEqual(list(row.note_en_embedding), [1.0] * NOTULE_EMBEDDING_DIMENSIONS)
+        self.assertEqual(list(row.note_fr_embedding), [0.0] * NOTULE_EMBEDDING_DIMENSIONS)
+        self.assertEqual(Image.objects.get(pk=untouched.pk).note_en, "A black cat.")
+
+    def test_no_changes_does_not_load_the_embedding_model(self):
+        create_image(identifier="clean")
+        with mock.patch("images.embeddings.embed_texts") as embed:
+            self.run_migration()
+        embed.assert_not_called()
