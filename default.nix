@@ -1,4 +1,6 @@
-# Pinned to a specific nixos-26.05 commit via fetchTarball instead of
+# Pinned to a specific nixos-26.05 commit (archive/<rev>.tar.gz, NOT a branch
+# ref - a branch tarball changes under a fixed sha256 and breaks every deploy
+# once the local Nix cache is garbage-collected) via fetchTarball instead of
 # resolving <nixpkgs> from whatever channel happens to be configured on the
 # local machine. That was resolving inconsistently (root's and django's
 # channels on the deploy server had different names/content) and, worse, a
@@ -9,8 +11,8 @@
 # longer and is identical on every machine regardless of local config.
 let
   nixpkgs = fetchTarball {
-    url = "https://github.com/NixOS/nixpkgs/archive/refs/heads/nixos-26.05.tar.gz";
-    sha256 = "16fa6vir35h0pajdrs1ws7d3ly28ifks2g9y67y3j7zw1hqyqm3h";
+    url = "https://github.com/NixOS/nixpkgs/archive/7993f34ee47e28a3d607a525aadc6c94b73be728.tar.gz";
+    sha256 = "1gdy838s9vsjsd1lqq746a597fqrgvqqpmnzs07fl0vksskbfsk4";
   };
 in
 with (import nixpkgs {});
