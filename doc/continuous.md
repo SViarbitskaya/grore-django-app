@@ -1,55 +1,22 @@
-# GITHUB ACTIONS
+# GitHub Actions CI/CD
 
-Try for continous integration underway.
+Three workflows, `.github/workflows/`:
 
-See 
+- `ci.yml` — runs the test suite on every push/PR.
+- `deploy-integration.yml` — triggered by `workflow_run` when `ci.yml` succeeds on the `integration` branch. SSHes into `grore-images.com` and runs `/home/django/integration.sh`. No approval gate: `integration` (demarchic) is the staging environment clients test against, so it's meant to update as soon as `integration` gets new, tested commits.
+- `deploy-production.yml` — same trigger, but on the `production` branch, and targets the `production` GitHub Environment (Settings > Environments > production), which has a required-reviewer rule. The job pauses until someone with write access clicks "Approve" in the Actions tab before it SSHes in and runs `/home/django/up.sh`.
 
-https://github.com/chris2fr/messhouse/wiki
+Both deploy scripts do the same thing on the server: sync the branch (`git fetch` + `git reset --hard @{u}`), enter the Nix shell from `default.nix` (`nix develop --extra-experimental-features "nix-command flakes"`), run `make up`, then restart the relevant systemd unit. `integration.sh` additionally recomputes `LD_LIBRARY_PATH` from the Nix shell and writes it into `.env` (consumed by the unit's `EnvironmentFile=` directive), since gunicorn as launched by systemd doesn't inherit the Nix shell's environment.
 
-for intgrating continuous deployment secret.
+## Setting up the deploy key
 
-The following command deploys from github:SVarbitskya/grore-django-app branch production
+Both deploy workflows authenticate via the `GRORE_DEPLOY_KEY` repository secret (Settings > Secrets and variables > Actions):
 
-ssh django@grore-images.com '/home/django/up.sh'
+```bash
+ssh-keygen -t ed25519 -f grore_deploy_key    # use a distinct name, not your default key
+```
 
-Assuming that   
-django@grore-images.com:/home/django/.ssh/authorized_keys  
-has the id_rsa.pub equivalent to the id_rsa used by the calling agent.
-`ssh-keygen -t rsa`  
-to create the id_rsa and id_rsa.pub files  in .ssh  
-`cat ~/.ssh/id_rsa.pub`   
-to share the public key.
+- Private key (`cat grore_deploy_key`) → paste as the `GRORE_DEPLOY_KEY` repo secret.
+- Public key (`cat grore_deploy_key.pub`) → append to `django@grore-images.com:~/.ssh/authorized_keys`.
 
-Also used by .github/workflows/up.yml continuous deployment script
-
-## Setup Continuous Integration
-
-Created .github/worflows/up.yml
-
-Needs secret GRORE_SSH_KEY
-
-![image](./media/github-settings-newkey-1.png)
-
-![image](./media/github-settings-newkey-2.png)
-
-
-ssh-keygen -t rsa
-
-use grore_ssh instead of default name
-
-cat grore_ssh # The private key and into the repository secret
-
-
-![image](./media/github-settings-newkey-3.png)
-
-![image](./media/github-settings-newkey-4.png)
-
-Put the grore_ssh.pub in the authorized_keys on grore-images.com
-
-cat grore_ssh.pub
-
-And on the distant machine
-
-echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCzHBtSaEeQFuGGs2wclOHy0ac+4xKxkK5vn/HUbCUvk/SaRVUhsWKHarY+Knl8qhrFVxOkbrt6KeXN2Q2+ome7S3deLHucF/ut25ZwZ+jWdNn3V9coyuzpThvjapFGXRmc8ip4MxAs6m2aBWBvlyr0u1TWZudS938+AkTNjNFyDdZ7m0+mSNk5q9So5AVDx1TqoS8khxB48kiLV7WaaRzM/3durwNgNMmtMv24DnUPiZOQ7901BWTOqAEpefu7ZAJyIf7DdeYwIuwbrAe9pFdLiT4zswoDYcWtVCtmB+AthHnuwfQlliBCO+uUjanXsWBrKVHCL2crHU+uTQGYFnbbDwEyY3RZJhfRJkYpZp22mtetOMDsl1W51+3EPR4D/xJ+Q9x/3yWyXjQ7COrSxqShg2vYJtV8rQ1bGyOj7iCy3aSEdGBzYDeFNo5+iyJ0cE2WTSWwvKR6G3cuiGUMjp8rfkqheEtf1nQAfbFD68nSzWlav+7XUjaqk/5JjNr5I5c=" >> /home/django/.ssh/authorized_keys
-
-
+The workflows also pin `grore-images.com`'s host key in `known_hosts` at connect time (fetched directly from the server) rather than trusting whatever answers on first connect.

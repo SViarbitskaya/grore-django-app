@@ -1,0 +1,8 @@
+.git
+media
+staticfiles
+images
+__pycache__
+*.pyc
+.env
+media_fixture.json

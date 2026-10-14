@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{% static '/images/css/style.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container below-navbar">
+    <h1>Contact</h1>
+    <div>
+        <p>
+            {{page.content}}
+        </p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,99 @@
+# ---------------------------------------------------------------------------
+# Continuous Integration
+#
+# GitHub runs this file automatically. Every time it runs it spins up a fresh
+# throwaway Linux machine ("runner"), checks out the repo, installs the
+# project, and runs the test suite. If anything fails you get a red X on the
+# commit / pull request; if everything passes, a green check.
+#
+# The file lives at .github/workflows/<name>.yml — GitHub discovers any *.yml
+# in that exact folder. The filename doesn't matter; the `name:` below is what
+# shows up in the Actions tab.
+# ---------------------------------------------------------------------------
+
+name: CI
+
+# --- WHEN should this run? -------------------------------------------------
+# `push`        : on every push to any branch (so you see a result while working)
+# `pull_request`: again when a PR is opened/updated, so a reviewer sees the
+#                 status of the merged result before clicking merge.
+on: [push, pull_request]
+
+# If you push twice in quick succession, cancel the older still-running job
+# instead of running both to completion.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest   # the throwaway machine image
+
+    # --- A real Postgres for the tests to talk to -------------------------
+    # GitHub starts this container alongside the job. It mirrors production
+    # (pgvector/pgvector:pg15, not SQLite) - plain postgres:15 doesn't have
+    # the vector extension the images app's migrations require. `django
+    # manage.py test` creates its own `test_grore` database inside it and
+    # drops it afterwards.
+    services:
+      postgres:
+        image: pgvector/pgvector:pg15
+        env:
+          POSTGRES_DB: grore
+          POSTGRES_USER: grore
+          POSTGRES_PASSWORD: grore
+        ports:
+          - 5432:5432
+        # Don't start running steps until Postgres answers.
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    # --- Settings the Django app reads from the environment ---------------
+    # In normal use these come from `.env` (which is git-ignored, so it isn't
+    # on the runner). Here we provide throwaway values good enough for tests.
+    env:
+      SECRET_KEY: ci-secret-key-not-used-anywhere-real
+      DEBUG: "false"
+      DB_ENGINE: django.db.backends.postgresql
+      DB_DATABASE: grore
+      DB_USER: grore
+      DB_PASSWORD: grore
+      DB_HOST: localhost
+      DB_PORT: "5432"
+      DJANGO_ALLOWED_HOSTS: localhost 127.0.0.1
+      DJANGO_LANGUAGE_CODE: fr
+      DJANGO_SETTINGS_MODULE: grore.settings
+
+    # --- The actual work, top to bottom ---------------------------------
+    steps:
+      # `uses:` pulls in a pre-made action. checkout = git clone this repo.
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      # Put Python 3.12 on the machine (matches the Dockerfile) and cache the
+      # pip download folder between runs so installs are fast.
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Fails if a model was changed but `makemigrations` wasn't run — catches
+      # the classic "works on my machine, migration missing in the commit".
+      - name: Check migrations are complete
+        run: python manage.py makemigrations --check --dry-run
+
+      # Django's own sanity checks (bad settings, admin misconfig, etc.).
+      - name: Django system checks
+        run: python manage.py check
+
+      - name: Run tests
+        run: python manage.py test --verbosity=2

@@ -1,46 +1,55 @@
-"""csv-to_json.py
-Creates a json fixure for images from the 'classeur.csv' file, save to classeur.json.
-"""
-
 import pandas as pd
-from datetime import datetime
 import json
-from json import load, dumps
-import re
+from datetime import datetime
 
-df = pd.read_csv('classeur.csv')
+# -------------------------------
+# CONFIG
+# -------------------------------
+CSV_FILE = "classeur.csv"
+OUTPUT_JSON = "classeur.json"
+IMAGE_FOLDER = "images/"
+THUMB_FOLDER = "thumbs/"
 
-result_json = df.to_json(orient='records', force_ascii=False)
+# -------------------------------
+# LOAD CSV
+# -------------------------------
+df = pd.read_csv(CSV_FILE)
 
-# Replace non-breaking spaces with regular spaces
-result_json = result_json.replace('\u00a0', '')
-result_json = result_json.replace('’', "'")
+# Strip whitespace and replace non-breaking spaces for all string columns
+for col in df.columns:
+    if df[col].dtype == object:
+        df[col] = df[col].astype(str).str.replace("\u00a0", " ").str.strip()
 
-# Decode Unicode escape sequences using json.loads
-decoded_json = json.loads(result_json)
+# Ensure 'identifier' has no spaces
+df["identifier"] = df["identifier"].str.replace(" ", "").str.strip()
 
+# -------------------------------
+# CREATE FIXTURES
+# -------------------------------
 fixtures_list = []
 
-for i, row in enumerate(decoded_json):
+for i, row in df.iterrows():
     entry = {
         "model": "images.image",
-            "pk": i+1,
-            "fields": {
-                "identifier": row["identifier"],
-                "slug": row["identifier"],       
-                "note": "",
-                "note_en": row["note_en"],
-                "note_fr": row["note_fr"],
-                "pub_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "modif_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "file": row["identifier"] +".jpg"
+        "pk": i + 1,
+        "fields": {
+            "identifier": row["identifier"],
+            "slug": row["identifier"],
+            "note": "",
+            "note_en": row.get("note_en", ""),
+            "note_fr": row.get("note_fr", ""),
+            "pub_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "modif_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "file": IMAGE_FOLDER + row["identifier"] + ".tiff",
+            "thumbnail": THUMB_FOLDER + row["identifier"] + ".jpg"
         }
-}
-fixtures_list.append(entry)
+    }
+    fixtures_list.append(entry)
 
-# Convert to JSON string with readable strings using json.dumps
-file_path = 'classeur.json'
-with open(file_path, 'w', encoding='utf-8') as file:
-    json.dump(fixtures_list, file, ensure_ascii=False)
+# -------------------------------
+# SAVE TO JSON
+# -------------------------------
+with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
+    json.dump(fixtures_list, f, ensure_ascii=False, indent=2)
 
-print("Created classeur.json. now you can load the fixtures!")
+print(f"✅ Django fixture created: {OUTPUT_JSON} ({len(fixtures_list)} entries)")

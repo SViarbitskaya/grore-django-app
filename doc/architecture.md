@@ -8,8 +8,8 @@ graph TB
 Django[/Django/]
 Nginx[/Nginx/]
 Postgres[(Postgres)]
-make-production-install>make production-install-nix]
-make-up>make up-nix]
+make-production-install>make production-install]
+make-up>make up]
 GroreNginxConf>"{APP_WEB_HOST}.conf"]
 grore.service>systemctl start grore.service]
 internet{{Internet}}

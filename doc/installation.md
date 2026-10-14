@@ -1,37 +1,33 @@
 # Grore Installation Strategy
 
-We use NIXPKGS and not NIXOS. To install Nixpkgs (multi-user daemon) :
+We use Nixpkgs, not NixOS. To install Nix (multi-user daemon):
 
 https://nixos.org/download/#download-nix
 
-for me this is 
+for me this is
 
 `sh <(curl -L https://nixos.org/nix/install) --daemon`
 
-Restart the terminal 
+Restart the terminal.
 
-in the same folder as `nix.shell`, run 
+In the repo root (where `default.nix` lives), run:
 
-`nix-shell`
+`nix develop --extra-experimental-features "nix-command flakes" -f default.nix`
 
-then a typical python virtual environment
+(`nix-shell` also reads `default.nix`, but has been unreliable in practice on some Nix client installs — prefer `nix develop -f default.nix`.)
 
-`python -m venv venv`
+From inside that shell, use the normal `make` targets (`make up`, `make runserver`, ...) — see `doc/makefile.md`.
 
-activate the venv
+Create and edit the `.env` configuration file:
 
-`source venv/bin/activate`
+`cp scripts/sample.env .env`
+then edit `.env` as needed — see `doc/configuration.md` for every variable.
 
-create and edit the .env configuration file:
+Start the database from Docker (if dev):
+check Docker is running: `systemctl status docker`
+then `docker compose up -d`, which is set to port 15432.
+Or provision a working database if production.
 
-`cp sample.env .env`  
-puis modifier .env selon les belsoins
-
-start the database from docker (if dev)  
-`docker compose up -d`  
-which is set to port 15432
-or provision a working database if production
-
-Copy the settings    
-`cp grore/settings.py grore/settings_local.py`  
-and modify parameters as required 
+Copy the settings:
+`cp grore/settings.py grore/settings_local.py`
+and modify parameters as required.

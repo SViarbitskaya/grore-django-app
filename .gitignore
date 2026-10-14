@@ -2,9 +2,12 @@
 *.log
 *.pot
 *.pyc
+.coverage
+htmlcov/
 __pycache__
 db.sqlite3
 media
+staticfiles/
 **/__pycache__/
 settings_local.py
 settings_prod.py
@@ -22,3 +25,6 @@ cache/
 .venv/
 result
 result/
+scripts/data/
+SERVER_SESSION_REPORT.md
+.hf_cache/
