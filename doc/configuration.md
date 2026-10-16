@@ -49,6 +49,7 @@ Voici les variables de configuration :
 |  |  false  |
 | DJANGO_ALLOWED_HOSTS |  La partie après "://" et avant ":" et avant "/", pour avoir permission d'y accéder. Pas besoin d'indiquer le port. |
 |  |  localhost, 127.0.0.1, grore-images.com, ${APP_WEB_HOST}  |
+|  |  **Attention :** sur un serveur, systemd lit `.env` via `EnvironmentFile=` et n'expanse **pas** `${...}`. Mettre au moins le nom d'hôte réel en toutes lettres (ex. `grore-images.com, www.grore-images.com`), sinon toutes les pages répondent 400 Bad Request.  |
 | DJANGO_HOST |  La partie après "://" et avant "/" où le serveur Django ou Gunicorn écoute principalement  |
 |  |  localhost ou  ou ${APP_WEB_HOST}  |
 | DJANGO_LANGUAGE_CODE | La langue (par défaut ?) du site  |
